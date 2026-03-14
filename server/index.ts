@@ -5,8 +5,16 @@ import { serveStatic } from "./static";
 import { createServer } from "http";
 import http from "http";
 import { Server } from "socket.io";
+import cors from "cors";
 
 const app = express();
+
+app.use(cors({
+  origin: "http://localhost:5173",
+  methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
+  credentials: true
+}));
+
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: { origin: "*" },
