@@ -24,12 +24,6 @@ declare module "http" {
     rawBody: unknown;
   }
 }
-app.get("/", (req, res) => {
-  res.status(200).json({
-    status: "ok",
-    service: "luneacab-backend",
-  });
-});
 app.get("/api/health", (req, res) => {
   res.status(200).json({
     status: "healthy",
