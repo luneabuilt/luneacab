@@ -1,0 +1,14 @@
+import admin from "firebase-admin";
+
+const serviceAccount = {
+  "project_id": "luneacabs",
+    "client_email": "firebase-adminsdk-fbsvc@luneacabs.iam.gserviceaccount.com",
+    "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCwAZEz3ZZPgfLk\nCk2nhcOpXYVv2Rcu2XuaG9tEYs3WkowiIFR7ir1B92dRPkuz94OwF8v6F/9Kq+eB\nvNtnsDY0MgnRRmbNZiyXEAbKGipralanC9BJa/bqXdtcd0dLqJipeCHPzVi9YnVp\n9FjEla5yA8tJD3dau8yYE429w8oWhnBxoSXpvYnk+i0LfYhpF6k4y5hx7WIIXpER\nuAHRaYFCnpaLg+Z6qDDPE6pDCV1SH070W5ue0WFjKRbiQp/BwsnR2CMyax0OTHTy\n5j42ms10LfxB35CTbTI3Yajbs1/gN6oTeq/Ft0/0UZ35EcH3Dy3/sFaHWPG3yIIG\neJZrVkrXAgMBAAECggEAB5Y5tRujJBA88RmEmWkJsx5F5zlbZ3iWfGEhBYSgzNQK\nWFo+agjj+Zj5iiX+S2aq9YdBEqnAJm7cjtoeNw0AeSWDCNNZEReLaoOVV1bjZzfx\nPkgjFVcjEJ01HHpDx34f/oYgJv36CkfZOdT/kpHFMEL7m02gXnfj7NZC8OAksO3O\nQ8vVRCvrPf2+Kk88nHmdQr2iF+sCgKiilwyEXHufnVoYDy7nQRd3dVE5cM0/pd4d\nL5V73oz8LWs538aWHFAQqNGhXvfToWHhLXU0DFu8lkCcB3Dbu7vMZTBH6bto2neC\nUrXQ1hZ7ChCgPCQx33uifNZoUQMjP1qBawlWtEx/kQKBgQDmzJYoVZlOWIamBmmh\n9zPdMrdHjOmWnGgN9R8MQYhYzi7OTut/DjZ1203yqP9qcopL5O7k5YfDUFdJs38f\nPZN0tfNF7eSJ/nSfrHr3FhIJ2hZ8rTlzSH0QZVQBD8h72nS6pAwq6hC1RQt/0Nvs\n29IGsgMVJWIhvBLF8J05qYW4OQKBgQDDOWDNL/2AJ91yiPu2Qu2yzKLgHTCFw/Ek\nn84GatFKcHnNvUdCiryIOZP9MfH8A/Eqx2mAQiLbYuP9TSuLIMJpDkZaikjmJBh8\nEy897HKRN+7gFfkbJ6OMBxhW30fnYvnepps8R9Jcpsk3jTZIxBuJT5bbwp0qjuX3\nB4+gwSl7jwKBgAYXrHcQG2XoDFXhoXQ3FFVoe1IWNCxXoJ+Nsu4d5L2DY9TqXGkU\nNPfTfDFFqMhkkaYDOxMrw/Ox8Tvu0xI+C+Bu1ScpankCEI4OfYh8Oqmr6iAMapHS\nfgqqwhbtFbu/PomWvwN6/knqsq0DFGsiOl8W3+H1BKwjTNOQ0HWvNepxAoGAZz/g\nb4TTGMV8vEewgLuzBV5vQgKOGCECV3FhQEmcOTd1ZBeYKZxAi/ePylhw9+2Jzis7\nJAdWchtCI0R+JA4GZBOVp+r9FSLABFcNJD36dc1UPBXC8tarC7Lw73kViU3ygwww\ni9gcbL4VK5k2vZNiUOPUEJREFS8Qdu77ynR+oQcCgYEAkqTqMlSQ/0K74XiVZxSa\n6vuwwzeXGD10RyBqZrKoAUBw+IDFJiOx5CLLekswrQUaEhFJJZeyYW49UAmmKzbI\n9Qh1aVjjPryJKg+QhbA2HxD2fo+GH8AkUqlucRQCssdV6PgpYWGfh3e0NzWoFaCN\nsfPPD+axkA10ikg74UuykrE=\n-----END PRIVATE KEY-----\n",
+
+};
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount as any),
+});
+
+export const messaging = admin.messaging();

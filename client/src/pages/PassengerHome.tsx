@@ -1,0 +1,1045 @@
+import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import {
+  useNearestDrivers,
+  useRequestRide,
+  useActiveRide,
+  useUpdateProfile,
+} from "@/hooks/use-api";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import Map from "@/components/Map";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Loader2,
+  MapPin,
+  Navigation,
+  Bike,
+  Car,
+  Truck,
+  ArrowRight,
+  Wallet,
+  CheckCircle,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { socket } from "@/lib/socket";
+
+// Helper for coordinates
+
+export default function PassengerHome() {
+  const [driverPosition, setDriverPosition] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  // States
+  const [currentLocationName, setCurrentLocationName] = useState<string>(
+    "Getting location...",
+  );
+  const [pickup, setPickup] = useState<{ lat: number; lng: number } | null>(
+    null,
+  );
+  const [drop, setDrop] = useState<{ lat: number; lng: number } | null>(null);
+  const [searchText, setSearchText] = useState("");
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+
+  const [pickupSearchText, setPickupSearchText] = useState("");
+  const [pickupSuggestions, setPickupSuggestions] = useState<any[]>([]);
+  const [activeField, setActiveField] = useState<"pickup" | "drop" | null>(
+    null,
+  );
+
+  const [isSearching, setIsSearching] = useState(false);
+  const [distanceKm, setDistanceKm] = useState<number | null>(null);
+  const [routeCoords, setRouteCoords] = useState<any[]>([]);
+  const [driverEta, setDriverEta] = useState<number | null>(null);
+  const [vehicleType, setVehicleType] = useState<"bike" | "auto" | "car">(
+    "auto",
+  );
+  const [estimatedFares, setEstimatedFares] = useState<any>({});
+  const [stage, setStage] = useState<
+    "search" | "confirm" | "searching" | "ride"
+  >("search");
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "upi">("cash");
+
+  // 🔥 Trip Timer
+  const [tripSeconds, setTripSeconds] = useState(0);
+  // 🔥 Searching Countdown
+  const [searchSeconds, setSearchSeconds] = useState(120);
+
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
+
+  // Queries & Mutations
+  const { data: drivers } = useNearestDrivers(
+    stage === "search" ? (pickup ? String(pickup.lat) : "") : "",
+    stage === "search" ? (pickup ? String(pickup.lng) : "") : "",
+    vehicleType,
+  );
+
+  const { data: activeRide, refetch } = useActiveRide(user?.id);
+
+  const currentDriver =
+    activeRide && drivers
+      ? drivers.find((d) => d.id === activeRide.driverId)
+      : null;
+
+  const getProgressStep = () => {
+    if (!activeRide) return 0;
+
+    switch (activeRide.status) {
+      case "requested":
+        return 1;
+      case "accepted":
+        return 2;
+      case "arrived":
+        return 3;
+      case "ongoing":
+        return 4;
+      case "payment_pending":
+        return 5;
+      default:
+        return 0;
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+
+    return `${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
+  };
+
+  const requestRide = useRequestRide();
+  const handleCancelRide = async () => {
+    if (!activeRide) return;
+
+    try {
+      await fetch(`/api/rides/${activeRide.id}/cancel`, {
+        method: "PATCH",
+      });
+
+      toast({
+        title: "Ride Cancelled",
+        description: "Your request has been cancelled",
+      });
+
+      await refetch();
+      setStage("search");
+    } catch (err) {
+      console.error("Cancel error:", err);
+    }
+  };
+  const handlePayment = async () => {
+    if (!activeRide) return;
+
+    setPaymentProcessing(true);
+
+    const res = await fetch(`/api/rides/${activeRide.id}/confirmPayment`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        role: "passenger",
+      }),
+    });
+
+    const updatedRide = await res.json();
+
+    console.log("Updated Ride After Payment:", updatedRide);
+
+    await refetch();
+    setPaymentProcessing(false);
+  };
+  const handleUPIPayment = () => {
+    if (!activeRide) return;
+    setPaymentProcessing(true);
+
+    const upiId = "7002491493@kotak811";
+    const amount = activeRide.fare;
+    const name = "Lunea Ride";
+    const note = `Ride Payment ${activeRide.id}`;
+
+    const upiLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+
+    setPaymentMethod("upi");
+
+    window.location.href = upiLink;
+
+    // wait for UPI payment app to open
+    setTimeout(() => {
+      handlePayment();
+    }, 4000);
+  };
+
+  // Effects
+  useEffect(() => {
+    socket.on("update-driver-location", (data) => {
+      if (activeRide && data.driverId !== activeRide.driverId) return;
+
+      setDriverPosition({
+        lat: data.lat,
+        lng: data.lng,
+      });
+    });
+
+    return () => {
+      socket.off("update-driver-location");
+    };
+  }, [activeRide]);
+  useEffect(() => {
+    socket.on("ride-accepted", (ride) => {
+      if (ride.passengerId === user?.id) {
+        refetch();
+      }
+    });
+
+    return () => {
+      socket.off("ride-accepted");
+    };
+  }, [user]);
+
+  useEffect(() => {
+    if (!pickup || !drop) return;
+
+    const fetchDistance = async () => {
+      const res = await fetch(
+        `https://router.project-osrm.org/route/v1/driving/${pickup.lng},${pickup.lat};${drop.lng},${drop.lat}?overview=false`,
+      );
+
+      const data = await res.json();
+
+      if (data.routes && data.routes.length > 0) {
+        const meters = data.routes[0].distance;
+        const km = meters / 1000;
+
+        // 🔥 Restrict ride distance from pickup (max 109km)
+        const MAX_DISTANCE_KM = 109;
+
+        if (km > MAX_DISTANCE_KM) {
+          alert(`Maximum ride distance is ${MAX_DISTANCE_KM} km`);
+          setDrop(null);
+          setDistanceKm(null);
+          return;
+        }
+
+        setDistanceKm(km);
+        console.log("Road Distance KM:", km);
+      }
+    };
+
+    fetchDistance();
+  }, [pickup, drop]);
+
+  useEffect(() => {
+    if (!activeRide || !drivers) return;
+
+    let fromLat: number | undefined;
+    let fromLng: number | undefined;
+    let toLat: number | undefined;
+    let toLng: number | undefined;
+
+    const driver = drivers.find((d) => d.id === activeRide.driverId);
+
+    if (!driver || !driver.currentLat || !driver.currentLng) return;
+
+    // BEFORE ARRIVAL → Driver to Pickup
+    if (activeRide.status === "accepted") {
+      fromLat = Number(driver.currentLat);
+      fromLng = Number(driver.currentLng);
+      toLat = Number(activeRide.pickupLat);
+      toLng = Number(activeRide.pickupLng);
+    }
+
+    // AFTER OTP → Driver to Drop
+    if (activeRide.status === "ongoing") {
+      fromLat = Number(driver.currentLat);
+      fromLng = Number(driver.currentLng);
+      toLat = Number(activeRide.dropLat);
+      toLng = Number(activeRide.dropLng);
+    }
+
+    if (fromLat === undefined || toLat === undefined) return;
+
+    const fetchRoute = async () => {
+      const res = await fetch(
+        `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`,
+      );
+
+      const data = await res.json();
+
+      if (data.routes && data.routes.length > 0) {
+        const geometry = data.routes[0].geometry.coordinates;
+
+        const formatted = geometry.map((coord: number[]) => [
+          coord[1],
+          coord[0],
+        ]);
+
+        setRouteCoords(formatted);
+
+        // ⭐ NEW: Calculate ETA
+        const durationSeconds = data.routes[0].duration;
+        const minutes = Math.ceil(durationSeconds / 60);
+
+        setDriverEta(minutes);
+      }
+    };
+
+    fetchRoute();
+  }, [activeRide, drivers]);
+
+  useEffect(() => {
+    if (!activeRide) {
+      setStage("search");
+      return;
+    }
+
+    if (activeRide.status === "completed") {
+      setStage("search");
+      return;
+    }
+
+    if (activeRide.status === "requested") {
+      setStage("searching");
+      return;
+    }
+
+    if (
+      activeRide.status === "accepted" ||
+      activeRide.status === "arrived" ||
+      activeRide.status === "ongoing" ||
+      activeRide.status === "payment_pending"
+    ) {
+      setStage("ride");
+      return;
+    }
+
+    setStage("search");
+  }, [activeRide?.status]);
+
+  // 🔥 Start Trip Timer When Ride Is Ongoing
+  useEffect(() => {
+    if (!activeRide) return;
+
+    if (activeRide.status !== "ongoing") {
+      setTripSeconds(0);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setTripSeconds((prev) => prev + 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [activeRide?.status]);
+
+  // 🔥 Searching Countdown Timer
+  useEffect(() => {
+    if (!activeRide) return;
+    if (activeRide.status !== "requested") return;
+
+    setSearchSeconds(120);
+
+    const interval = setInterval(() => {
+      setSearchSeconds((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [activeRide?.status]);
+
+  useEffect(() => {
+    if (distanceKm === null) return;
+
+    const fetchEstimates = async () => {
+      const types = ["bike", "auto", "car"];
+      const fares: any = {};
+
+      for (const type of types) {
+        const res = await fetch(
+          `/api/rides/estimate?distanceKm=${distanceKm}&vehicleType=${type}`,
+        );
+        const data = await res.json();
+        fares[type] = Math.round(Number(data.fare));
+      }
+
+      setEstimatedFares(fares);
+    };
+
+    fetchEstimates();
+  }, [distanceKm]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        console.log("Passenger GPS:", latitude, longitude);
+
+        // Update DB
+        await fetch(`/api/users/${user.id}/location`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            lat: latitude,
+            lng: longitude,
+          }),
+        });
+
+        // Also update pickup location on map
+        setPickup({ lat: latitude, lng: longitude });
+        setPickupSearchText("Current Location");
+        // Reverse geocode to get readable location
+        try {
+          const geoRes = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
+          );
+
+          const geoData = await geoRes.json();
+          console.log("Reverse Geo Data:", geoData);
+
+          const address = geoData.address;
+
+          const locationName = [
+            address.city || address.town || address.village || address.county,
+            address.state,
+          ]
+            .filter(Boolean)
+            .join(", ");
+
+          setCurrentLocationName(locationName || "Current Location");
+        } catch (err) {
+          console.log("Reverse geocode failed", err);
+          setCurrentLocationName("Current Location");
+        }
+      },
+      (error) => {
+        console.error("GPS error:", error);
+      },
+    );
+  }, [user]);
+
+  // Handlers
+  const handleMapClick = (lat: number, lng: number) => {
+    if (stage !== "search") return;
+
+    if (activeField === "pickup") {
+      setPickup({ lat, lng });
+      setPickupSearchText("Selected on map");
+      setPickupSuggestions([]);
+    }
+
+    if (activeField === "drop") {
+      setDrop({ lat, lng });
+      setSearchText("Selected on map");
+      setSuggestions([]);
+    }
+
+    setActiveField(null); // VERY IMPORTANT
+  };
+
+  const handleRequestRide = () => {
+    if (!drop || !pickup || !user || !distanceKm) return;
+
+    // Calculate mock fare
+    const fare =
+      vehicleType === "bike" ? 40 : vehicleType === "auto" ? 70 : 120;
+
+    requestRide.mutate({
+      passengerId: user.id,
+      vehicleType,
+      pickupLat: String(pickup.lat),
+      pickupLng: String(pickup.lng),
+      dropLat: String(drop.lat),
+      dropLng: String(drop.lng),
+      distanceKm: distanceKm?.toString() || "0",
+      paymentMethod: paymentMethod,
+    });
+    setStage("searching");
+  };
+
+  // Render Helpers
+
+  const renderVehicleOption = (
+    type: "bike" | "auto" | "car",
+    price: number,
+    time: string,
+  ) => (
+    <div
+      onClick={() => setVehicleType(type)}
+      className={`
+        flex items-center justify-between p-3 rounded-xl border-2 cursor-pointer transition-all
+        ${
+          vehicleType === type
+            ? "border-primary bg-primary/5 shadow-sm"
+            : "border-transparent bg-secondary/50 hover:bg-secondary"
+        }
+      `}
+    >
+      <div className="flex items-center gap-3">
+        <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center shadow-sm">
+          {type === "bike" && <Bike className="w-6 h-6" />}
+          {type === "auto" && <Truck className="w-6 h-6" />}
+          {type === "car" && <Car className="w-6 h-6" />}
+        </div>
+        <div>
+          <p className="font-bold capitalize">{type}</p>
+          <p className="text-xs text-muted-foreground">{time} away</p>
+        </div>
+      </div>
+      <p className="font-bold">₹{price}</p>
+    </div>
+  );
+
+  return (
+    <div className="h-screen w-full relative flex flex-col">
+      <h1
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          background: "red",
+          zIndex: 9999,
+        }}
+      >
+        TEST BUILD
+      </h1>
+      {/* Map Background */}
+      <div className="absolute inset-0 z-0">
+        {activeRide && activeRide.status !== "completed" && (
+          <div className="absolute top-1/2 right-4 -translate-y-1/2 z-[1000]">
+            <button
+              onClick={() => {
+                const lat =
+                  activeRide.status === "accepted"
+                    ? activeRide.pickupLat
+                    : activeRide.dropLat;
+
+                const lng =
+                  activeRide.status === "accepted"
+                    ? activeRide.pickupLng
+                    : activeRide.dropLng;
+
+                window.open(
+                  `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`,
+                  "_blank",
+                );
+              }}
+              className="h-14 w-14 rounded-full bg-black text-white shadow-2xl flex items-center justify-center"
+            >
+              🧭
+            </button>
+          </div>
+        )}
+        {pickup && (
+          <Map
+            center={pickup}
+            zoom={14}
+            markers={
+              [
+                ...(pickup
+                  ? [
+                      {
+                        lat: pickup.lat,
+                        lng: pickup.lng,
+                        type: "pickup",
+                        id: "p1",
+                      },
+                    ]
+                  : []),
+                ...(drop
+                  ? [{ lat: drop.lat, lng: drop.lng, type: "drop", id: "d1" }]
+                  : []),
+
+                ...(driverPosition
+                  ? [
+                      {
+                        lat: driverPosition.lat,
+                        lng: driverPosition.lng,
+                        type: "driver",
+                        id: "live-driver",
+                      },
+                    ]
+                  : []),
+
+                ...(activeRide &&
+                activeRide.status !== "completed" &&
+                activeRide.driverId &&
+                drivers &&
+                !driverPosition
+                  ? drivers
+                      .filter((d) => d.id === activeRide.driverId)
+                      .map((d) => ({
+                        lat: Number(d.currentLat),
+                        lng: Number(d.currentLng),
+                        type: "driver",
+                        id: d.id,
+                        vehicleType: d.vehicleType,
+                      }))
+                  : []),
+              ] as any
+            }
+            route={routeCoords}
+            onMapClick={handleMapClick}
+          />
+        )}
+      </div>
+
+      {/* Floating Header */}
+      <div className="absolute top-4 left-4 right-4 z-10">
+        <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-4 flex items-center gap-3">
+          <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
+            <MapPin className="text-primary w-5 h-5" />
+          </div>
+          <div className="flex-1">
+            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
+              Current Location
+            </p>
+            <p className="font-bold text-sm truncate">{currentLocationName}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Sheet UI */}
+      <div className="mt-auto z-10 w-full max-h-[40vh]">
+        <AnimatePresence mode="wait">
+          {stage === "search" && (
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              className="bg-white/95 backdrop-blur-md rounded-t-3xl shadow-xl p-4 pb-16"
+            >
+              <div className="max-h-[37vh] overflow-y-auto">
+                <h2 className="text-xl font-bold mb-4">Where to?</h2>
+                <div className="space-y-3">
+                  <div className="relative">
+                    <div className="absolute left-3 top-3.5 h-3 w-3 rounded-full bg-green-500 ring-4 ring-green-100" />
+
+                    <Input
+                      value={pickupSearchText}
+                      placeholder="Search pickup location"
+                      className="pl-10 h-12 bg-secondary/30 border-0"
+                      onFocus={() => {
+                        setActiveField("pickup");
+
+                        if (pickupSearchText === "Current Location") {
+                          setPickupSearchText("");
+                        }
+                      }}
+                      onChange={async (e) => {
+                        const value = e.target.value;
+                        setPickupSearchText(value);
+
+                        if (value.length < 3) {
+                          setPickupSuggestions([]);
+                          return;
+                        }
+
+                        if (!pickup) return;
+
+                        const res = await fetch(
+                          `https://photon.komoot.io/api/?q=${value}&limit=5&lat=${pickup.lat}&lon=${pickup.lng}`,
+                        );
+
+                        const data = await res.json();
+                        setPickupSuggestions(data.features || []);
+                      }}
+                    />
+
+                    {pickupSuggestions.length > 0 && (
+                      <div className="absolute left-0 right-0 bg-white shadow-lg rounded-xl mt-1 z-50 max-h-60 overflow-y-auto">
+                        {pickupSuggestions.map((place, index) => (
+                          <div
+                            key={index}
+                            className="p-3 hover:bg-gray-100 cursor-pointer text-sm"
+                            onClick={() => {
+                              const lat = place.geometry.coordinates[1];
+                              const lon = place.geometry.coordinates[0];
+
+                              setPickup({ lat, lng: lon });
+                              setPickupSearchText(
+                                [
+                                  place.properties.name,
+                                  place.properties.postcode,
+                                  place.properties.city,
+                                  place.properties.state,
+                                ]
+                                  .filter(Boolean)
+                                  .join(", "),
+                              );
+                              setPickupSuggestions([]);
+                            }}
+                          >
+                            {[
+                              place.properties.name,
+                              place.properties.postcode,
+                              place.properties.city,
+                              place.properties.state,
+                            ]
+                              .filter(Boolean)
+                              .join(", ")}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <Input
+                      value={searchText}
+                      placeholder="Search destination"
+                      className="pl-10 h-12 bg-secondary/30 border-0"
+                      onFocus={() => setActiveField("drop")}
+                      onChange={async (e) => {
+                        const value = e.target.value;
+                        setSearchText(value);
+
+                        if (value.length < 3) {
+                          setSuggestions([]);
+                          return;
+                        }
+
+                        setIsSearching(true);
+
+                        if (!pickup) return;
+
+                        const res = await fetch(
+                          `https://photon.komoot.io/api/?q=${value}&limit=5&lat=${pickup.lat}&lon=${pickup.lng}`,
+                        );
+
+                        const data = await res.json();
+                        setSuggestions(data.features || []);
+                      }}
+                    />
+
+                    {/* Suggestions Dropdown */}
+                    {suggestions.length > 0 && (
+                      <div className="absolute left-0 right-0 bg-white shadow-lg rounded-xl mt-1 z-50 max-h-60 overflow-y-auto">
+                        {suggestions.map((place, index) => (
+                          <div
+                            key={index}
+                            className="p-3 hover:bg-gray-100 cursor-pointer text-sm"
+                            onClick={() => {
+                              const lat = place.geometry.coordinates[1];
+                              const lon = place.geometry.coordinates[0];
+
+                              setDrop({ lat, lng: lon });
+
+                              setSearchText(
+                                [
+                                  place.properties.name,
+                                  place.properties.postcode,
+                                  place.properties.street,
+                                  place.properties.city,
+                                  place.properties.state,
+                                  place.properties.country,
+                                ]
+                                  .filter(Boolean)
+                                  .join(", "),
+                              );
+
+                              setSuggestions([]);
+                            }}
+                          >
+                            {[
+                              place.properties.name,
+                              place.properties.postcode,
+                              place.properties.city,
+                              place.properties.state,
+                            ]
+                              .filter(Boolean)
+                              .join(", ")}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {drop && (
+                  <div className="mt-6 space-y-3">
+                    <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">
+                      Choose Ride
+                    </h3>
+                    {distanceKm && (
+                      <div className="bg-secondary/30 p-3 rounded-xl text-sm flex justify-between">
+                        <span>Trip Distance</span>
+                        <span className="font-semibold">
+                          {distanceKm.toFixed(2)} km
+                        </span>
+                      </div>
+                    )}
+                    {renderVehicleOption(
+                      "bike",
+                      estimatedFares.bike || 0,
+                      "3 min",
+                    )}
+                    {renderVehicleOption(
+                      "auto",
+                      estimatedFares.auto || 0,
+                      "5 min",
+                    )}
+                    {renderVehicleOption(
+                      "car",
+                      estimatedFares.car || 0,
+                      "8 min",
+                    )}
+
+                    <Button
+                      onClick={handleRequestRide}
+                      className="w-full h-14 text-lg mt-4 shadow-lg shadow-primary/25"
+                    >
+                      Book Ride <ArrowRight className="ml-2" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+
+          {stage === "searching" && (
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              className="bg-white/95 backdrop-blur-md rounded-t-3xl shadow-xl p-4 pb-16"
+            >
+              <div className="max-h-[37vh] overflow-y-auto">
+                <div className="mx-auto w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-4 relative">
+                  <div className="absolute inset-0 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />
+                  <Navigation className="w-8 h-8 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">
+                  Finding nearby drivers... {searchSeconds}s
+                </h3>
+                <p className="text-muted-foreground mb-6">
+                  Connecting you with the best ride
+                </p>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleCancelRide}
+                >
+                  Cancel Request
+                </Button>
+              </div>
+            </motion.div>
+          )}
+
+          {stage === "ride" && activeRide && (
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              className="bg-white/95 backdrop-blur-md rounded-t-3xl shadow-xl p-4 pb-16"
+            >
+              <div className="max-h-[37vh] overflow-y-auto">
+                {activeRide.status === "payment_pending" ? (
+                  <div className="text-center space-y-4">
+                    <div className="h-16 w-16 bg-green-100 rounded-full flex items-center justify-center mx-auto text-green-600">
+                      <CheckCircle className="w-8 h-8" />
+                    </div>
+                    <h2 className="text-2xl font-bold">Payment Pending</h2>
+                    <div className="bg-secondary/30 p-4 rounded-xl">
+                      <p className="text-sm text-muted-foreground">
+                        Total Fare
+                      </p>
+                      <p className="text-3xl font-bold text-primary">
+                        ₹{activeRide.fare}
+                      </p>
+                    </div>
+                    {paymentProcessing && (
+                      <p className="text-sm text-blue-600 font-medium animate-pulse">
+                        Processing Payment...
+                      </p>
+                    )}
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button
+                        className="h-12"
+                        variant="outline"
+                        disabled={paymentProcessing}
+                        onClick={() => {
+                          setPaymentMethod("cash");
+                          handlePayment();
+                        }}
+                      >
+                        {paymentProcessing ? (
+                          <Loader2 className="w-4 h-4 animate-spin mx-auto" />
+                        ) : (
+                          "Pay Cash"
+                        )}
+                      </Button>
+
+                      <Button
+                        className="h-12"
+                        disabled={paymentProcessing}
+                        onClick={handleUPIPayment}
+                      >
+                        {paymentProcessing ? (
+                          <Loader2 className="w-4 h-4 animate-spin mx-auto" />
+                        ) : (
+                          "Pay UPI"
+                        )}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Please complete payment to finish the ride.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* 🔥 Ride Progress Tracker */}
+                    <div className="mb-6">
+                      <div className="flex justify-between text-xs text-muted-foreground mb-2">
+                        <span>Requested</span>
+                        <span>Accepted</span>
+                        <span>Arrived</span>
+                        <span>Trip</span>
+                        <span>Payment</span>
+                      </div>
+
+                      <div className="flex gap-2">
+                        {[1, 2, 3, 4, 5].map((step) => (
+                          <div
+                            key={step}
+                            className={`h-2 flex-1 rounded-full ${
+                              getProgressStep() >= step
+                                ? "bg-primary"
+                                : "bg-gray-200"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center border-b pb-4">
+                      <div>
+                        {activeRide.status === "accepted" && (
+                          <>
+                            <h3 className="font-bold text-lg">On the way</h3>
+                            <p className="text-sm text-muted-foreground">
+                              Driver arriving in{" "}
+                              {driverEta
+                                ? `${driverEta} min`
+                                : "calculating..."}
+                            </p>
+                          </>
+                        )}
+
+                        {activeRide.status === "arrived" && (
+                          <>
+                            <h3 className="font-bold text-lg text-green-600">
+                              Driver Arrived
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                              Please share OTP to start ride
+                            </p>
+                          </>
+                        )}
+
+                        {activeRide.status === "ongoing" && (
+                          <>
+                            <h3 className="font-bold text-lg text-primary">
+                              Trip in Progress
+                            </h3>
+
+                            <p className="text-sm text-muted-foreground">
+                              Trip Time: {formatTime(tripSeconds)}
+                            </p>
+                          </>
+                        )}
+                      </div>
+                      {activeRide.status === "arrived" && (
+                        <div className="bg-primary/10 px-3 py-1 rounded-full text-primary font-bold text-sm">
+                          OTP: {activeRide?.otp}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-4 bg-secondary/20 p-3 rounded-xl">
+                      <div className="h-14 w-14 bg-gray-200 rounded-full overflow-hidden">
+                        <img
+                          src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=100&h=100&fit=crop"
+                          alt="Driver"
+                        />
+                      </div>
+                      <div>
+                        <p className="font-bold text-lg">
+                          {currentDriver?.name || "Driver"}
+                        </p>
+
+                        <p className="text-sm text-muted-foreground">
+                          {currentDriver?.vehicleType?.toUpperCase()} •{" "}
+                          {currentDriver?.vehicleNumber
+                            ?.toUpperCase()
+                            .replace(/(.{2})(.{2})(.{2})(.{4})/, "$1 $2 $3 $4")}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <Button
+                        className="flex-1"
+                        variant="outline"
+                        onClick={() => {
+                          if (!currentDriver?.phone) {
+                            alert("Driver phone not available");
+                            return;
+                          }
+
+                          window.location.href = `tel:${currentDriver.phone}`;
+                        }}
+                      >
+                        Call Driver
+                      </Button>
+                      <Button
+                        className="flex-1"
+                        variant="destructive"
+                        onClick={() => {
+                          const confirmCall = window.confirm(
+                            "Call National Emergency Helpline (112)?",
+                          );
+
+                          if (confirmCall) {
+                            window.location.href = "tel:112";
+                          }
+                        }}
+                      >
+                        Emergency
+                      </Button>
+                    </div>
+                    {activeRide.status === "accepted" && (
+                      <Button
+                        className="w-full mt-3"
+                        variant="destructive"
+                        onClick={handleCancelRide}
+                      >
+                        Cancel Ride
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}
