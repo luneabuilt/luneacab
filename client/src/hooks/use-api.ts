@@ -166,7 +166,7 @@ export function useRequestRide() {
 
 export function useActiveRide(userId?: number) {
   return useQuery({
-    queryKey: ["active-ride", userId],
+    queryKey: [api.rides.getActiveForUser.path, userId],
     queryFn: async () => {
       if (!userId) return null;
 
