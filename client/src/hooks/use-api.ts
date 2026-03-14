@@ -171,11 +171,17 @@ export function useActiveRide(userId?: number) {
       if (!userId) return null;
 
       const url = buildUrl(api.rides.getActiveForUser.path, { userId });
+
       const res = await fetch(url);
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch active ride");
+      }
+
       return res.json();
     },
     enabled: !!userId,
-    refetchInterval: false,
+    refetchInterval: 3000,
     refetchOnWindowFocus: false,
     staleTime: 10000,
   });
