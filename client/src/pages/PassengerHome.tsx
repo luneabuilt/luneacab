@@ -595,7 +595,7 @@ export default function PassengerHome() {
                         lng: Number(d.currentLng),
                         type: "driver",
                         id: d.id,
-                        vehicleType: d.vehicleType,
+                        vehicleType: d.vehicleType || "car",
                       }))
                   : []),
               ] as any
