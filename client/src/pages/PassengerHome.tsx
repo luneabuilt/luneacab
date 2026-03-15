@@ -31,7 +31,7 @@ export default function PassengerHome() {
   const [driverPosition, setDriverPosition] = useState<{
   lat: number;
   lng: number;
-  vehicleType?: "bike" | "auto" | "car";
+  vehicleType: "bike" | "auto" | "car";
 } | null>(null);
 
   const { user } = useAuth();
@@ -188,7 +188,7 @@ export default function PassengerHome() {
         return {
           lat: data.lat,
           lng: data.lng,
-          vehicleType: data.vehicleType,
+          vehicleType: data.vehicleType || "car",
         };
       }
 
@@ -198,7 +198,7 @@ export default function PassengerHome() {
       return {
         lat: smoothLat,
         lng: smoothLng,
-        vehicleType: data.vehicleType,
+        vehicleType: data.vehicleType || "car",
       };
     });
   });
@@ -578,7 +578,7 @@ export default function PassengerHome() {
   lng: driverPosition.lng,
   type: "driver",
   id: "live-driver",
-  vehicleType: driverPosition.vehicleType || currentDriver?.vehicleType || "car",
+  vehicleType: driverPosition?.vehicleType ?? currentDriver?.vehicleType ?? "car",
 },
     ]
   : []),
