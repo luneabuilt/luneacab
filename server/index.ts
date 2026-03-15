@@ -205,7 +205,7 @@ app.use((req, res, next) => {
     console.log("Ride sent to driver:", driverId);
   }
 
-  const port = parseInt(process.env.PORT || "3000", 10);
+  const port = Number(process.env.PORT) || 3000;
 
 httpServer.listen(port, () => {
   log(`serving on port ${port}`);
