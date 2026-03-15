@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import Map from "@/components/Map";
 import { useToast } from "@/hooks/use-toast";
-import { Power } from "lucide-react";
+import { Power, Navigation } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getFCMToken } from "@/firebase-messaging";
 import { socket } from "@/lib/socket";
@@ -525,9 +525,9 @@ export default function DriverDashboard() {
                     "_blank",
                   );
                 }}
-                className="h-14 w-14 rounded-full bg-black text-white shadow-2xl flex items-center justify-center"
+                className="h-12 w-12 rounded-full bg-white shadow-lg flex items-center justify-center border transition transform hover:scale-110 active:scale-95"
               >
-                🧭
+                <Navigation className="w-5 h-5 text-gray-700" />
               </button>
             </div>
           )}

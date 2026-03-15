@@ -545,9 +545,9 @@ export default function PassengerHome() {
                   "_blank",
                 );
               }}
-              className="h-14 w-14 rounded-full bg-black text-white shadow-2xl flex items-center justify-center"
+              className="h-12 w-12 rounded-full bg-white shadow-lg flex items-center justify-center border transition transform hover:scale-110 active:scale-95"
             >
-              🧭
+              <Navigation className="w-5 h-5 text-gray-700" />
             </button>
           </div>
         )}

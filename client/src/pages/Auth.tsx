@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useSyncUser } from "@/hooks/use-api";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { auth } from "@/lib/firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 
+
 export default function Auth() {
   const [, setLocation] = useLocation();
   const syncUser = useSyncUser();
@@ -20,14 +21,22 @@ export default function Auth() {
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [confirmationResult, setConfirmationResult] = useState<any>(null);
 
+  useEffect(() => {
+  if (!(window as any).recaptchaVerifier) {
+    const verifier = new RecaptchaVerifier(
+      "recaptcha-container",
+      { size: "invisible" },
+      auth
+    );
+
+    verifier.render();
+    (window as any).recaptchaVerifier = verifier;
+  }
+}, []);
+
   const setupRecaptcha = () => {
-    if (!(window as any).recaptchaVerifier) {
-      (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': () => {}
-      });
-    }
-  };
+  return (window as any).recaptchaVerifier;
+};
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,8 +44,7 @@ export default function Auth() {
     setIsLoading(true);
     
     try {
-      setupRecaptcha();
-      const appVerifier = (window as any).recaptchaVerifier;
+     const appVerifier = setupRecaptcha();
       const formattedPhone = phone.startsWith('+') ? phone : `+91${phone}`;
       const confirmation = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
       setConfirmationResult(confirmation);
