@@ -540,7 +540,7 @@ export default function PassengerHome() {
         )}
         {pickup && (
           <Map
-            center={pickup}
+          center={driverPosition || pickup}
             zoom={14}
             markers={
               [
