@@ -180,20 +180,33 @@ export default function PassengerHome() {
 
   // Effects
   useEffect(() => {
-    socket.on("update-driver-location", (data) => {
-  if (activeRide && data.driverId !== activeRide.driverId) return;
+  socket.on("update-driver-location", (data) => {
+    if (activeRide && data.driverId !== activeRide.driverId) return;
 
-  setDriverPosition({
-    lat: data.lat,
-    lng: data.lng,
-    vehicleType: data.vehicleType,
+    setDriverPosition((prev) => {
+      if (!prev) {
+        return {
+          lat: data.lat,
+          lng: data.lng,
+          vehicleType: data.vehicleType,
+        };
+      }
+
+      const smoothLat = prev.lat + (data.lat - prev.lat) * 0.5;
+      const smoothLng = prev.lng + (data.lng - prev.lng) * 0.5;
+
+      return {
+        lat: smoothLat,
+        lng: smoothLng,
+        vehicleType: data.vehicleType,
+      };
+    });
   });
-});
 
-    return () => {
-      socket.off("update-driver-location");
-    };
-  }, [activeRide]);
+  return () => {
+    socket.off("update-driver-location");
+  };
+}, [activeRide]);
   useEffect(() => {
     socket.on("ride-accepted", (ride) => {
       if (ride.passengerId === user?.id) {
@@ -540,8 +553,8 @@ export default function PassengerHome() {
         )}
         {pickup && (
           <Map
-          center={driverPosition || pickup}
-            zoom={14}
+  center={activeRide ? driverPosition || pickup : pickup}
+  zoom={activeRide ? 16 : 14}
             markers={
               [
                 ...(pickup
