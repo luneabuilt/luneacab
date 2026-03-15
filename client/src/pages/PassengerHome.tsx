@@ -29,9 +29,10 @@ import { socket } from "@/lib/socket";
 
 export default function PassengerHome() {
   const [driverPosition, setDriverPosition] = useState<{
-    lat: number;
-    lng: number;
-  } | null>(null);
+  lat: number;
+  lng: number;
+  vehicleType?: "bike" | "auto" | "car";
+} | null>(null);
 
   const { user } = useAuth();
   const { toast } = useToast();
@@ -180,13 +181,14 @@ export default function PassengerHome() {
   // Effects
   useEffect(() => {
     socket.on("update-driver-location", (data) => {
-      if (activeRide && data.driverId !== activeRide.driverId) return;
+  if (activeRide && data.driverId !== activeRide.driverId) return;
 
-      setDriverPosition({
-        lat: data.lat,
-        lng: data.lng,
-      });
-    });
+  setDriverPosition({
+    lat: data.lat,
+    lng: data.lng,
+    vehicleType: data.vehicleType,
+  });
+});
 
     return () => {
       socket.off("update-driver-location");
@@ -559,12 +561,12 @@ export default function PassengerHome() {
                 ...(driverPosition
   ? [
       {
-        lat: driverPosition.lat,
-        lng: driverPosition.lng,
-        type: "driver",
-        id: "live-driver",
-        vehicleType: currentDriver?.vehicleType || "car",
-      },
+  lat: driverPosition.lat,
+  lng: driverPosition.lng,
+  type: "driver",
+  id: "live-driver",
+  vehicleType: driverPosition.vehicleType || currentDriver?.vehicleType || "car",
+},
     ]
   : []),
 

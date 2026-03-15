@@ -204,10 +204,11 @@ export default function DriverDashboard() {
     const interval = setInterval(
       () => {
         socket.emit("driver-location", {
-          driverId: user.id,
-          lat: driverPosition.lat,
-          lng: driverPosition.lng,
-        });
+  driverId: user.id,
+  lat: driverPosition.lat,
+  lng: driverPosition.lng,
+  vehicleType: user.vehicleType,
+});
       },
       activeRide ? 3000 : 10000,
     );
