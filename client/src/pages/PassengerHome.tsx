@@ -181,7 +181,7 @@ export default function PassengerHome() {
   // Effects
   useEffect(() => {
   socket.on("update-driver-location", (data) => {
-    if (activeRide && data.driverId !== activeRide.driverId) return;
+    if (!activeRide || data.driverId !== activeRide.driverId) return;
 
     setDriverPosition((prev) => {
       if (!prev) {
@@ -206,7 +206,7 @@ export default function PassengerHome() {
   return () => {
     socket.off("update-driver-location");
   };
-}, [activeRide]);
+}, []);
   useEffect(() => {
     socket.on("ride-accepted", (ride) => {
       if (ride.passengerId === user?.id) {
