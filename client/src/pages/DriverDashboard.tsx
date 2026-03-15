@@ -480,13 +480,11 @@ export default function DriverDashboard() {
               <Button
                 className="w-full"
                 onClick={async () => {
-                  const res = await fetch(`http://localhost:3000/api/rides/${activeRide.id}/payment`,
-                    {
-                      method: "PATCH",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ role: "driver" }),
-                    },
-                  );
+                  fetch(`/api/rides/${activeRide.id}/payment`, {
+  method: "PATCH",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ role: "driver" }),
+});
 
                   if (res.ok) {
                     toast({
