@@ -651,9 +651,7 @@ export default function DriverDashboard() {
                   New Request
                 </Badge>
                 <h2 className="text-2xl font-bold">₹{incomingRequest.fare}</h2>
-                <p className="text-muted-foreground text-sm">
-                  Pickup: {pickupDistanceKm ?? "--"} km away
-                </p>
+                
 
                 <p className="text-muted-foreground text-sm">
                   Trip: {incomingRequest.distanceKm ?? "--"} km

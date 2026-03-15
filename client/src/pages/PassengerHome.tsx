@@ -508,17 +508,7 @@ export default function PassengerHome() {
 
   return (
     <div className="h-screen w-full relative flex flex-col">
-      <h1
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          background: "red",
-          zIndex: 9999,
-        }}
-      >
-        TEST BUILD
-      </h1>
+      
       {/* Map Background */}
       <div className="absolute inset-0 z-0">
         {activeRide && activeRide.status !== "completed" && (
@@ -567,15 +557,16 @@ export default function PassengerHome() {
                   : []),
 
                 ...(driverPosition
-                  ? [
-                      {
-                        lat: driverPosition.lat,
-                        lng: driverPosition.lng,
-                        type: "driver",
-                        id: "live-driver",
-                      },
-                    ]
-                  : []),
+  ? [
+      {
+        lat: driverPosition.lat,
+        lng: driverPosition.lng,
+        type: "driver",
+        id: "live-driver",
+        vehicleType: currentDriver?.vehicleType || "car",
+      },
+    ]
+  : []),
 
                 ...(activeRide &&
                 activeRide.status !== "completed" &&
