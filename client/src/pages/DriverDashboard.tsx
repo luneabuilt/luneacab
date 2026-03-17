@@ -148,7 +148,7 @@ export default function DriverDashboard() {
   );
 
   useEffect(() => {
-    if (!user || user.role !== "driver" || !user.isOnline) return;
+    if (!user || user.role !== "driver") return;
 
     const interval = setInterval(
       () => {
@@ -303,9 +303,18 @@ export default function DriverDashboard() {
   }, [activeRide]);
 
   const handleGoOnline = (checked: boolean) => {
-    toggleOnline.mutate(checked);
-    if (!checked) setIncomingRequest(null);
-  };
+  toggleOnline.mutate(checked);
+
+  if (checked && user) {
+    // ✅ IMPORTANT: register driver when going online
+    socket.emit("register-driver", user.id);
+    console.log("Driver registered:", user.id);
+  }
+
+  if (!checked) {
+    setIncomingRequest(null);
+  }
+};
 
   const handleAccept = () => {
     if (!user || !incomingRequest) return;
