@@ -25,6 +25,7 @@ function Router() {
         <Route path="/driver" component={DriverDashboard} />
         <Route path="/auth" component={Auth} />
         <Route path="/profile" component={Profile} />
+        <Route path="/admin" component={Admin} />
 
         <Route path="/super-admin-dashboard" component={Admin} />
 
