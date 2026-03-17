@@ -19,4 +19,7 @@ export function serveStatic(app: express.Express) {
   app.get("/auth", (req, res) => {
     res.sendFile(path.join(distPath, "index.html"));
   });
+  app.get("/admin", (req, res) => {
+  res.sendFile(path.join(distPath, "index.html"));
+});
 }
