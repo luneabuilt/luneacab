@@ -6,6 +6,14 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 
+process.on("uncaughtException", (err) => {
+  console.error("💥 UNCAUGHT EXCEPTION:", err);
+});
+
+process.on("unhandledRejection", (err) => {
+  console.error("💥 UNHANDLED REJECTION:", err);
+});
+
 const app = express();
 
 app.use(cors({
@@ -215,7 +223,11 @@ app.use((req, res, next) => {
 
   const port = Number(process.env.PORT) || 3000;
 
-httpServer.listen(port, () => {
-  log(`serving on port ${port}`);
-});
+try {
+  httpServer.listen(port, () => {
+    log(`serving on port ${port}`);
+  });
+} catch (err) {
+  console.error("💥 SERVER START CRASH:", err);
+}
 })();
