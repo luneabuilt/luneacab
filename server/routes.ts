@@ -128,16 +128,24 @@ export async function registerRoutes(
 
       if (!user) {
         // Create new user
-        user = await storage.createUser({
-          firebaseUid: input.firebaseUid,
-          phone: input.phone,
-          name: "New User",
-          role: "passenger",
-        });
+        const ADMIN_PHONE = "+91YOURNUMBER";
+
+user = await storage.createUser({
+  firebaseUid: input.firebaseUid,
+  phone: input.phone,
+  name: "New User",
+  role: input.phone === ADMIN_PHONE ? "admin" : "passenger",
+});
         res.status(201).json(user);
       } else {
-        res.status(200).json(user);
-      }
+  const ADMIN_PHONE = "+91YOURNUMBER";
+
+  if (user.phone === ADMIN_PHONE && user.role !== "admin") {
+    user = await storage.updateUser(user.id, { role: "admin" });
+  }
+
+  res.status(200).json(user);
+}
     } catch (err) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({
