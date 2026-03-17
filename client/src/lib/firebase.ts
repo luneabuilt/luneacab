@@ -5,12 +5,12 @@ import { getFirestore } from "firebase/firestore";
 // TODO: Replace with your app's Firebase project configuration
 // You can find this in your Firebase console Project Settings
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: "AIzaSyCkl3wqF_0SwBdLQieHu8vXeO79_7zkAy4",
+  authDomain: "luneacabs.firebaseapp.com",
+  projectId: "luneacabs",
+  storageBucket: "luneacabs.firebasestorage.app",
+  messagingSenderId: "736709697784",
+  appId: "1:736709697784:web:c6a6f80b40a02bda27db0d",
 };
 
 // Initialize Firebase
