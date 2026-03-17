@@ -122,8 +122,13 @@ app.use((req, res, next) => {
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
   if (process.env.NODE_ENV === "production") {
-    serveStatic(app);
-  } else {
+  serveStatic(app);
+
+  // ✅ ADD THIS BLOCK (VERY IMPORTANT)
+  app.get("*", (_req, res) => {
+    res.sendFile("index.html", { root: "dist/public" });
+  });
+} else {
     const { setupVite } = await import("./vite");
     await setupVite(httpServer, app);
   }
