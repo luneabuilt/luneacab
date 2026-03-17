@@ -12,7 +12,10 @@ export function useUser(id?: number) {
       if (!id) return null;
       const url = buildUrl(api.users.get.path, { id });
       const res = await fetch(url);
-      if (!res.ok) throw new Error("Failed to fetch user");
+      if (!res.ok) {
+  const error = await res.json().catch(() => ({}));
+  throw new Error(error.message || "Failed to fetch user");
+}
       return (await res.json()) as User;
     },
     enabled: !!id,
@@ -21,6 +24,8 @@ export function useUser(id?: number) {
 
 export function useSyncUser() {
   const { setUser } = useAuth();
+  const { toast } = useToast();
+
   return useMutation({
     mutationFn: async (data: { firebaseUid: string; phone: string }) => {
       const res = await fetch(`/api/users/sync`, {
@@ -28,11 +33,25 @@ export function useSyncUser() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error("Sync failed");
+
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({}));
+        throw new Error(error.message || "Sync failed");
+      }
+
       return (await res.json()) as User;
     },
+
     onSuccess: (user) => {
       setUser(user);
+    },
+
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message,
+      });
     },
   });
 }
@@ -51,7 +70,10 @@ export function useUpdateProfile() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error("Update failed");
+      if (!res.ok) {
+  const error = await res.json().catch(() => ({}));
+  throw new Error(error.message || "Update failed");
+}
       return (await res.json()) as User;
     },
     onSuccess: (updatedUser) => {
@@ -59,11 +81,19 @@ export function useUpdateProfile() {
       queryClient.invalidateQueries({
         queryKey: [api.users.get.path, updatedUser.id],
       });
+      
       toast({
         title: "Profile updated",
         description: "Your changes have been saved.",
       });
     },
+    onError: (error: any) => {
+  toast({
+    variant: "destructive",
+    title: "Error",
+    description: error.message,
+  });
+},
   });
 }
 
@@ -84,17 +114,21 @@ export function useNearestDrivers(
       const res = await fetch(
         `${api.users.nearestDrivers.path}?${queryParams}`,
       );
-      if (!res.ok) throw new Error("Failed to fetch drivers");
+      if (!res.ok) {
+  const error = await res.json().catch(() => ({}));
+  throw new Error(error.message || "Failed to fetch drivers");
+}
       return (await res.json()) as User[];
     },
-    enabled: !!lat && !!lng && false,
-    refetchInterval: false,
+   enabled:  !!lat && !!lng,
+    refetchInterval: 5000,
   });
 }
 
 export function useToggleOnline() {
   const queryClient = useQueryClient();
   const { user, setUser } = useAuth();
+  const { toast } = useToast(); // ADD THIS
 
   return useMutation({
     mutationFn: async (isOnline: boolean) => {
@@ -117,21 +151,29 @@ export function useToggleOnline() {
       const res = await fetch(url, {
         method: api.users.toggleOnline.method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          isOnline,
-          lat,
-          lng,
-        }),
+        body: JSON.stringify({ isOnline, lat, lng }),
       });
 
-      if (!res.ok) throw new Error("Toggle failed");
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({}));
+        throw new Error(error.message || "Toggle failed");
+      }
 
       return (await res.json()) as User;
     },
+
     onSuccess: (updatedUser) => {
       setUser(updatedUser);
       queryClient.invalidateQueries({
         queryKey: [api.users.get.path, updatedUser.id],
+      });
+    },
+
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message,
       });
     },
   });
@@ -149,7 +191,10 @@ export function useRequestRide() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error("Ride request failed");
+      if (!res.ok) {
+  const error = await res.json().catch(() => ({}));
+  throw new Error(error.message || "Ride request failed");
+}
       return (await res.json()) as Ride;
     },
     onSuccess: (_, variables) => {
@@ -161,6 +206,13 @@ export function useRequestRide() {
         description: "Looking for nearby drivers...",
       });
     },
+    onError: (error: any) => {
+  toast({
+    variant: "destructive",
+    title: "Error",
+    description: error.message,
+  });
+},
   });
 }
 
@@ -175,8 +227,9 @@ export function useActiveRide(userId?: number) {
       const res = await fetch(url);
 
       if (!res.ok) {
-        throw new Error("Failed to fetch active ride");
-      }
+  const error = await res.json().catch(() => ({}));
+  throw new Error(error.message || "Failed to fetch active ride");
+}
 
       return res.json();
     },
@@ -205,12 +258,15 @@ export function useAcceptRide() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ driverId }),
       });
-      if (!res.ok) throw new Error("Failed to accept ride");
+      if (!res.ok) {
+  const error = await res.json().catch(() => ({}));
+  throw new Error(error.message || "Failed to accept ride");
+}
       return (await res.json()) as Ride;
     },
     onSuccess: (updatedRide) => {
       queryClient.invalidateQueries({
-        queryKey: ["active-ride"],
+        queryKey: [api.rides.getActiveForUser.path],
       });
 
       toast({
@@ -218,38 +274,49 @@ export function useAcceptRide() {
         description: "Head to the pickup location.",
       });
     },
+    onError: (error: any) => {
+  toast({
+    variant: "destructive",
+    title: "Error",
+    description: error.message,
+  });
+},
   });
 }
 
 export function useUpdateRideStatus() {
   const queryClient = useQueryClient();
+  const { toast } = useToast(); // ADD THIS
 
   return useMutation({
-    mutationFn: async ({
-      rideId,
-      status,
-      paymentMethod,
-    }: {
-      rideId: number;
-      status: string;
-      paymentMethod?: string;
-    }) => {
+    mutationFn: async ({ rideId, status, paymentMethod }: any) => {
       const url = buildUrl(api.rides.updateStatus.path, { id: rideId });
+
       const res = await fetch(url, {
         method: api.rides.updateStatus.method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status, paymentMethod }),
       });
 
-      if (!res.ok) throw new Error("Failed to update status");
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({}));
+        throw new Error(error.message || "Failed to update status");
+      }
 
-      return (await res.json()) as Ride;
+      return res.json();
     },
 
-    onSuccess: (updatedRide) => {
-      // 🔥 THIS IS THE CORRECT INVALIDATION
+    onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["active-ride"],
+        queryKey: [api.rides.getActiveForUser.path],
+      });
+    },
+
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message,
       });
     },
   });
@@ -262,7 +329,10 @@ export function useRideHistory(userId?: number) {
       if (!userId) return [];
 
       const res = await fetch(`/api/users/${userId}/rides`);
-      if (!res.ok) throw new Error("Failed to fetch history");
+      if (!res.ok) {
+  const error = await res.json().catch(() => ({}));
+  throw new Error(error.message || "Failed to fetch history");
+}
 
       return res.json();
     },
