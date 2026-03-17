@@ -23,14 +23,13 @@ export default function Auth() {
 
   useEffect(() => {
   if (!(window as any).recaptchaVerifier) {
-    const verifier = new RecaptchaVerifier(
+    (window as any).recaptchaVerifier = new RecaptchaVerifier(
+      auth,
       "recaptcha-container",
-      { size: "invisible" },
-      auth
+      {
+        size: "invisible",
+      }
     );
-
-    verifier.render();
-    (window as any).recaptchaVerifier = verifier;
   }
 }, []);
 
