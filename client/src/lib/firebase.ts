@@ -8,7 +8,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyCkl3wqF_0SwBdLQieHu8vXeO79_7zkAy4",
   authDomain: "luneacabs.firebaseapp.com",
   projectId: "luneacabs",
-  storageBucket: "luneacabs.firebasestorage.app",
+  storageBucket: "luneacabs.appspot.com",
   messagingSenderId: "736709697784",
   appId: "1:736709697784:web:c6a6f80b40a02bda27db0d",
 };
