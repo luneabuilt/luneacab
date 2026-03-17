@@ -1,9 +1,36 @@
 import admin from "firebase-admin";
 
 const serviceAccount = {
-  projectId: process.env.FIREBASE_PROJECT_ID,
-  clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-  privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+  projectId: "luneacabs",
+  clientEmail: "firebase-adminsdk-fbsvc@luneacabs.iam.gserviceaccount.com",
+  privateKey: `-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCwAZEz3ZZPgfLk
+Ck2nhcOpXYVv2Rcu2XuaG9tEYs3WkowiIFR7ir1B92dRPkuz94OwF8v6F/9Kq+eB
+vNtnsDY0MgnRRmbNZiyXEAbKGipralanC9BJa/bqXdtcd0dLqJipeCHPzVi9YnVp
+9FjEla5yA8tJD3dau8yYE429w8oWhnBxoSXpvYnk+i0LfYhpF6k4y5hx7WIIXpER
+uAHRaYFCnpaLg+Z6qDDPE6pDCV1SH070W5ue0WFjKRbiQp/BwsnR2CMyax0OTHTy
+5j42ms10LfxB35CTbTI3Yajbs1/gN6oTeq/Ft0/0UZ35EcH3Dy3/sFaHWPG3yIIG
+eJZrVkrXAgMBAAECggEAB5Y5tRujJBA88RmEmWkJsx5F5zlbZ3iWfGEhBYSgzNQK
+WFo+agjj+Zj5iiX+S2aq9YdBEqnAJm7cjtoeNw0AeSWDCNNZEReLaoOVV1bjZzfx
+PkgjFVcjEJ01HHpDx34f/oYgJv36CkfZOdT/kpHFMEL7m02gXnfj7NZC8OAksO3O
+Q8vVRCvrPf2+Kk88nHmdQr2iF+sCgKiilwyEXHufnVoYDy7nQRd3dVE5cM0/pd4d
+L5V73oz8LWs538aWHFAQqNGhXvfToWHhLXU0DFu8lkCcB3Dbu7vMZTBH6bto2neC
+UrXQ1hZ7ChCgPCQx33uifNZoUQMjP1qBawlWtEx/kQKBgQDmzJYoVZlOWIamBmmh
+9zPdMrdHjOmWnGgN9R8MQYhYzi7OTut/DjZ1203yqP9qcopL5O7k5YfDUFdJs38f
+PZN0tfNF7eSJ/nSfrHr3FhIJ2hZ8rTlzSH0QZVQBD8h72nS6pAwq6hC1RQt/0Nvs
+29IGsgMVJWIhvBLF8J05qYW4OQKBgQDDOWDNL/2AJ91yiPu2Qu2yzKLgHTCFw/Ek
+n84GatFKcHnNvUdCiryIOZP9MfH8A/Eqx2mAQiLbYuP9TSuLIMJpDkZaikjmJBh8
+Ey897HKRN+7gFfkbJ6OMBxhW30fnYvnepps8R9Jcpsk3jTZIxBuJT5bbwp0qjuX3
+B4+gwSl7jwKBgAYXrHcQG2XoDFXhoXQ3FFVoe1IWNCxXoJ+Nsu4d5L2DY9TqXGkU
+NPfTfDFFqMhkkaYDOxMrw/Ox8Tvu0xI+C+Bu1ScpankCEI4OfYh8Oqmr6iAMapHS
+fgqqwhbtFbu/PomWvwN6/knqsq0DFGsiOl8W3+H1BKwjTNOQ0HWvNepxAoGAZz/g
+b4TTGMV8vEewgLuzBV5vQgKOGCECV3FhQEmcOTd1ZBeYKZxAi/ePylhw9+2Jzis7
+JAdWchtCI0R+JA4GZBOVp+r9FSLABFcNJD36dc1UPBXC8tarC7Lw73kViU3ygwww
+i9gcbL4VK5k2vZNiUOPUEJREFS8Qdu77ynR+oQcCgYEAkqTqMlSQ/0K74XiVZxSa
+6vuwwzeXGD10RyBqZrKoAUBw+IDFJiOx5CLLekswrQUaEhFJJZeyYW49UAmmKzbI
+9Qh1aVjjPryJKg+QhbA2HxD2fo+GH8AkUqlucRQCssdV6PgpYWGfh3e0NzWoFaCN
+sfPPD+axkA10ikg74UuykrE=
+-----END PRIVATE KEY-----`,
 };
 
 if (!admin.apps.length) {
