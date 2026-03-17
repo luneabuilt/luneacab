@@ -86,7 +86,16 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  await registerRoutes(httpServer, app);
+  try {
+    console.log("🚀 Starting server...");
+
+    await registerRoutes(httpServer, app);
+
+    console.log("✅ Routes registered");
+  } catch (err) {
+    console.error("❌ CRASH BEFORE START:", err);
+    process.exit(1);
+  }
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
