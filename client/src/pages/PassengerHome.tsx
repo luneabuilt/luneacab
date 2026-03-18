@@ -36,6 +36,14 @@ export default function PassengerHome() {
 } | null>(null);
 
   const { user } = useAuth();
+
+// ✅ ADD THIS RIGHT HERE
+useEffect(() => {
+  if (!user) return;
+
+  socket.emit("register-user", user.id);
+  console.log("Passenger registered:", user.id);
+}, [user]);
   const { toast } = useToast();
 
   // States

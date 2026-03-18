@@ -391,36 +391,27 @@ user = await storage.createUser({
       // 🚀 Send ride to the nearest driver first (fast dispatch)
 
       if (nearestDrivers.length > 0) {
+  const firstDriver = nearestDrivers[0] as any;
 
-        const firstDriver = nearestDrivers[0];
+  io.to(`driver-${firstDriver.id}`).emit("new-ride-request", newRide);
 
-        io.to(`driver-${firstDriver.id}`).emit("new-ride-request", newRide);
-
-      }
-
-      // 🔔 Send push notification to first driver
-      if (nearestDrivers.length > 0) {
-
-        const firstDriver = nearestDrivers[0];
-
-        if (firstDriver.pushToken) {
-
-          messaging.send({
-            token: firstDriver.pushToken,
-            notification: {
-              title: "🚕 New Ride Request",
-              body: `Pickup ${input.distanceKm} km trip • Fare ₹${fare}`,
-            },
-            data: {
-              rideId: newRide.id.toString(),
-            },
-          }).catch(err => {
-            console.error("Push send error:", err);
-          });
-
-        }
-
-      }
+  if (firstDriver.pushToken) {
+    (messaging as any)
+  .send({
+        token: firstDriver.pushToken,
+        notification: {
+          title: "🚕 New Ride Request",
+          body: `Pickup ${input.distanceKm} km trip • Fare ₹${fare}`,
+        },
+        data: {
+          rideId: newRide.id.toString(),
+        },
+      } as any)
+      .catch((err: any) => {
+        console.error("Push send error:", err);
+      });
+  }
+}
 
       // 🚨 AUTO CANCEL IF NO DRIVER ACCEPTS (120 seconds)
       setTimeout(async () => {
@@ -532,7 +523,9 @@ user = await storage.createUser({
         driverId: input.driverId,
         status: "accepted",
       });
-      io.emit("ride-accepted", updatedRide);
+      if (updatedRide && updatedRide.passengerId) {
+  io.to(`user-${updatedRide.passengerId}`).emit("ride-accepted", updatedRide);
+}
 
       res.json(updatedRide);
     } catch (err) {
@@ -582,7 +575,9 @@ user = await storage.createUser({
         Number(req.params.id),
         updates,
       );
-      io.emit("ride-updated", updatedRide);
+      if (updatedRide && updatedRide.passengerId) {
+  io.to(`user-${updatedRide.passengerId}`).emit("ride-updated", updatedRide);
+}
 
       res.json(updatedRide);
     } catch (err) {

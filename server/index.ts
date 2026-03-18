@@ -136,11 +136,19 @@ app.use((req, res, next) => {
   // It is the only port that is not firewalled.
 
   io.on("connection", (socket) => {
-    console.log("Socket connected:", socket.id);
-    socket.on("register-driver", (driverId) => {
-      socket.join(`driver-${driverId}`);
-      console.log("Driver registered in room:", driverId);
-    });
+  console.log("Socket connected:", socket.id);
+
+  // ✅ ADD THIS BLOCK
+  socket.on("register-user", (userId) => {
+    socket.join(`user-${userId}`);
+    console.log("Passenger registered in room:", userId);
+  });
+
+  // EXISTING CODE (KEEP)
+  socket.on("register-driver", (driverId) => {
+    socket.join(`driver-${driverId}`);
+    console.log("Driver registered in room:", driverId);
+  });
 
     socket.on("driver-location", (data) => {
       activeDrivers[data.driverId] = {
