@@ -38,6 +38,7 @@ export default function PassengerHome() {
   const { toast } = useToast();
 
   // States
+  const [isLocationLoading, setIsLocationLoading] = useState(true);
   const [currentLocationName, setCurrentLocationName] = useState<string>(
     "Getting location...",
   );
@@ -180,7 +181,7 @@ export default function PassengerHome() {
 
   // Effects
   useEffect(() => {
-  socket.on("update-driver-location", (data) => {
+  const handler = (data: any) => {
     if (!activeRide || data.driverId !== activeRide.driverId) return;
 
     setDriverPosition((prev) => {
@@ -201,12 +202,14 @@ export default function PassengerHome() {
         vehicleType: data.vehicleType || "car",
       };
     });
-  });
+  };
+
+  socket.on("update-driver-location", handler);
 
   return () => {
-    socket.off("update-driver-location");
+    socket.off("update-driver-location", handler);
   };
-}, []);
+}, [activeRide]);
   useEffect(() => {
     socket.on("ride-accepted", (ride) => {
       if (ride.passengerId === user?.id) {
@@ -990,10 +993,12 @@ export default function PassengerHome() {
                         </p>
 
                         <p className="text-sm text-muted-foreground">
-                          {currentDriver?.vehicleType?.toUpperCase()} •{" "}
-                          {currentDriver?.vehicleNumber
-                            ?.toUpperCase()
-                            .replace(/(.{2})(.{2})(.{2})(.{4})/, "$1 $2 $3 $4")}
+                          {currentDriver?.vehicleType?.toUpperCase() || "VEHICLE"} •{" "}
+{currentDriver?.vehicleNumber
+  ? currentDriver.vehicleNumber
+      .toUpperCase()
+      .replace(/(.{2})(.{2})(.{2})(.{4})/, "$1 $2 $3 $4")
+  : "----"}
                         </p>
                       </div>
                     </div>

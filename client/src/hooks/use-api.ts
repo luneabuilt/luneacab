@@ -234,7 +234,21 @@ export function useActiveRide(userId?: number) {
       return res.json();
     },
     enabled: !!userId,
-    refetchInterval: 3000,
+    refetchInterval: (data: any) => {
+  if (!data) return false;
+
+  if (
+    data.status === "requested" ||
+    data.status === "accepted" ||
+    data.status === "arrived" ||
+    data.status === "ongoing" ||
+    data.status === "payment_pending"
+  ) {
+    return 4000;
+  }
+
+  return false;
+},
     refetchOnWindowFocus: false,
     staleTime: 10000,
   });

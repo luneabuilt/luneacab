@@ -157,8 +157,16 @@ app.use((req, res, next) => {
     });
 
     socket.on("disconnect", () => {
-      console.log("Socket disconnected:", socket.id);
-    });
+  console.log("Socket disconnected:", socket.id);
+
+  // ✅ remove driver from activeDrivers
+  for (const driverId in activeDrivers) {
+    if (activeDrivers[driverId].socketId === socket.id) {
+      delete activeDrivers[driverId];
+      console.log("Removed inactive driver:", driverId);
+    }
+  }
+});
   });
 
   function calculateDistance(
