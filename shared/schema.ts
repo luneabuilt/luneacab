@@ -72,21 +72,17 @@ export const rides = pgTable("rides", {
   queueIndex: integer("queue_index").default(0),
   rejectedDrivers: text("rejected_drivers"),
   createdAt: timestamp("created_at").defaultNow(),
+
+  
 });
 // --- Schemas ---
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
-  totalEarnings: true,
 });
 export const insertRideSchema = createInsertSchema(rides).omit({
   id: true,
   createdAt: true,
-  driverId: true,
-  fare: true,
-  commission: true,
-  driverEarning: true,
-  status: true,
   customerPaid: true,
   driverConfirmed: true,
 });

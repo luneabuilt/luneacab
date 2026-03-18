@@ -184,8 +184,8 @@ user = await storage.createUser({
     try {
       const input = api.users.updateLocation.input.parse(req.body);
       const user = await storage.updateUser(Number(req.params.id), {
-        currentLat: input.lat.toString(),
-        currentLng: input.lng.toString(),
+        currentLat: (input.lat ?? "").toString(),
+currentLng: (input.lng ?? "").toString(),
       });
       if (!user) return res.status(404).json({ message: "User not found" });
       res.json(user);
@@ -205,8 +205,8 @@ user = await storage.createUser({
       const input = api.users.toggleOnline.input.parse(req.body);
       const user = await storage.updateUser(Number(req.params.id), {
         isOnline: input.isOnline,
-        currentLat: input.lat?.toString(),
-        currentLng: input.lng?.toString(),
+        currentLat: (input.lat ?? "").toString(),
+currentLng: (input.lng ?? "").toString(),
       });
       if (!user) return res.status(404).json({ message: "User not found" });
       res.json(user);
@@ -267,7 +267,7 @@ user = await storage.createUser({
         const grouped: Record<string, number> = {};
 
         completed.forEach((ride) => {
-          const date = new Date(ride.createdAt).toLocaleDateString();
+          const date = new Date(ride.createdAt ?? new Date()).toLocaleDateString();
 
           if (!grouped[date]) grouped[date] = 0;
 
@@ -318,8 +318,8 @@ user = await storage.createUser({
         const distance = getDistanceFromLatLonInKm(
           lat,
           lng,
-          parseFloat(driver.currentLat.toString()),
-          parseFloat(driver.currentLng.toString()),
+          parseFloat((driver.currentLat ?? "0").toString()),
+parseFloat((driver.currentLng ?? "0").toString()),
         );
         return { ...driver, distance };
       });
@@ -350,8 +350,8 @@ user = await storage.createUser({
           const distance = getDistanceFromLatLonInKm(
             Number(input.pickupLat),
             Number(input.pickupLng),
-            Number(driver.currentLat),
-            Number(driver.currentLng),
+            Number(driver.currentLat ?? 0),
+Number(driver.currentLng ?? 0),
           );
 
           // 🚀 Only consider drivers within 8km
@@ -635,11 +635,11 @@ user = await storage.createUser({
           const driver = await storage.getUser(ride.driverId);
           if (driver) {
             const currentEarnings = parseFloat(
-              driver.totalEarnings?.toString() || "0",
+              (driver.totalEarnings ?? "0").toString(),
             );
 
             const newEarnings =
-              currentEarnings + parseFloat(ride.driverEarning.toString());
+              currentEarnings + parseFloat((ride.driverEarning ?? "0").toString());
 
             await storage.updateUser(ride.driverId, {
               totalEarnings: newEarnings.toString(),
