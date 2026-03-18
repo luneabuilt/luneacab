@@ -85,9 +85,9 @@ export default function PassengerHome() {
   const { data: activeRide, refetch } = useActiveRide(user?.id);
 
   const currentDriver =
-    activeRide && drivers
-      ? drivers.find((d) => d.id === activeRide.driverId)
-      : null;
+  activeRide && drivers?.length
+    ? drivers.find((d) => d.id === activeRide.driverId)
+    : null;
 
   const getProgressStep = () => {
     if (!activeRide) return 0;
