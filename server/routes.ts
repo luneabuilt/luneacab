@@ -559,7 +559,7 @@ Number(driver.currentLng ?? 0),
         cancelled: [],
       };
 
-      if (!allowedTransitions[ride.status]?.includes(input.status)) {
+      if (!ride.status || !allowedTransitions[ride.status]?.includes(input.status)) {
         return res.status(400).json({
           message: `Invalid status transition from ${ride.status} to ${input.status}`,
         });
@@ -697,7 +697,7 @@ Number(driver.currentLng ?? 0),
         return res.status(404).json({ message: "Ride not found" });
       }
 
-      if (!["requested", "accepted"].includes(ride.status)) {
+      if (!["requested", "accepted"].includes((ride.status ?? ""))) {
         return res
           .status(400)
           .json({ message: "Ride cannot be cancelled now" });

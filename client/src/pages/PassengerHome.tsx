@@ -521,8 +521,11 @@ useEffect(() => {
       pickupLng: String(pickup.lng),
       dropLat: String(drop.lat),
       dropLng: String(drop.lng),
-      distanceKm: distanceKm?.toString() || "0",
-      paymentMethod: paymentMethod,
+      distanceKm: (distanceKm ?? 0).toString(),
+      paymentMethod: paymentMethod as "cash" | "upi",
+      fare: "",
+      commission: "",
+      driverEarning: ""
     });
     setStage("searching");
   };

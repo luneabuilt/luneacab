@@ -20,6 +20,7 @@ let DefaultIcon = L.icon({
   shadowUrl: iconShadow,
   iconSize: [25, 41],
   iconAnchor: [12, 41],
+  popupAnchor: [0, -41], // ✅ ADD THIS
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
@@ -28,6 +29,7 @@ const carIcon = new L.Icon({
   iconUrl: "/icons/car.png",
   iconSize: [36, 36],
   iconAnchor: [18, 18],
+  popupAnchor: [0, -18],
 });
 
 // 🏍 Bike icon
@@ -35,6 +37,7 @@ const bikeIcon = new L.Icon({
   iconUrl: "/icons/bike.png",
   iconSize: [34, 34],
   iconAnchor: [17, 17],
+  popupAnchor: [0, -17],
 });
 
 // 🛺 Auto icon
@@ -42,6 +45,7 @@ const autoIcon = new L.Icon({
   iconUrl: "/icons/auto.png",
   iconSize: [38, 38],
   iconAnchor: [19, 19],
+  popupAnchor: [0, -19],
 });
 
 // User location icon
@@ -101,7 +105,7 @@ export default function Map({
   return (
     <div className={className}>
       <MapContainer
-        center={[center.lat, center.lng]}
+        center={[center.lat, center.lng] as [number, number]}
         zoom={zoom}
         scrollWheelZoom={true}
         className="h-full w-full rounded-none md:rounded-3xl z-0"
@@ -193,7 +197,7 @@ function MapEventsHandler({
 }) {
   const map = useMap();
   useEffect(() => {
-    map.on("click", (e) => {
+    map.on("click", (e: L.LeafletMouseEvent) => {
       onMapClick(e.latlng.lat, e.latlng.lng);
     });
     return () => {
@@ -237,7 +241,7 @@ function SmoothMarker({
   smooth,
 }: {
   position: [number, number];
-  icon: any;
+  icon: L.Icon;
   smooth: boolean;
 }) {
   const markerRef = useRef<L.Marker | null>(null);
