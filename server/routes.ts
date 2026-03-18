@@ -582,6 +582,7 @@ user = await storage.createUser({
         Number(req.params.id),
         updates,
       );
+      io.emit("ride-updated", updatedRide);
 
       res.json(updatedRide);
     } catch (err) {

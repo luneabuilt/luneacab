@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { socket } from "@/lib/socket";
+import { useQueryClient } from "@tanstack/react-query";
 
 // Helper for coordinates
 
@@ -81,6 +82,8 @@ export default function PassengerHome() {
     stage === "search" ? (pickup ? String(pickup.lng) : "") : "",
     vehicleType,
   );
+
+  const queryClient = useQueryClient();
 
   const { data: activeRide, refetch } = useActiveRide(user?.id);
 
@@ -211,16 +214,41 @@ export default function PassengerHome() {
   };
 }, [activeRide]);
   useEffect(() => {
-    socket.on("ride-accepted", (ride) => {
-      if (ride.passengerId === user?.id) {
-        refetch();
-      }
-    });
+  const handler = (ride: any) => {
+    if (ride.passengerId === user?.id) {
+      // 🚀 INSTANT UPDATE (no wait for API)
+      queryClient.setQueryData(
+        ["/api/rides/active", user?.id],
+        ride
+      );
+    }
+  };
 
-    return () => {
-      socket.off("ride-accepted");
-    };
-  }, [user]);
+  socket.on("ride-accepted", handler);
+
+  return () => {
+    socket.off("ride-accepted", handler);
+  };
+}, [user]);
+
+// ✅ ADD HERE (new useEffect)
+useEffect(() => {
+  const handler = (ride: any) => {
+    if (ride.passengerId === user?.id) {
+      queryClient.setQueryData(
+        ["/api/rides/active", user?.id],
+        ride
+      );
+    }
+  };
+
+  socket.on("ride-updated", handler);
+
+  return () => {
+    socket.off("ride-updated", handler);
+  };
+}, [user]);
+
 
   useEffect(() => {
     if (!pickup || !drop) return;
