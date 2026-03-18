@@ -204,20 +204,20 @@ app.use((req, res, next) => {
     let minDistance = Infinity;
 
     for (const driverId in activeDrivers) {
-      const driver = activeDrivers[driverId];
+  const driver = activeDrivers[Number(driverId)];
 
-      const distance = calculateDistance(
-        pickupLat,
-        pickupLng,
-        driver.lat,
-        driver.lng,
-      );
+  const distance = calculateDistance(
+    pickupLat,
+    pickupLng,
+    driver.lat,
+    driver.lng,
+  );
 
-      if (distance < minDistance) {
-        minDistance = distance;
-        nearestDriver = driverId;
-      }
-    }
+  if (distance < minDistance) {
+    minDistance = distance;
+    nearestDriver = Number(driverId);
+  }
+}
 
     return nearestDriver;
   }

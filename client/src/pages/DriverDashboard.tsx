@@ -94,7 +94,7 @@ export default function DriverDashboard() {
 
         acceptRide.mutate({
           rideId: rideId,
-          driverId: user?.id,
+          driverId: user!.id,
         });
       }
     };
@@ -107,21 +107,24 @@ export default function DriverDashboard() {
   }, [user]);
 
   useEffect(() => {
-    socket.on("passenger-paid", (data) => {
-      if (!activeRide) return;
+  const handler = (data: any) => {
+    if (!activeRide) return;
+    if (data.rideId !== activeRide.id) return;
 
-      if (data.rideId !== activeRide.id) return;
-
-      toast({
-        title: "Passenger Paid",
-        description: "Confirm payment to complete ride",
-      });
-
-      refetch();
+    toast({
+      title: "Passenger Paid",
+      description: "Confirm payment to complete ride",
     });
 
-    return () => socket.off("passenger-paid");
-  }, [activeRide]);
+    refetch();
+  };
+
+  socket.on("passenger-paid", handler);
+
+  return () => {
+    socket.off("passenger-paid", handler);
+  };
+}, [activeRide]);
 
   const [routeCoords, setRouteCoords] = useState<any[]>([]);
   const [etaMinutes, setEtaMinutes] = useState<number | null>(null);
@@ -556,7 +559,7 @@ export default function DriverDashboard() {
                 lat: driverPosition.lat,
                 lng: driverPosition.lng,
                 type: "driver" as const,
-                vehicleType: user?.vehicleType || "car",
+                vehicleType: (user?.vehicleType as "bike" | "auto" | "car") || "car",
                 id: "me",
               },
               ...(activeRide
