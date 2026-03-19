@@ -715,12 +715,22 @@ useEffect(() => {
 
             <div className="grid grid-cols-2 gap-4">
               <Button
-                variant="outline"
-                className="h-12"
-                onClick={() => setIncomingRequest(null)}
-              >
-                Reject
-              </Button>
+  variant="outline"
+  className="h-12"
+  onClick={async () => {
+    if (!incomingRequest || !user) return;
+
+    await fetch(`/api/rides/${incomingRequest.id}/reject`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ driverId: user.id }),
+    });
+
+    setIncomingRequest(null);
+  }}
+>
+  Reject
+</Button>
               <Button
                 className="h-12 text-lg shadow-lg shadow-primary/20"
                 onClick={handleAccept}

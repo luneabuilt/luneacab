@@ -89,6 +89,74 @@ function getDistanceFromLatLonInKm(
 function deg2rad(deg: number) {
   return deg * (Math.PI / 180);
 }
+// 🔥 DRIVER LOOP SYSTEM (GLOBAL)
+async function dispatchToNextDriver(rideId: number) {
+  try {
+    const ride = await storage.getRide(rideId);
+    if (!ride) return;
+
+    if (ride.status !== "requested") return;
+
+    let queue: number[] = [];
+
+try {
+  queue = JSON.parse(ride.driverQueue || "[]");
+} catch {
+  queue = [];
+}
+    let currentIndex = ride.queueIndex ?? 0;
+
+    if (currentIndex >= queue.length) {
+      console.log("No more drivers available");
+      return;
+    }
+
+    const driverId = queue[currentIndex];
+    const driver = await storage.getUser(driverId);
+
+    // 🔥 SOCKET (real-time)
+io.to(`driver-${driverId}`).emit("new-ride-request", ride);
+
+// 🔥 PUSH NOTIFICATION (NEW)
+if (driver?.pushToken) {
+  (messaging as any)
+    .send({
+      token: driver.pushToken,
+      notification: {
+        title: "🚕 New Ride Request",
+        body: `New trip • Fare ₹${ride.fare}`,
+      },
+      data: {
+        rideId: ride.id.toString(),
+      },
+    })
+    .catch((err: any) => {
+      console.error("Push send error:", err);
+    });
+}
+
+    console.log("Sent to driver:", driverId);
+
+    setTimeout(async () => {
+  const updatedRide = await storage.getRide(rideId);
+  if (!updatedRide) return;
+
+  // 🔥 STOP if index already moved (reject happened)
+  if ((updatedRide.queueIndex ?? 0) !== currentIndex) return;
+
+  if (updatedRide.status !== "requested") return;
+
+  await storage.updateRide(rideId, {
+    queueIndex: currentIndex + 1,
+  });
+
+  dispatchToNextDriver(rideId);
+}, 10000);
+
+  } catch (err) {
+    console.error("Dispatch error:", err);
+  }
+}
 
 export async function registerRoutes(
   httpServer: Server,
@@ -365,6 +433,8 @@ Number(driver.currentLng ?? 0),
       driversWithDistance.sort((a: any, b: any) => a.distance - b.distance);
 
       const nearestDrivers = driversWithDistance.slice(0, 5);
+      // 🔥 STEP 1: CREATE DRIVER QUEUE
+const driverQueueIds = nearestDrivers.map((d: any) => d.id);
 
       // calculate fare
       const { fare, commission, driverEarning } = calculateFare(
@@ -382,7 +452,7 @@ Number(driver.currentLng ?? 0),
         status: "requested",
         otp: generatedOtp,
         assignedDriverId: null,
-        driverQueue: null,
+        driverQueue: JSON.stringify(driverQueueIds),
         queueIndex: 0,
       });
 
@@ -391,26 +461,8 @@ Number(driver.currentLng ?? 0),
       // 🚀 Send ride to the nearest driver first (fast dispatch)
 
       if (nearestDrivers.length > 0) {
-  const firstDriver = nearestDrivers[0] as any;
-
-  io.to(`driver-${firstDriver.id}`).emit("new-ride-request", newRide);
-
-  if (firstDriver.pushToken) {
-    (messaging as any)
-  .send({
-        token: firstDriver.pushToken,
-        notification: {
-          title: "🚕 New Ride Request",
-          body: `Pickup ${input.distanceKm} km trip • Fare ₹${fare}`,
-        },
-        data: {
-          rideId: newRide.id.toString(),
-        },
-      } as any)
-      .catch((err: any) => {
-        console.error("Push send error:", err);
-      });
-  }
+  // 🔥 START DISPATCH LOOP
+dispatchToNextDriver(newRide.id);
 }
 
       // 🚨 AUTO CANCEL IF NO DRIVER ACCEPTS (120 seconds)
@@ -425,6 +477,15 @@ Number(driver.currentLng ?? 0),
           await storage.updateRide(newRide.id, {
             status: "cancelled",
           });
+          const updatedRide = await storage.getRide(newRide.id);
+
+if (updatedRide?.passengerId) {
+  io.to(`user-${updatedRide.passengerId}`).emit("ride-updated", updatedRide);
+}
+
+if (updatedRide?.driverId) {
+  io.to(`driver-${updatedRide.driverId}`).emit("ride-updated", updatedRide);
+}
         }
       }, 120000);
       res.status(201).json(newRide);
@@ -543,6 +604,50 @@ if (updatedRide.driverId) {
       throw err;
     }
   });
+
+  app.patch("/api/rides/:id/reject", async (req, res) => {
+  try {
+    const rideId = Number(req.params.id);
+    const { driverId } = req.body;
+
+    const ride = await storage.getRide(rideId);
+    if (!ride) {
+      return res.status(404).json({ message: "Ride not found" });
+    }
+
+    if (ride.status !== "requested") {
+      return res.status(400).json({ message: "Ride not available" });
+    }
+
+    let queue: number[] = [];
+
+    try {
+      queue = JSON.parse(ride.driverQueue || "[]");
+    } catch {
+      queue = [];
+    }
+
+    let currentIndex = ride.queueIndex ?? 0;
+
+    // ❌ If driver is not current → ignore
+    if (queue[currentIndex] !== driverId) {
+      return res.status(400).json({ message: "Not your turn" });
+    }
+
+    // 👉 Move to next driver immediately
+    await storage.updateRide(rideId, {
+      queueIndex: currentIndex + 1,
+    });
+
+    // 🔥 trigger next driver instantly
+    dispatchToNextDriver(rideId);
+
+    res.json({ success: true });
+
+  } catch (err) {
+    res.status(500).json({ message: "Reject error" });
+  }
+});
 
   app.patch(api.rides.updateStatus.path, async (req, res) => {
     try {
