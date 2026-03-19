@@ -25,6 +25,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { socket } from "@/lib/socket";
 import { useQueryClient } from "@tanstack/react-query";
+import { api } from "@shared/routes";
 
 // Helper for coordinates
 
@@ -223,10 +224,9 @@ useEffect(() => {
 }, [activeRide]);
   useEffect(() => {
   const handler = (ride: any) => {
-    if (ride.passengerId === user?.id) {
-      // 🚀 INSTANT UPDATE (no wait for API)
+    if (!user || ride.passengerId !== user.id) return; {
       queryClient.setQueryData(
-        ["/api/rides/active", user?.id],
+        [api.rides.getActiveForUser.path, user?.id],
         ride
       );
     }
@@ -242,9 +242,9 @@ useEffect(() => {
 // ✅ ADD HERE (new useEffect)
 useEffect(() => {
   const handler = (ride: any) => {
-    if (ride.passengerId === user?.id) {
+    if (!user || ride.passengerId !== user.id) return; {
       queryClient.setQueryData(
-        ["/api/rides/active", user?.id],
+        [api.rides.getActiveForUser.path, user?.id],
         ride
       );
     }
