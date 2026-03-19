@@ -680,10 +680,19 @@ Number(driver.currentLng ?? 0),
       }
 
       const updatedRide = await storage.updateRide(rideId, {
-        status: "ongoing",
-      });
+  status: "ongoing",
+});
 
-      res.json(updatedRide);
+// 🔥🔥 ADD THIS (MOST IMPORTANT FIX)
+if (updatedRide && updatedRide.passengerId) {
+  io.to(`user-${updatedRide.passengerId}`).emit("ride-updated", updatedRide);
+}
+
+if (updatedRide && updatedRide.driverId) {
+  io.to(`driver-${updatedRide.driverId}`).emit("ride-updated", updatedRide);
+}
+
+res.json(updatedRide);
     } catch (err) {
       res.status(500).json({ message: "Server error" });
     }
