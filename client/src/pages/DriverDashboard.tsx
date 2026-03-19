@@ -16,6 +16,8 @@ import { Power, Navigation } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getFCMToken } from "@/firebase-messaging";
 import { socket } from "@/lib/socket";
+import { useQueryClient } from "@tanstack/react-query";
+
 
 const rideAlertSound = new Audio(
   "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3",
@@ -25,6 +27,7 @@ const rideAlertSound = new Audio(
 
 export default function DriverDashboard() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const { data: activeRide, refetch } = useActiveRide(user?.id);
 
   useEffect(() => {
@@ -125,6 +128,25 @@ export default function DriverDashboard() {
     socket.off("passenger-paid", handler);
   };
 }, [activeRide]);
+useEffect(() => {
+  const handler = (ride: any) => {
+    if (!activeRide) return;
+
+    if (ride.id !== activeRide.id) return;
+
+    // 🔥 UPDATE DRIVER UI INSTANTLY
+    queryClient.setQueryData(
+      ["/api/rides/active", user?.id],
+      ride
+    );
+  };
+
+  socket.on("ride-updated", handler);
+
+  return () => {
+    socket.off("ride-updated", handler);
+  };
+}, [activeRide, user]);
 
   const [routeCoords, setRouteCoords] = useState<any[]>([]);
   const [etaMinutes, setEtaMinutes] = useState<number | null>(null);
