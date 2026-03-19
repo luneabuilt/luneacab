@@ -130,15 +130,13 @@ export default function DriverDashboard() {
 }, [activeRide]);
 useEffect(() => {
   const handler = (ride: any) => {
-    if (!activeRide) return;
+    if (!user) return;
 
-    if (ride.id !== activeRide.id) return;
-
-    // 🔥 UPDATE DRIVER UI INSTANTLY
+    // 🔥 ALWAYS update (no activeRide check)
     queryClient.setQueryData(
-      ["/api/rides/active", user?.id],
-      ride
-    );
+  ["/api/rides/active", user.id],
+  ride
+);
   };
 
   socket.on("ride-updated", handler);
@@ -146,7 +144,7 @@ useEffect(() => {
   return () => {
     socket.off("ride-updated", handler);
   };
-}, [activeRide, user]);
+}, [user]);
 
   const [routeCoords, setRouteCoords] = useState<any[]>([]);
   const [etaMinutes, setEtaMinutes] = useState<number | null>(null);

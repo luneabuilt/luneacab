@@ -524,7 +524,12 @@ Number(driver.currentLng ?? 0),
         status: "accepted",
       });
       if (updatedRide && updatedRide.passengerId) {
-  io.to(`user-${updatedRide.passengerId}`).emit("ride-accepted", updatedRide);
+  // 🔥 USE SAME EVENT EVERYWHERE
+io.to(`user-${updatedRide.passengerId}`).emit("ride-updated", updatedRide);
+
+if (updatedRide.driverId) {
+  io.to(`driver-${updatedRide.driverId}`).emit("ride-updated", updatedRide);
+}
 }
 
       res.json(updatedRide);
