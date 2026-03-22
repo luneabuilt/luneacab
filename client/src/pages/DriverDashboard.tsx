@@ -31,10 +31,10 @@ export default function DriverDashboard() {
   const { data: activeRide, refetch } = useActiveRide(user?.id);
 
   useEffect(() => {
-    if (!user) return;
+  if (!user || !user.isOnline) return;
 
-    socket.emit("register-driver", user.id);
-  }, [user]);
+  socket.emit("register-driver", user.id);
+}, [user]);
   useEffect(() => {
     async function registerPushToken() {
       if (!user) return;
@@ -325,17 +325,19 @@ useEffect(() => {
   }, [activeRide]);
 
   const handleGoOnline = (checked: boolean) => {
-  toggleOnline.mutate(checked);
+  if (!user) return;
 
-  if (checked && user) {
-    // ✅ IMPORTANT: register driver when going online
-    socket.emit("register-driver", user.id);
-    console.log("Driver registered:", user.id);
-  }
-
-  if (!checked) {
-    setIncomingRequest(null);
-  }
+  toggleOnline.mutate(checked, {
+    onSuccess: () => {
+      if (checked) {
+        socket.emit("register-driver", user.id);
+        console.log("Driver ONLINE:", user.id);
+      } else {
+        console.log("Driver OFFLINE:", user.id);
+        setIncomingRequest(null);
+      }
+    },
+  });
 };
 
   const handleAccept = () => {
