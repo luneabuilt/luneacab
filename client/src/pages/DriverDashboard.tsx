@@ -515,7 +515,7 @@ useEffect(() => {
               <Button
                 className="w-full"
                 onClick={async () => {
-                  const res = await fetch(`/api/rides/${activeRide.id}/confirm-payment`, {
+                  const res = await fetch(`/api/rides/${activeRide.id}/payment`, {
   method: "PATCH",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ role: "driver" }),
