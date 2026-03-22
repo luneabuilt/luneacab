@@ -133,10 +133,9 @@ useEffect(() => {
     if (!user) return;
 
     // 🔥 ALWAYS update (no activeRide check)
-    queryClient.setQueryData(
-  ["/api/rides/active", user.id],
-  ride
-);
+    queryClient.invalidateQueries({
+  queryKey: ["/api/rides/active", user.id],
+});
   };
 
   socket.on("ride-updated", handler);
@@ -475,11 +474,14 @@ useEffect(() => {
                     );
 
                     if (res.ok) {
-                      toast({
-                        title: "OTP Verified",
-                        description: "Ride Started",
-                      });
-                      setEnteredOtp("");
+  toast({
+    title: "OTP Verified",
+    description: "Ride Started",
+  });
+
+  setEnteredOtp("");
+
+  await refetch(); // ✅ ADD THIS
                     } else {
                       toast({
                         title: "Invalid OTP",
