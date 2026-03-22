@@ -113,6 +113,13 @@ try {
 
     const driverId = queue[currentIndex];
     const driver = await storage.getUser(driverId);
+    if (!driver?.isOnline) {
+  await storage.updateRide(rideId, {
+    queueIndex: currentIndex + 1,
+  });
+
+  return dispatchToNextDriver(rideId);
+}
 
     // 🔥 SOCKET (real-time)
 io.to(`driver-${driverId}`).emit("new-ride-request", ride);
@@ -127,8 +134,8 @@ if (driver?.pushToken) {
         body: `New trip • Fare ₹${ride.fare}`,
       },
       data: {
-        rideId: ride.id.toString(),
-      },
+  rideId: ride.id.toString(),
+},
     })
     .catch((err: any) => {
       console.error("Push send error:", err);
@@ -451,7 +458,6 @@ const driverQueueIds = nearestDrivers.map((d: any) => d.id);
         driverEarning,
         status: "requested",
         otp: generatedOtp,
-        assignedDriverId: null,
         driverQueue: JSON.stringify(driverQueueIds),
         queueIndex: 0,
       });
