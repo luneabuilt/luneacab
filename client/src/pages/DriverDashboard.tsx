@@ -26,15 +26,26 @@ const rideAlertSound = new Audio(
 // Helper for coordinates
 
 export default function DriverDashboard() {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
+const [isOnlineLocal, setIsOnlineLocal] = useState(user?.isOnline || false);
   const queryClient = useQueryClient();
   const { data: activeRide, refetch } = useActiveRide(user?.id);
 
+
   useEffect(() => {
-  if (!user || !user.isOnline) return;
+  if (user) {
+    setIsOnlineLocal(user.isOnline ?? false);
+  }
+}, [user]);
+
+  
+
+  useEffect(() => {
+  if (!user) return;
 
   socket.emit("register-driver", user.id);
-}, [user]);
+  console.log("Driver socket registered:", user.id);
+}, [user?.id]);
   useEffect(() => {
     async function registerPushToken() {
       if (!user) return;
@@ -327,6 +338,10 @@ useEffect(() => {
   const handleGoOnline = (checked: boolean) => {
   if (!user) return;
 
+  // 🔥 1. instant UI update
+  setIsOnlineLocal(checked);
+
+  // 🔥 2. call API
   toggleOnline.mutate(checked, {
     onSuccess: () => {
       if (checked) {
@@ -336,6 +351,10 @@ useEffect(() => {
         console.log("Driver OFFLINE:", user.id);
         setIncomingRequest(null);
       }
+    },
+    onError: () => {
+      // 🔥 3. rollback if API fails
+      setIsOnlineLocal(!checked);
     },
   });
 };
@@ -621,9 +640,9 @@ useEffect(() => {
               </span>
             </div>
             <Switch
-              checked={user?.isOnline || false}
-              onCheckedChange={handleGoOnline}
-            />
+  checked={isOnlineLocal}
+  onCheckedChange={handleGoOnline}
+/>
           </CardContent>
         </Card>
       </div>
