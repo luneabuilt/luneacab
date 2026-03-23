@@ -280,8 +280,8 @@ currentLng: (input.lng ?? "").toString(),
       const input = api.users.toggleOnline.input.parse(req.body);
       const user = await storage.updateUser(Number(req.params.id), {
         isOnline: input.isOnline,
-        currentLat: (input.lat ?? "").toString(),
-currentLng: (input.lng ?? "").toString(),
+        currentLat: input.lat ? input.lat.toString() : null,
+currentLng: input.lng ? input.lng.toString() : null,
       });
       if (!user) return res.status(404).json({ message: "User not found" });
       res.json(user);

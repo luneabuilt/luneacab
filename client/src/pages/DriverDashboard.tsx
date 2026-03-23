@@ -41,11 +41,11 @@ const [isOnlineLocal, setIsOnlineLocal] = useState(user?.isOnline || false);
   
 
   useEffect(() => {
-  if (!user) return;
+  if (!user || !user.isOnline) return;
 
   socket.emit("register-driver", user.id);
   console.log("Driver socket registered:", user.id);
-}, [user?.id]);
+}, [user?.id, user?.isOnline]);
   useEffect(() => {
     async function registerPushToken() {
       if (!user) return;
@@ -335,25 +335,27 @@ useEffect(() => {
     fetchPlaceNames();
   }, [activeRide]);
 
-  const handleGoOnline = (checked: boolean) => {
+
+const handleGoOnline = (checked: boolean) => {
   if (!user) return;
 
-  // 🔥 1. instant UI update
+  // 🔥 instant UI update
   setIsOnlineLocal(checked);
 
-  // 🔥 2. call API
   toggleOnline.mutate(checked, {
-    onSuccess: () => {
-      if (checked) {
-        socket.emit("register-driver", user.id);
-        console.log("Driver ONLINE:", user.id);
+    onSuccess: (updatedUser) => {
+      setIsOnlineLocal(updatedUser.isOnline ?? false);
+
+      if (updatedUser.isOnline) {
+        socket.emit("register-driver", updatedUser.id);
+        console.log("Driver ONLINE:", updatedUser.id);
       } else {
-        console.log("Driver OFFLINE:", user.id);
+        console.log("Driver OFFLINE:", updatedUser.id);
         setIncomingRequest(null);
       }
     },
     onError: () => {
-      // 🔥 3. rollback if API fails
+      // rollback if failed
       setIsOnlineLocal(!checked);
     },
   });
@@ -680,7 +682,7 @@ useEffect(() => {
       )}
 
       {/* Stats Overlay when Offline */}
-      {!user?.isOnline && (
+      {!isOnlineLocal && (
         <div className="absolute inset-0 z-0 bg-background/80 flex items-center justify-center p-6">
           <div className="text-center space-y-6 w-full max-w-sm">
             <div className="h-24 w-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">

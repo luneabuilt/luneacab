@@ -138,13 +138,22 @@ export function useToggleOnline() {
       let lng: number | undefined;
 
       if (isOnline) {
-        const position = await new Promise<GeolocationPosition>(
-          (resolve, reject) =>
-            navigator.geolocation.getCurrentPosition(resolve, reject),
-        );
-        lat = position.coords.latitude;
-        lng = position.coords.longitude;
-      }
+  try {
+    const position = await new Promise<GeolocationPosition>(
+      (resolve, reject) =>
+        navigator.geolocation.getCurrentPosition(resolve, reject),
+    );
+
+    lat = position.coords.latitude;
+    lng = position.coords.longitude;
+  } catch (err) {
+    console.warn("GPS failed, using fallback location");
+
+    // 🔥 fallback (IMPORTANT)
+    lat = 20.5937;
+    lng = 78.9629;
+  }
+}
 
       const url = buildUrl(api.users.toggleOnline.path, { id: user.id });
 
