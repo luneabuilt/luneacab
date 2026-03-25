@@ -86,13 +86,15 @@ const [isOnlineLocal, setIsOnlineLocal] = useState(user?.isOnline || false);
   const [enteredOtp, setEnteredOtp] = useState("");
 
   useEffect(() => {
-    socket.on("new-ride-request", (ride) => {
-      console.log("🚕 New ride received:", ride);
+socket.on("new-ride-request", (ride) => {
+  if (!user?.isOnline) return;
 
-      setIncomingRequest(ride);
+  console.log("🚕 New ride received:", ride);
 
-      rideAlertSound.play().catch(() => {});
-    });
+  setIncomingRequest(ride);
+
+  rideAlertSound.play().catch(() => {});
+});
 
     return () => {
       socket.off("new-ride-request");
@@ -145,7 +147,7 @@ useEffect(() => {
 
     // 🔥 ALWAYS update (no activeRide check)
     queryClient.invalidateQueries({
-  queryKey: ["/api/rides/active", user.id],
+  queryKey: ["/api/rides/active", user?.id],
 });
   };
 
@@ -193,6 +195,14 @@ useEffect(() => {
               lat: latitude,
               lng: longitude,
             });
+            await fetch(`/api/users/${user.id}/location`, {
+  method: "PATCH",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    lat: latitude,
+    lng: longitude,
+  }),
+});
 
             console.log("Driver live location:", latitude, longitude);
           },
@@ -236,7 +246,8 @@ useEffect(() => {
 
     const interval = setInterval(
       () => {
-        socket.emit("driver-location", {
+if (!user?.isOnline) return;
+        socket.emit("update-driver-location", {
   driverId: user.id,
   lat: driverPosition.lat,
   lng: driverPosition.lng,
@@ -362,20 +373,26 @@ const handleGoOnline = (checked: boolean) => {
 };
 
   const handleAccept = () => {
-    if (!user || !incomingRequest) return;
+  if (!user || !incomingRequest) return;
 
-    acceptRide.mutate({
-      rideId: incomingRequest.id,
-      driverId: user.id,
-    });
+  acceptRide.mutate({
+    rideId: incomingRequest.id,
+    driverId: user.id,
+  });
 
-    toast({
-      title: "Ride Accepted",
-      description: "Navigating to pickup...",
-    });
+  // ✅ ADD THIS (VERY IMPORTANT)
+  socket.emit("ride-accepted", {
+    ...incomingRequest,
+    driverId: user.id,
+  });
 
-    setIncomingRequest(null);
-  };
+  toast({
+    title: "Ride Accepted",
+    description: "Navigating to pickup...",
+  });
+
+  setIncomingRequest(null);
+};
 
   return (
     <div className="h-screen w-full relative flex flex-col bg-background">
@@ -444,12 +461,17 @@ const handleGoOnline = (checked: boolean) => {
 
                 <Button
                   className="w-full"
-                  onClick={() =>
-                    updateStatus.mutate({
-                      rideId: activeRide.id,
-                      status: "arrived",
-                    })
-                  }
+                  onClick={async () => {
+  await updateStatus.mutateAsync({
+    rideId: activeRide.id,
+    status: "arrived",
+  });
+
+  socket.emit("ride-updated", {
+    ...activeRide,
+    status: "arrived",
+  });
+}}
                 >
                   Mark Arrived
                 </Button>
@@ -496,7 +518,9 @@ const handleGoOnline = (checked: boolean) => {
                       },
                     );
 
-                    if (res.ok) {
+if (res.ok) {
+  const ride = await res.json(); // ✅ IMPORTANT
+
   toast({
     title: "OTP Verified",
     description: "Ride Started",
@@ -504,8 +528,10 @@ const handleGoOnline = (checked: boolean) => {
 
   setEnteredOtp("");
 
-  await refetch(); // ✅ ADD THIS
-                    } else {
+  socket.emit("ride-updated", ride); // ✅ REAL DATA
+
+  await refetch();
+} else {
                       toast({
                         title: "Invalid OTP",
                         variant: "destructive",
@@ -522,12 +548,17 @@ const handleGoOnline = (checked: boolean) => {
               <>
                 <Button
                   className="w-full"
-                  onClick={() =>
-                    updateStatus.mutate({
-                      rideId: activeRide.id,
-                      status: "payment_pending",
-                    })
-                  }
+                  onClick={async () => {
+  await updateStatus.mutateAsync({
+    rideId: activeRide.id,
+    status: "payment_pending",
+  });
+
+  socket.emit("ride-updated", {
+    ...activeRide,
+    status: "payment_pending",
+  });
+}}
                 >
                   End Ride
                 </Button>

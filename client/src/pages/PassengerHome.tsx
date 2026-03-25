@@ -168,7 +168,13 @@ useEffect(() => {
     console.log("Updated Ride After Payment:", updatedRide);
 
     await refetch();
-    setPaymentProcessing(false);
+
+// ✅ ADD THIS
+socket.emit("passenger-paid", {
+  rideId: activeRide.id,
+});
+
+setPaymentProcessing(false);
   };
   const handleUPIPayment = () => {
     if (!activeRide) return;
