@@ -96,10 +96,7 @@ useEffect(() => {
 
   const { data: activeRide, refetch } = useActiveRide(user?.id);
 
-  const currentDriver =
-  activeRide && drivers?.length
-    ? drivers.find((d) => d.id === activeRide.driverId)
-    : null;
+const driver = activeRide?.driver;
 
   const getProgressStep = () => {
     if (!activeRide) return 0;
@@ -626,7 +623,7 @@ useEffect(() => {
   lng: driverPosition.lng,
   type: "driver",
   id: "live-driver",
-  vehicleType: driverPosition?.vehicleType ?? currentDriver?.vehicleType ?? "car",
+  vehicleType: driverPosition?.vehicleType ?? driver?.vehicleType ?? "car",
 },
     ]
   : []),
@@ -1034,17 +1031,17 @@ useEffect(() => {
                       </div>
                       <div>
                         <p className="font-bold text-lg">
-                          {currentDriver?.name || "Driver"}
-                        </p>
+  {driver?.name || "Driver"}
+</p>
 
-                        <p className="text-sm text-muted-foreground">
-                          {currentDriver?.vehicleType?.toUpperCase() || "VEHICLE"} •{" "}
-{currentDriver?.vehicleNumber
-  ? currentDriver.vehicleNumber
-      .toUpperCase()
-      .replace(/(.{2})(.{2})(.{2})(.{4})/, "$1 $2 $3 $4")
-  : "----"}
-                        </p>
+<p className="text-sm text-muted-foreground">
+  {driver?.vehicleType?.toUpperCase() || "VEHICLE"} •{" "}
+  {driver?.vehicleNumber
+    ? driver.vehicleNumber
+        .toUpperCase()
+        .replace(/(.{2})(.{2})(.{2})(.{4})/, "$1 $2 $3 $4")
+    : "----"}
+</p>
                       </div>
                     </div>
 
@@ -1053,12 +1050,12 @@ useEffect(() => {
                         className="flex-1"
                         variant="outline"
                         onClick={() => {
-                          if (!currentDriver?.phone) {
+                          if (!driver?.phone) {
                             alert("Driver phone not available");
                             return;
                           }
 
-                          window.location.href = `tel:${currentDriver.phone}`;
+                          window.location.href = `tel:${driver.phone}`;
                         }}
                       >
                         Call Driver

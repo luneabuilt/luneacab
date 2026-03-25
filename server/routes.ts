@@ -553,7 +553,28 @@ if (updatedRide?.driverId) {
 
   app.get(api.rides.getActiveForUser.path, async (req, res) => {
     const ride = await storage.getActiveRideForUser(Number(req.params.userId));
-    res.json(ride || null);
+
+if (!ride) return res.json(null);
+
+let driver = null;
+
+if (ride.driverId) {
+  const d = await storage.getUser(ride.driverId);
+  if (d) {
+    driver = {
+      id: d.id,
+      name: d.name,
+      phone: d.phone,
+      vehicleType: d.vehicleType,
+      vehicleNumber: d.vehicleNumber,
+    };
+  }
+}
+
+res.json({
+  ...ride,
+  driver,
+});
   });
   app.get("/api/users/:userId/rides", async (req, res) => {
     try {
@@ -587,19 +608,37 @@ if (updatedRide?.driverId) {
       }
 
       const updatedRide = await storage.updateRide(Number(req.params.id), {
-        driverId: input.driverId,
-        status: "accepted",
-      });
-      if (updatedRide && updatedRide.passengerId) {
-  // 🔥 USE SAME EVENT EVERYWHERE
-io.to(`user-${updatedRide.passengerId}`).emit("ride-updated", updatedRide);
+  driverId: input.driverId,
+  status: "accepted",
+});
 
-if (updatedRide.driverId) {
-  io.to(`driver-${updatedRide.driverId}`).emit("ride-updated", updatedRide);
-}
+// 🔥 GET DRIVER DETAILS
+const driver = await storage.getUser(input.driverId);
+
+// 🔥 ATTACH DRIVER TO RIDE
+const rideWithDriver = {
+  ...updatedRide,
+  driver: driver
+    ? {
+        id: driver.id,
+        name: driver.name,
+        phone: driver.phone,
+        vehicleType: driver.vehicleType,
+        vehicleNumber: driver.vehicleNumber,
+      }
+    : null,
+};
+
+// 🔥 SEND TO PASSENGER + DRIVER
+if (updatedRide?.passengerId) {
+  io.to(`user-${updatedRide.passengerId}`).emit("ride-updated", rideWithDriver);
 }
 
-      res.json(updatedRide);
+if (updatedRide?.driverId) {
+  io.to(`driver-${updatedRide.driverId}`).emit("ride-updated", rideWithDriver);
+}
+
+res.json(rideWithDriver);
     } catch (err) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({
