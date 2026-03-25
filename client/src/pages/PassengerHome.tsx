@@ -204,7 +204,10 @@ setPaymentProcessing(false);
         return {
           lat: data.lat,
           lng: data.lng,
-          vehicleType: data.vehicleType || "car",
+  vehicleType:
+  data.vehicleType ||
+  activeRide?.driver?.vehicleType ||
+  "car",
         };
       }
 
@@ -214,7 +217,10 @@ setPaymentProcessing(false);
       return {
         lat: smoothLat,
         lng: smoothLng,
-        vehicleType: data.vehicleType || "car",
+  vehicleType:
+  data.vehicleType ||
+  activeRide?.driver?.vehicleType ||
+  "car",
       };
     });
   };
@@ -294,62 +300,57 @@ useEffect(() => {
   }, [pickup, drop]);
 
   useEffect(() => {
-    if (!activeRide || !drivers) return;
+  if (!activeRide || !driverPosition) return;
 
-    let fromLat: number | undefined;
-    let fromLng: number | undefined;
-    let toLat: number | undefined;
-    let toLng: number | undefined;
+  let fromLat: number | undefined;
+  let fromLng: number | undefined;
+  let toLat: number | undefined;
+  let toLng: number | undefined;
 
-    const driver = drivers.find((d) => d.id === activeRide.driverId);
+  // Driver → Pickup
+  if (activeRide.status === "accepted") {
+    fromLat = driverPosition.lat;
+    fromLng = driverPosition.lng;
+    toLat = Number(activeRide.pickupLat);
+    toLng = Number(activeRide.pickupLng);
+  }
 
-    if (!driver || !driver.currentLat || !driver.currentLng) return;
+  // Driver → Drop
+  if (activeRide.status === "ongoing") {
+    fromLat = driverPosition.lat;
+    fromLng = driverPosition.lng;
+    toLat = Number(activeRide.dropLat);
+    toLng = Number(activeRide.dropLng);
+  }
 
-    // BEFORE ARRIVAL → Driver to Pickup
-    if (activeRide.status === "accepted") {
-      fromLat = Number(driver.currentLat);
-      fromLng = Number(driver.currentLng);
-      toLat = Number(activeRide.pickupLat);
-      toLng = Number(activeRide.pickupLng);
+  if (!fromLat || !toLat) return;
+
+  const fetchRoute = async () => {
+    const res = await fetch(
+      `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`,
+    );
+
+    const data = await res.json();
+
+    if (data.routes && data.routes.length > 0) {
+      const geometry = data.routes[0].geometry.coordinates;
+
+      const formatted = geometry.map((coord: number[]) => [
+        coord[1],
+        coord[0],
+      ]);
+
+      setRouteCoords(formatted);
+
+      const durationSeconds = data.routes[0].duration;
+      const minutes = Math.ceil(durationSeconds / 60);
+
+      setDriverEta(minutes);
     }
+  };
 
-    // AFTER OTP → Driver to Drop
-    if (activeRide.status === "ongoing") {
-      fromLat = Number(driver.currentLat);
-      fromLng = Number(driver.currentLng);
-      toLat = Number(activeRide.dropLat);
-      toLng = Number(activeRide.dropLng);
-    }
-
-    if (fromLat === undefined || toLat === undefined) return;
-
-    const fetchRoute = async () => {
-      const res = await fetch(
-        `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`,
-      );
-
-      const data = await res.json();
-
-      if (data.routes && data.routes.length > 0) {
-        const geometry = data.routes[0].geometry.coordinates;
-
-        const formatted = geometry.map((coord: number[]) => [
-          coord[1],
-          coord[0],
-        ]);
-
-        setRouteCoords(formatted);
-
-        // ⭐ NEW: Calculate ETA
-        const durationSeconds = data.routes[0].duration;
-        const minutes = Math.ceil(durationSeconds / 60);
-
-        setDriverEta(minutes);
-      }
-    };
-
-    fetchRoute();
-  }, [activeRide, drivers]);
+  fetchRoute();
+}, [activeRide, driverPosition]);
 
   useEffect(() => {
     if (!activeRide) {
@@ -628,21 +629,19 @@ useEffect(() => {
     ]
   : []),
 
-                ...(activeRide &&
-                activeRide.status !== "completed" &&
-                activeRide.driverId &&
-                drivers &&
-                !driverPosition
-                  ? drivers
-                      .filter((d) => d.id === activeRide.driverId)
-                      .map((d) => ({
-                        lat: Number(d.currentLat),
-                        lng: Number(d.currentLng),
-                        type: "driver",
-                        id: d.id,
-                        vehicleType: d.vehicleType || "car",
-                      }))
-                  : []),
+...(activeRide &&
+  activeRide.driver &&
+  !driverPosition
+  ? [
+      {
+        lat: Number(activeRide.pickupLat), // fallback
+        lng: Number(activeRide.pickupLng),
+        type: "driver",
+        id: activeRide.driver.id,
+        vehicleType: activeRide.driver.vehicleType || "car",
+      },
+    ]
+  : []),
               ] as any
             }
             route={routeCoords}
