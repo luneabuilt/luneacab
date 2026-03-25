@@ -150,7 +150,7 @@ app.use((req, res, next) => {
     console.log("Driver registered in room:", driverId);
   });
 
-    socket.on("driver-location", (data) => {
+    socket.on("update-driver-location", (data) => {
       activeDrivers[data.driverId] = {
         lat: data.lat,
         lng: data.lng,
@@ -158,10 +158,11 @@ app.use((req, res, next) => {
       };
 
       io.emit("update-driver-location", {
-        driverId: data.driverId,
-        lat: data.lat,
-        lng: data.lng,
-      });
+  driverId: data.driverId,
+  lat: data.lat,
+  lng: data.lng,
+  vehicleType: data.vehicleType, // ✅ ADD THIS
+});
     });
 
     socket.on("disconnect", () => {

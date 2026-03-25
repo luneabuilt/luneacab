@@ -128,7 +128,7 @@ export default function Map({
           let iconToUse = userIcon;
 
         if (marker.type === "driver") {
-          const type = marker.vehicleType?.toLowerCase();
+          const type = (marker.vehicleType || "car").toLowerCase();
 
           if (type === "bike") {
             iconToUse = bikeIcon;

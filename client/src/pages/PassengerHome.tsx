@@ -95,6 +95,12 @@ useEffect(() => {
   const queryClient = useQueryClient();
 
   const { data: activeRide, refetch } = useActiveRide(user?.id);
+useEffect(() => {
+  console.log("ACTIVE RIDE:", activeRide);
+}, [activeRide]);
+useEffect(() => {
+  console.log("DRIVER DATA:", activeRide?.driver);
+}, [activeRide]);
 
 const driver = activeRide?.driver;
 
@@ -199,30 +205,31 @@ setPaymentProcessing(false);
   const handler = (data: any) => {
     if (!activeRide || data.driverId !== activeRide.driverId) return;
 
-    setDriverPosition((prev) => {
-      if (!prev) {
-        return {
-          lat: data.lat,
-          lng: data.lng,
-  vehicleType:
-  data.vehicleType ||
-  activeRide?.driver?.vehicleType ||
-  "car",
-        };
-      }
+setDriverPosition((prev) => {
+  if (!prev) {
+    return {
+      lat: data.lat,
+      lng: data.lng,
+      vehicleType:
+        data.vehicleType ||
+        activeRide?.driver?.vehicleType ||
+        "car",
+    };
+  }
 
-      const smoothLat = prev.lat + (data.lat - prev.lat) * 0.5;
-      const smoothLng = prev.lng + (data.lng - prev.lng) * 0.5;
+  const smoothLat = prev.lat + (data.lat - prev.lat) * 0.5;
+  const smoothLng = prev.lng + (data.lng - prev.lng) * 0.5;
 
-      return {
-        lat: smoothLat,
-        lng: smoothLng,
-  vehicleType:
-  data.vehicleType ||
-  activeRide?.driver?.vehicleType ||
-  "car",
-      };
-    });
+  return {
+    lat: smoothLat,
+    lng: smoothLng,
+    vehicleType:
+      data.vehicleType ||
+      prev.vehicleType ||
+      activeRide?.driver?.vehicleType ||
+      "car",
+  };
+});
   };
 
   socket.on("update-driver-location", handler);
@@ -234,10 +241,14 @@ setPaymentProcessing(false);
   useEffect(() => {
   const handler = (ride: any) => {
     if (!user || ride.passengerId !== user.id) return; {
-      queryClient.setQueryData(
-        [api.rides.getActiveForUser.path, user?.id],
-        ride
-      );
+queryClient.setQueryData(
+  [api.rides.getActiveForUser.path, user?.id],
+  (old: any) => ({
+    ...old,
+    ...ride,
+    driver: ride?.driver ?? old?.driver, // ✅ PRESERVE DRIVER
+  })
+);
     }
   };
 
@@ -252,10 +263,14 @@ setPaymentProcessing(false);
 useEffect(() => {
   const handler = (ride: any) => {
     if (!user || ride.passengerId !== user.id) return; {
-      queryClient.setQueryData(
-        [api.rides.getActiveForUser.path, user?.id],
-        ride
-      );
+queryClient.setQueryData(
+  [api.rides.getActiveForUser.path, user?.id],
+  (old: any) => ({
+    ...old,
+    ...ride,
+    driver: ride?.driver ?? old?.driver,  // ✅ PRESERVE DRIVER
+  })
+);
     }
   };
 
