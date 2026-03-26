@@ -92,10 +92,14 @@ function deg2rad(deg: number) {
 // 🔥 DRIVER LOOP SYSTEM (GLOBAL)
 async function dispatchToNextDriver(rideId: number) {
   try {
-    const ride = await storage.getRide(rideId);
-    if (!ride) return;
+const ride = await storage.getRide(rideId);
+if (!ride) return;
 
-    if (ride.status !== "requested") return;
+// 🔥 STOP DISPATCH if ride is no longer valid
+if (ride.status !== "requested") {
+  console.log("⛔ Dispatch stopped (ride not requested):", ride.status);
+  return;
+}
 
     let queue: number[] = [];
 
@@ -105,13 +109,29 @@ try {
   queue = [];
 }
     let currentIndex = ride.queueIndex ?? 0;
+    console.log("🚀 Dispatching ride:", rideId);
+console.log("👉 Queue:", queue);
+console.log("👉 Current Index:", currentIndex);
 
-    if (currentIndex >= queue.length) {
-      console.log("No more drivers available");
-      return;
-    }
+if (currentIndex >= queue.length) {
+  console.log("❌ No more drivers available for ride:", rideId);
+
+  // 🔥 AUTO CANCEL + NOTIFY PASSENGER
+await storage.updateRide(rideId, {
+  status: "cancelled",
+});
+
+  const updatedRide = await storage.getRide(rideId);
+
+  if (updatedRide?.passengerId) {
+    io.to(`user-${updatedRide.passengerId}`).emit("ride-updated", updatedRide);
+  }
+
+  return;
+}
 
     const driverId = queue[currentIndex];
+    console.log("🎯 Trying driver:", driverId);
     const driver = await storage.getUser(driverId);
     if (!driver?.isOnline) {
   await storage.updateRide(rideId, {
@@ -146,12 +166,16 @@ if (driver?.pushToken) {
 
     setTimeout(async () => {
   const updatedRide = await storage.getRide(rideId);
-  if (!updatedRide) return;
+if (!updatedRide) return;
 
-  // 🔥 STOP if index already moved (reject happened)
-  if ((updatedRide.queueIndex ?? 0) !== currentIndex) return;
+// 🔥 STOP if ride already handled
+if (updatedRide.status !== "requested") {
+  console.log("⛔ Timeout stopped, ride already handled:", updatedRide.status);
+  return;
+}
 
-  if (updatedRide.status !== "requested") return;
+// 🔥 STOP if index already moved (reject happened)
+if ((updatedRide.queueIndex ?? 0) !== currentIndex) return;
 
   await storage.updateRide(rideId, {
     queueIndex: currentIndex + 1,
@@ -477,7 +501,8 @@ dispatchToNextDriver(newRide.id);
 
         if (!ride) return;
 
-        if (ride && ride.status === "requested") {
+if (ride && ride.status === "requested") {
+  console.log("⏳ Global timeout triggered for ride:", newRide.id);
           console.log("Ride auto cancelled after 120 seconds");
 
           await storage.updateRide(newRide.id, {
