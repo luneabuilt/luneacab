@@ -11,6 +11,7 @@ import "leaflet/dist/leaflet.css";
 import { useEffect } from "react";
 import { useRef } from "react";
 
+
 // Fix for default Leaflet marker icons in React
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
