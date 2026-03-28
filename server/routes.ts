@@ -38,9 +38,9 @@ const vehiclePricing: Record<
   string,
   { base: number; rate: number; minimum: number; commissionPercent: number }
 > = {
-  bike: { base: 12, rate: 9, minimum: 25, commissionPercent: 8 },
-  auto: { base: 18, rate: 13, minimum: 50, commissionPercent: 10 },
-  car: { base: 30, rate: 21, minimum: 75, commissionPercent: 11 },
+  bike: { base: 12, rate: 7.5, minimum: 25, commissionPercent: 8.5 },
+  auto: { base: 18, rate: 12, minimum: 50, commissionPercent: 9.5 },
+  car: { base: 30, rate: 20, minimum: 90, commissionPercent: 10.5 },
 };
 function calculateFare(distanceKm: number, vehicleType: string) {
   const pricing = vehiclePricing[vehicleType];
