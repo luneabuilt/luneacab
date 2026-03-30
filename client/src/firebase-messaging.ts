@@ -5,8 +5,14 @@ const messaging = getMessaging(app);
 
 export async function getFCMToken() {
   try {
+    // 🔥 Register your custom service worker
+    const registration = await navigator.serviceWorker.register(
+      "/firebase-messaging-sw.js"
+    );
+
     const token = await getToken(messaging, {
       vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+      serviceWorkerRegistration: registration, // ✅ THIS FIXES EVERYTHING
     });
 
     return token;
