@@ -12,7 +12,7 @@ export async function getFCMToken() {
 
     const token = await getToken(messaging, {
       vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
-      serviceWorkerRegistration: registration, // ✅ THIS FIXES EVERYTHING
+      serviceWorkerRegistration: registration, // ✅ VERY IMPORTANT
     });
 
     return token;
