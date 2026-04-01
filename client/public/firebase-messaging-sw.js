@@ -17,10 +17,12 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage(function (payload) {
-  const notificationTitle = payload.notification.title;
+  console.log("🔥 Background message:", payload);
+
+  const notificationTitle = payload.data.title;
 
   const notificationOptions = {
-    body: payload.notification.body,
+    body: payload.data.body,
     icon: "/icon.png",
     data: {
       rideId: payload.data.rideId,

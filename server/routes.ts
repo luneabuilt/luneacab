@@ -146,17 +146,17 @@ io.to(`driver-${driverId}`).emit("new-ride-request", ride);
 
 // 🔥 PUSH NOTIFICATION (NEW)
 if (driver?.pushToken) {
-  (messaging as any)
-    .send({
-      token: driver.pushToken,
-      notification: {
-        title: "🚕 New Ride Request",
-        body: `New trip • Fare ₹${ride.fare}`,
-      },
-      data: {
-  rideId: ride.id.toString(),
-},
-    })
+(messaging as any).send({
+  token: driver.pushToken,
+
+  // ❌ REMOVE notification block completely
+
+  data: {
+    title: "🚕 New Ride Request",
+    body: `New trip • Fare ₹${ride.fare}`,
+    rideId: ride.id.toString(),
+  },
+})
     .catch((err: any) => {
       console.error("Push send error:", err);
     });
