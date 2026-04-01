@@ -46,32 +46,44 @@ const [isOnlineLocal, setIsOnlineLocal] = useState(user?.isOnline || false);
   socket.emit("register-driver", user.id);
   console.log("Driver socket registered:", user.id);
 }, [user?.id, user?.isOnline]);
-  useEffect(() => {
-    async function registerPushToken() {
-      if (!user) return;
-      await Notification.requestPermission();
+useEffect(() => {
+  async function registerPushToken() {
+    if (!user) return;
 
-      try {
-        const token = await getFCMToken();
+    const permission = await Notification.requestPermission();
+    console.log("🔔 Notification permission:", permission);
 
-        if (!token) return;
-
-        await fetch(`/api/users/${user.id}/push-token`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ token }),
-        });
-
-        console.log("Push token registered:", token);
-      } catch (err) {
-        console.error("Push registration error:", err);
-      }
+    if (permission !== "granted") {
+      console.log("❌ Notification permission denied");
+      return;
     }
 
-    registerPushToken();
-  }, [user]);
+    try {
+      const token = await getFCMToken();
+
+      console.log("🔥 FCM TOKEN:", token); // ✅ VERY IMPORTANT
+
+      if (!token) {
+        console.log("❌ No FCM token received");
+        return;
+      }
+
+      await fetch(`/api/users/${user.id}/push-token`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token }),
+      });
+
+      console.log("✅ Push token saved to backend");
+    } catch (err) {
+      console.error("❌ Push registration error:", err);
+    }
+  }
+
+  registerPushToken();
+}, [user]);
   const { toast } = useToast();
 
   // Mutations

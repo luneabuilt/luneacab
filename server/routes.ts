@@ -149,12 +149,16 @@ if (driver?.pushToken) {
 (messaging as any).send({
   token: driver.pushToken,
 
-  // ❌ REMOVE notification block completely
-
-  data: {
+  // ✅ ADD THIS (VERY IMPORTANT)
+  notification: {
     title: "🚕 New Ride Request",
     body: `New trip • Fare ₹${ride.fare}`,
+  },
+
+  // ✅ KEEP DATA ALSO
+  data: {
     rideId: ride.id.toString(),
+    click_action: "/driver",
   },
 })
     .catch((err: any) => {

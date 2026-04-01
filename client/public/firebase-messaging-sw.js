@@ -19,10 +19,11 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage(function (payload) {
   console.log("🔥 Background message:", payload);
 
-  const notificationTitle = payload.data.title;
+const notificationTitle =
+  payload.notification?.title || payload.data?.title;
 
-  const notificationOptions = {
-    body: payload.data.body,
+const notificationOptions = {
+  body: payload.notification?.body || payload.data?.body,
     icon: "/icon.png",
     data: {
       rideId: payload.data.rideId,
