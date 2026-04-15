@@ -3,6 +3,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { BASE_URL } from "@/lib/config";
 
 export default function DriverSignup() {
+
+    const { setUser } = useAuth();
   const { user } = useAuth();
 
   const [name, setName] = useState("");
@@ -25,39 +27,38 @@ export default function DriverSignup() {
     return data.url;
   };
 
-  const handleSubmit = async () => {
-    if (!user) return;
+const handleSubmit = async () => {
+  if (!user) return;
 
-    // upload all files
-    const licenseUrl = licenseFile ? await uploadFile(licenseFile) : null;
-    const vehicleImageUrl = vehicleFile ? await uploadFile(vehicleFile) : null;
-    const profileImageUrl = profileFile ? await uploadFile(profileFile) : null;
+  // upload files
+  const licenseUrl = licenseFile ? await uploadFile(licenseFile) : null;
+  const vehicleImageUrl = vehicleFile ? await uploadFile(vehicleFile) : null;
+  const profileImageUrl = profileFile ? await uploadFile(profileFile) : null;
 
-    // save to backend
-    await fetch(`${BASE_URL}/api/users/${user.id}/documents`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name,
-        vehicleNumber,
-        licenseUrl,
-        vehicleImageUrl,
-        profileImageUrl,
-      }),
-    });
+  // save to backend
+await fetch(`${BASE_URL}/api/users/${user.id}/documents`, {
+  method: "PATCH",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    name,
+    vehicleNumber,
+    role: "driver",
+    licenseUrl,
+    vehicleImageUrl,
+    profileImageUrl,
+  }),
+});
 
-    alert("Submitted! Wait for admin approval.");
-
-// 🔥 FETCH UPDATED USER
+// ✅ FETCH UPDATED USER
 const res = await fetch(`${BASE_URL}/api/users/${user.id}`);
 const updatedUser = await res.json();
 
-// 🔥 UPDATE AUTH STATE
-localStorage.setItem("user", JSON.stringify(updatedUser));
+// ✅ UPDATE ZUSTAND STORE (THIS IS THE REAL FIX)
+setUser(updatedUser);
 
-// 🔥 RELOAD APP
+// ✅ REDIRECT
 window.location.href = "/profile";
-  };
+};
 
   return (
     <div className="p-6 space-y-4">
