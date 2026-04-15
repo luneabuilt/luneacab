@@ -223,10 +223,13 @@ const rejectDriver = async (id: number) => {
           </CardContent>
         </Card>
         <Card className="col-span-2">
-  <CardContent className="p-6">
-    <h2 className="text-xl font-semibold mb-4">
-      Pending Driver Approvals
-    </h2>
+  <CardContent className="p-6 max-h-[400px] overflow-y-auto">
+    <h2 className="text-xl font-bold mb-4 flex items-center justify-between">
+  Pending Driver Approvals
+  <span className="text-sm text-muted-foreground">
+    {pendingDrivers.length} requests
+  </span>
+</h2>
 
     {pendingDrivers.length === 0 && (
       <p className="text-sm text-muted-foreground">
@@ -234,14 +237,14 @@ const rejectDriver = async (id: number) => {
       </p>
     )}
 
-    <div className="space-y-4">
+    <div className="space-y-3">
       {pendingDrivers.map((driver) => (
         <div
-          key={driver.id}
-          className="flex justify-between items-center border p-4 rounded-lg"
-        >
-          <div>
-            <p className="font-semibold">{driver.name}</p>
+  key={driver.id}
+  className="flex justify-between items-center border p-4 rounded-xl shadow-sm bg-white hover:shadow-md transition"
+>
+          <div className="space-y-1">
+  <p className="font-semibold text-base">{driver.name}</p>
             <p className="text-sm text-muted-foreground">
               {driver.phone}
             </p>
@@ -253,14 +256,14 @@ const rejectDriver = async (id: number) => {
           <div className="flex gap-2">
             <button
               onClick={() => approveDriver(driver.id)}
-              className="bg-green-600 text-white px-3 py-1 rounded"
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded-lg text-sm"
             >
               Approve
             </button>
 
             <button
               onClick={() => rejectDriver(driver.id)}
-              className="bg-red-600 text-white px-3 py-1 rounded"
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg text-sm"
             >
               Reject
             </button>
