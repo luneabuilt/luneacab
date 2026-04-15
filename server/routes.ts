@@ -840,6 +840,49 @@ res.json(rideWithDriver);
     }
   });
 
+app.patch("/api/rides/:id/payment", async (req, res) => {
+  try {
+    const rideId = Number(req.params.id);
+    const { role } = req.body;
+
+    const ride = await storage.getRide(rideId);
+    if (!ride) {
+      return res.status(404).json({ message: "Ride not found" });
+    }
+
+    console.log("🔥 PAYMENT API CALLED");
+    console.log("Ride Status:", ride.status);
+
+    // ✅ FIX: allow ongoing + payment_pending
+    if (
+      ride.status !== "payment_pending" &&
+      ride.status !== "ongoing"
+    ) {
+      return res.status(400).json({
+        message: "Payment not allowed in this state",
+      });
+    }
+
+    const updatedRide = await storage.updateRide(rideId, {
+      status: "completed",
+    });
+
+    // 🔥 notify both sides
+    if (updatedRide?.passengerId) {
+      io.to(`user-${updatedRide.passengerId}`).emit("ride-updated", updatedRide);
+    }
+
+    if (updatedRide?.driverId) {
+      io.to(`driver-${updatedRide.driverId}`).emit("ride-updated", updatedRide);
+    }
+
+    res.json(updatedRide);
+  } catch (err) {
+    console.error("Payment error:", err);
+    res.status(500).json({ message: "Payment failed" });
+  }
+});
+
   app.patch("/api/rides/:id/verify-otp", async (req, res) => {
     try {
       const rideId = Number(req.params.id);

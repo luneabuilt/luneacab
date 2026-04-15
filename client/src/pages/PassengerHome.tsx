@@ -166,7 +166,10 @@ const handlePayment = async () => {
       {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role: "passenger" }),
+        body: JSON.stringify({
+  role: "passenger",
+  paymentMethod: paymentMethod, // 🔥 ADD THIS
+}),
       }
     );
 
