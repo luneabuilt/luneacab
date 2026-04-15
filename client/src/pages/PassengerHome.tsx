@@ -27,8 +27,8 @@ import { socket } from "@/lib/socket";
 import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@shared/routes";
 
-import { Geolocation } from '@capacitor/geolocation';
 import { getLocation } from "@/utils/platform";
+import { BASE_URL } from "@/lib/config"; // ADD at top
 
 // Helper for coordinates
 
@@ -461,22 +461,42 @@ useEffect(() => {
   if (!user) return;
 
   const loadLocation = async () => {
+    setIsLocationLoading(true);
+
     const loc = await getLocation();
 
-    if (!loc) return;
+    if (!loc) {
+      console.log("❌ Location not received");
+
+      toast({
+        title: "Location Error",
+        description: "Please enable GPS permission",
+        variant: "destructive",
+      });
+
+      setIsLocationLoading(false);
+      return;
+    }
 
     const { lat, lng } = loc;
 
-    console.log("Passenger Location:", lat, lng);
+    console.log("✅ Passenger Location:", lat, lng);
 
-    await fetch(`/api/users/${user.id}/location`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ lat, lng }),
-    });
+    try {
+      await fetch(`${BASE_URL}/api/users/${user.id}/location`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lat, lng }),
+      });
 
-    setPickup({ lat, lng });
-    setPickupSearchText("Current Location");
+      setPickup({ lat, lng });
+      setPickupSearchText("Current Location");
+      setCurrentLocationName("Current Location");
+    } catch (err) {
+      console.error("❌ Backend update failed", err);
+    }
+
+    setIsLocationLoading(false);
   };
 
   loadLocation();
