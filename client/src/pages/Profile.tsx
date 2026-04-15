@@ -28,13 +28,21 @@ export default function Profile() {
   });
 
   const selectedRole = form.watch("role");
+  useEffect(() => {
+  if (user?.role === "driver" && !user?.licenseUrl) {
+    setLocation("/driver-signup");
+  }
+}, [user]);
 
   const onSubmit = (data: any) => {
     updateProfile.mutate(data, {
       onSuccess: () => {
         // Redirect to appropriate dashboard after profile update if needed
-        if (data.role === "passenger") setLocation("/home");
-        else setLocation("/driver");
+if (data.role === "passenger") {
+  setLocation("/home");
+} else {
+  setLocation("/driver-signup"); // 👈 IMPORTANT
+}
       }
     });
   };
