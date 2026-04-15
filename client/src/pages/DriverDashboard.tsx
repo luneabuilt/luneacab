@@ -521,11 +521,6 @@ if (res.ok) {
     rideId: activeRide.id,
     status: "payment_pending",
   });
-
-  socket.emit("ride-updated", {
-    ...activeRide,
-    status: "payment_pending",
-  });
 }}
                 >
                   End Ride

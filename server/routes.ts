@@ -756,14 +756,21 @@ res.json(rideWithDriver);
       }
 
       const updatedRide = await storage.updateRide(
-        Number(req.params.id),
-        updates,
-      );
-      if (updatedRide && updatedRide.passengerId) {
+  Number(req.params.id),
+  updates,
+);
+
+// 🔥 send to passenger
+if (updatedRide && updatedRide.passengerId) {
   io.to(`user-${updatedRide.passengerId}`).emit("ride-updated", updatedRide);
 }
 
-      res.json(updatedRide);
+// 🔥🔥 ADD THIS (VERY IMPORTANT)
+if (updatedRide && updatedRide.driverId) {
+  io.to(`driver-${updatedRide.driverId}`).emit("ride-updated", updatedRide);
+}
+
+res.json(updatedRide);
     } catch (err) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({
@@ -850,18 +857,14 @@ app.patch("/api/rides/:id/payment", async (req, res) => {
       return res.status(404).json({ message: "Ride not found" });
     }
 
-    console.log("🔥 PAYMENT API CALLED");
-    console.log("Ride Status:", ride.status);
+console.log("🔥 PAYMENT API CALLED");
+console.log("🔥 PAYMENT STATUS:", ride.status);
 
-    // ✅ FIX: allow ongoing + payment_pending
-    if (
-      ride.status !== "payment_pending" &&
-      ride.status !== "ongoing"
-    ) {
-      return res.status(400).json({
-        message: "Payment not allowed in this state",
-      });
-    }
+if (!["payment_pending", "ongoing"].includes(ride.status ?? "")) {
+  return res.status(400).json({
+    message: "Payment not allowed in this state",
+  });
+}
 
     const updatedRide = await storage.updateRide(rideId, {
       status: "completed",
