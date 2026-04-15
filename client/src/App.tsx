@@ -25,53 +25,53 @@ function Router() {
     <div className="min-h-screen bg-background text-foreground antialiased font-sans pb-16 md:pb-0">
       <Switch>
 
-        {/* 🔥 NOT LOGGED IN */}
-        {!user && <Route path="*" component={Auth} />}
+  {/* 🔥 NOT LOGGED IN */}
+  {!user && <Route path="*" component={Auth} />}
 
-        {/* 🔥 DRIVER NOT REGISTERED */}
-        {user && user.role !== "driver" && (
-          <>
-            <Route path="/driver-signup" component={DriverSignup} />
-            <Route path="*">
-              <Redirect to="/driver-signup" />
-            </Route>
-          </>
-        )}
+  {/* 🔥 PASSENGER */}
+  {user && user.role === "passenger" && (
+    <>
+      <Route path="/" component={Home} />
+      <Route path="/home" component={Home} />
+      <Route path="/profile" component={Profile} />
+      <Route path="/history" component={History} />
+      <Route path="/driver-signup" component={DriverSignup} />
+    </>
+  )}
 
-        {/* 🔥 DRIVER NOT APPROVED */}
-        {user && user.role === "driver" && !user.isApproved && (
-          <Route path="*">
-            <div className="p-6 text-center">
-              <h2 className="text-xl font-bold">Waiting for Approval</h2>
-              <p className="text-muted-foreground">
-                Your account is under review by admin.
-              </p>
-            </div>
-          </Route>
-        )}
+  {/* 🔥 DRIVER NOT APPROVED */}
+  {user && user.role === "driver" && !user.isApproved && (
+    <Route path="*">
+      <div className="p-6 text-center">
+        <h2 className="text-xl font-bold">Waiting for Approval</h2>
+        <p className="text-muted-foreground">
+          Your account is under review
+        </p>
+      </div>
+    </Route>
+  )}
 
-        {/* 🔥 APPROVED DRIVER */}
-        {user && user.role === "driver" && user.isApproved && (
-          <>
-            <Route path="/" component={DriverDashboard} />
-            <Route path="/driver" component={DriverDashboard} />
-            <Route path="/profile" component={Profile} />
-            <Route path="/earnings" component={Earnings} />
-            <Route path="/history" component={History} />
-          </>
-        )}
+  {/* 🔥 APPROVED DRIVER */}
+  {user && user.role === "driver" && user.isApproved && (
+    <>
+      <Route path="/" component={DriverDashboard} />
+      <Route path="/driver" component={DriverDashboard} />
+      <Route path="/earnings" component={Earnings} />
+      <Route path="/history" component={History} />
+    </>
+  )}
 
-        {/* 🔥 ADMIN */}
-        {user && user.role === "admin" && (
-          <>
-            <Route path="/admin" component={Admin} />
-            <Route path="*">
-              <Redirect to="/admin" />
-            </Route>
-          </>
-        )}
+  {/* 🔥 ADMIN */}
+  {user && user.role === "admin" && (
+    <>
+      <Route path="/admin" component={Admin} />
+      <Route path="*">
+        <Redirect to="/admin" />
+      </Route>
+    </>
+  )}
 
-      </Switch>
+</Switch>
 
       <BottomNav />
     </div>
