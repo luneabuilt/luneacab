@@ -47,10 +47,17 @@ export default function DriverSignup() {
     });
 
     alert("Submitted! Wait for admin approval.");
-  };
 
-  alert("Submitted! Wait for admin approval.");
-window.location.reload(); // 🔥 ADD THIS
+// 🔥 FETCH UPDATED USER
+const res = await fetch(`${BASE_URL}/api/users/${user.id}`);
+const updatedUser = await res.json();
+
+// 🔥 UPDATE AUTH STATE
+localStorage.setItem("user", JSON.stringify(updatedUser));
+
+// 🔥 RELOAD APP
+window.location.href = "/profile";
+  };
 
   return (
     <div className="p-6 space-y-4">
