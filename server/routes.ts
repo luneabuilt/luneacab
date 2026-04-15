@@ -327,7 +327,7 @@ isApproved: false,
     }
   });
 
-  app.patch("/api/users/:id/documents", async (req, res) => {
+app.patch("/api/users/:id/documents", async (req, res) => {
   try {
     const userId = Number(req.params.id);
 
@@ -340,18 +340,23 @@ isApproved: false,
       role,
     } = req.body;
 
-    const user = await storage.updateUser(userId, {
-      licenseUrl,
-      vehicleImageUrl,
-      profileImageUrl,
-      name,
-      vehicleNumber,
-      role,
-      isApproved: false,
-    });
+    console.log("📥 Incoming documents:", req.body);
+
+const user = await storage.updateUser(userId, {
+  licenseUrl,
+  vehicleImageUrl,
+  profileImageUrl,
+  name,
+  vehicleNumber,
+  role,
+  isApproved: false, // ✅ ADD THIS
+});
+
+    console.log("💾 Saved user:", user);
 
     res.json(user);
   } catch (err) {
+    console.error("❌ Document save error:", err);
     res.status(500).json({ message: "Failed to save documents" });
   }
 });

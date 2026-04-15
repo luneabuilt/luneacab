@@ -30,34 +30,46 @@ export default function DriverSignup() {
 const handleSubmit = async () => {
   if (!user) return;
 
-  // upload files
-  const licenseUrl = licenseFile ? await uploadFile(licenseFile) : null;
-  const vehicleImageUrl = vehicleFile ? await uploadFile(vehicleFile) : null;
-  const profileImageUrl = profileFile ? await uploadFile(profileFile) : null;
+  try {
+    console.log("🚀 Uploading files...");
 
-  // save to backend
-await fetch(`${BASE_URL}/api/users/${user.id}/documents`, {
-  method: "PATCH",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    name,
-    vehicleNumber,
-    role: "driver",
-    licenseUrl,
-    vehicleImageUrl,
-    profileImageUrl,
-  }),
-});
+    const licenseUrl = licenseFile ? await uploadFile(licenseFile) : null;
+    const vehicleImageUrl = vehicleFile ? await uploadFile(vehicleFile) : null;
+    const profileImageUrl = profileFile ? await uploadFile(profileFile) : null;
 
-// ✅ FETCH UPDATED USER
-const res = await fetch(`${BASE_URL}/api/users/${user.id}`);
-const updatedUser = await res.json();
+    console.log("✅ Uploaded:", {
+      licenseUrl,
+      vehicleImageUrl,
+      profileImageUrl,
+    });
 
-// ✅ UPDATE ZUSTAND STORE (THIS IS THE REAL FIX)
-setUser(updatedUser);
+    const res1 = await fetch(`${BASE_URL}/api/users/${user.id}/documents`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name,
+        vehicleNumber,
+        role: "driver",
+isApproved: false,
+        licenseUrl,
+        vehicleImageUrl,
+        profileImageUrl,
+      }),
+    });
 
-// ✅ REDIRECT
-window.location.href = "/profile";
+    console.log("📡 PATCH status:", res1.status);
+
+    const res2 = await fetch(`${BASE_URL}/api/users/${user.id}`);
+    const updatedUser = await res2.json();
+
+    console.log("👤 Updated user:", updatedUser);
+
+    setUser(updatedUser);
+
+    window.location.href = "/profile";
+  } catch (err) {
+    console.error("❌ Signup error:", err);
+  }
 };
 
   return (

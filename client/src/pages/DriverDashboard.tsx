@@ -30,6 +30,19 @@ const rideAlertSound = new Audio(
 
 export default function DriverDashboard() {
   const { user, setUser } = useAuth();
+
+  if (user?.role === "driver" && !user?.isApproved) {
+  return (
+    <div className="h-screen flex items-center justify-center">
+      <div className="text-center space-y-4">
+        <h2 className="text-2xl font-bold">⏳ Waiting for Approval</h2>
+        <p className="text-muted-foreground">
+          Your documents are under review by admin.
+        </p>
+      </div>
+    </div>
+  );
+}
 const [isOnlineLocal, setIsOnlineLocal] = useState(user?.isOnline || false);
   const queryClient = useQueryClient();
   const { data: activeRide, refetch } = useActiveRide(user?.id);
@@ -629,10 +642,10 @@ if (res.ok) {
           <CardContent className="p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div
-                className={`h-3 w-3 rounded-full ${user?.isOnline ? "bg-green-500 animate-pulse" : "bg-red-500"}`}
+                className={`h-3 w-3 rounded-full ${isOnlineLocal ? "bg-green-500 animate-pulse" : "bg-red-500"}`}
               />
               <span className="font-semibold">
-                {user?.isOnline ? "You are Online" : "You are Offline"}
+                {isOnlineLocal ? "You are Online" : "You are Offline"}
               </span>
             </div>
             <Switch
