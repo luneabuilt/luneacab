@@ -40,7 +40,6 @@ export default function DriverSignup() {
       body: JSON.stringify({
         name,
         vehicleNumber,
-        role: "driver",
         licenseUrl,
         vehicleImageUrl,
         profileImageUrl,
