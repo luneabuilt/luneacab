@@ -5,6 +5,17 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import { messaging } from "./firebase-admin";
 import { io } from "./index";
+import multer from "multer";
+import { v2 as cloudinary } from "cloudinary";
+
+ // Configuration
+    cloudinary.config({ 
+        cloud_name: 'dy7flkgly', 
+        api_key: '569317233745129', 
+        api_secret: 'Ics21L31ReHfGOefgKLRYKjtAgM'
+    });
+
+    const upload = multer({ storage: multer.memoryStorage() });
 
 async function requireAuth(req: any, res: any, next: any) {
   const userId = req.headers["x-user-id"];
@@ -209,6 +220,49 @@ export async function registerRoutes(
     next();
   });
   // -- Users API --
+
+  app.post("/api/upload", upload.single("file"), async (req: any, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const result = await new Promise<any>((resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream({ folder: "kyc_uploads" }, (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        })
+        .end(req.file.buffer);
+    });
+
+    res.json({
+      url: result.secure_url,
+    });
+  } catch (err) {
+    console.error("Upload error:", err);
+    res.status(500).json({ message: "Upload failed" });
+  }
+});
+
+app.patch("/api/users/:id/documents", async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+    const { licenseUrl, vehicleImageUrl, profileImageUrl } = req.body;
+
+    const user = await storage.updateUser(userId, {
+      licenseUrl,
+      vehicleImageUrl,
+      profileImageUrl,
+    });
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to save documents" });
+  }
+});
+
+
   app.post("/api/users/:id/push-token", async (req, res) => {
     try {
       const userId = Number(req.params.id);
@@ -282,6 +336,34 @@ user = await storage.createUser({
       throw err;
     }
   });
+
+  app.patch("/api/users/:id/documents", async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+
+    const {
+      licenseUrl,
+      vehicleImageUrl,
+      profileImageUrl,
+      name,
+      vehicleNumber,
+      role,
+    } = req.body;
+
+    const user = await storage.updateUser(userId, {
+      licenseUrl,
+      vehicleImageUrl,
+      profileImageUrl,
+      name,
+      vehicleNumber,
+      role,
+    });
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to save documents" });
+  }
+});
 
   app.patch(api.users.updateLocation.path, async (req, res) => {
     try {

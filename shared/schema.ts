@@ -43,6 +43,10 @@ export const users = pgTable("users", {
   upiName: text("upi_name"),
   totalEarnings: numeric("total_earnings").default("0"),
   createdAt: timestamp("created_at").defaultNow(),
+  licenseUrl: text("license_url"),
+vehicleImageUrl: text("vehicle_image_url"),
+profileImageUrl: text("profile_image_url"),
+isApproved: boolean("is_approved").default(false),
 });
 
 // --- Rides Table ---
