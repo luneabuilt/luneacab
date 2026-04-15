@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">LuneaCab</string>
+    <string name="title_activity_main">LuneaCab</string>
+    <string name="package_name">com.luneacab.app</string>
+    <string name="custom_url_scheme">com.luneacab.app</string>
+</resources>

@@ -2,7 +2,7 @@ import { io } from "socket.io-client";
 
 const SOCKET_URL = import.meta.env.PROD
   ? "https://luneacab-production.up.railway.app"
-  : "http://localhost:3000";
+  : "http://192.168.1.42:3000";
 
 export const socket = io(SOCKET_URL, {
   transports: ["websocket"], // force websocket only (no polling)

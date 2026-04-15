@@ -14,10 +14,13 @@ import Map from "@/components/Map";
 import { useToast } from "@/hooks/use-toast";
 import { Power, Navigation } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { getFCMToken } from "@/firebase-messaging";
+
 import { socket } from "@/lib/socket";
 import { useQueryClient } from "@tanstack/react-query";
+import { BASE_URL } from "@/lib/config";
 
+
+import { getLocation, setupPush } from "@/utils/platform";
 
 const rideAlertSound = new Audio(
   "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3",
@@ -46,44 +49,13 @@ const [isOnlineLocal, setIsOnlineLocal] = useState(user?.isOnline || false);
   socket.emit("register-driver", user.id);
   console.log("Driver socket registered:", user.id);
 }, [user?.id, user?.isOnline]);
+
 useEffect(() => {
-  async function registerPushToken() {
-    if (!user) return;
+  if (!user) return;
 
-    const permission = await Notification.requestPermission();
-    console.log("🔔 Notification permission:", permission);
-
-    if (permission !== "granted") {
-      console.log("❌ Notification permission denied");
-      return;
-    }
-
-    try {
-      const token = await getFCMToken();
-
-      console.log("🔥 FCM TOKEN:", token); // ✅ VERY IMPORTANT
-
-      if (!token) {
-        console.log("❌ No FCM token received");
-        return;
-      }
-
-      await fetch(`/api/users/${user.id}/push-token`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ token }),
-      });
-
-      console.log("✅ Push token saved to backend");
-    } catch (err) {
-      console.error("❌ Push registration error:", err);
-    }
-  }
-
-  registerPushToken();
+  setupPush(user.id, BASE_URL);
 }, [user]);
+
   const { toast } = useToast();
 
   // Mutations
@@ -194,45 +166,30 @@ useEffect(() => {
       : null,
   );
 
-  useEffect(() => {
-    if (!user || user.role !== "driver") return;
+useEffect(() => {
+  if (!user || user.role !== "driver") return;
 
-    const interval = setInterval(
-      () => {
-        navigator.geolocation.getCurrentPosition(
-          async (position) => {
-            const { latitude, longitude } = position.coords;
+  const interval = setInterval(async () => {
+    const loc = await getLocation();
 
-            setDriverPosition({
-              lat: latitude,
-              lng: longitude,
-            });
-            await fetch(`/api/users/${user.id}/location`, {
-  method: "PATCH",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    lat: latitude,
-    lng: longitude,
-  }),
-});
+    if (!loc) return;
 
-            console.log("Driver live location:", latitude, longitude);
-          },
-          (error) => {
-            console.error("GPS error:", error);
-          },
-          {
-            enableHighAccuracy: true,
-            maximumAge: 0,
-            timeout: 5000,
-          },
-        );
-      },
-      activeRide ? 3000 : 10000,
-    );
+    const { lat, lng } = loc;
 
-    return () => clearInterval(interval);
-  }, [user, activeRide]);
+    setDriverPosition({ lat, lng });
+
+    await fetch(`${BASE_URL}/api/users/${user.id}/location`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lat, lng }),
+    });
+
+    console.log("Driver Location:", lat, lng);
+
+  }, activeRide ? 3000 : 10000);
+
+  return () => clearInterval(interval);
+}, [user, activeRide]);
 
   useEffect(() => {
     if (!incomingRequest) return;
@@ -492,7 +449,7 @@ const handleGoOnline = (checked: boolean) => {
                   variant="destructive"
                   className="w-full"
                   onClick={async () => {
-                    await fetch(`/api/rides/${activeRide.id}/cancel`, {
+                    await fetch(`${BASE_URL}/api/rides/${activeRide.id}/cancel`, {
                       method: "PATCH",
                     });
 
@@ -521,8 +478,7 @@ const handleGoOnline = (checked: boolean) => {
                 <Button
                   className="w-full"
                   onClick={async () => {
-                    const res = await fetch(
-                      `/api/rides/${activeRide.id}/verify-otp`,
+                    const res = await fetch(`${BASE_URL}/api/rides/${activeRide.id}/verify-otp`,
                       {
                         method: "PATCH",
                         headers: { "Content-Type": "application/json" },
@@ -581,7 +537,7 @@ if (res.ok) {
               <Button
                 className="w-full"
                 onClick={async () => {
-                  const res = await fetch(`/api/rides/${activeRide.id}/payment`, {
+                  const res = await fetch(`${BASE_URL}/api/rides/${activeRide.id}/payment`, {
   method: "PATCH",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ role: "driver" }),
@@ -788,7 +744,7 @@ if (res.ok) {
   onClick={async () => {
     if (!incomingRequest || !user) return;
 
-    await fetch(`/api/rides/${incomingRequest.id}/reject`, {
+    await fetch(`${BASE_URL}/api/rides/${incomingRequest.id}/reject`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ driverId: user.id }),

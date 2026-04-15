@@ -21,3 +21,11 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 
 export default app;
+// 🔥 ADD THIS (VERY IMPORTANT)
+
+const authInstance = getAuth();
+
+// Enable testing mode (bypass reCAPTCHA)
+(authInstance as any).settings = {
+  appVerificationDisabledForTesting: true,
+};

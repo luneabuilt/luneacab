@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Loader2, Car, Smartphone, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
-import { useToast } from "@/hooks/use-toast";
+let globalVerificationId: string | null = null;
 
 
 export default function Auth() {
@@ -19,77 +20,70 @@ export default function Auth() {
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState<"phone" | "otp">("phone");
-  const [confirmationResult, setConfirmationResult] = useState<any>(null);
+  const [verificationId, setVerificationId] = useState<string | null>(null);
 
   useEffect(() => {
   if (!(window as any).recaptchaVerifier) {
     (window as any).recaptchaVerifier = new RecaptchaVerifier(
       auth,
       "recaptcha-container",
-      {
-        size: "invisible",
-      }
+      { size: "invisible" }
     );
   }
 }, []);
 
-  const setupRecaptcha = () => {
-  return (window as any).recaptchaVerifier;
+
+
+
+const handleSendOtp = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  const appVerifier = (window as any).recaptchaVerifier;
+  const formattedPhone = phone.startsWith("+") ? phone : `+91${phone}`;
+
+  try {
+    const confirmation = await signInWithPhoneNumber(
+      auth,
+      formattedPhone,
+      appVerifier
+    );
+
+    (window as any).confirmationResult = confirmation;
+
+    setStep("otp");
+  } catch (error: any) {
+    console.error(error);
+    alert(error.message);
+  }
 };
 
-  const handleSendOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (phone.length < 10) return;
-    setIsLoading(true);
-    
-    try {
-     const appVerifier = setupRecaptcha();
-      const formattedPhone = phone.startsWith('+') ? phone : `+91${phone}`;
-      const confirmation = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
-      setConfirmationResult(confirmation);
-      setStep("otp");
-      toast({
-        title: "OTP Sent",
-        description: "Please check your phone for the verification code.",
-      });
-    } catch (error: any) {
-      console.error(error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to send OTP. Please try again.",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+const handleVerifyOtp = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-  const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!confirmationResult || otp.length < 6) return;
-    setIsLoading(true);
-    
-    try {
-      const result = await confirmationResult.confirm(otp);
-      const user = result.user;
-      
-      await syncUser.mutateAsync({
-        firebaseUid: user.uid,
-        phone: user.phoneNumber || phone
-      });
-      
-      setLocation("/profile");
-    } catch (error: any) {
-      console.error(error);
-      toast({
-        variant: "destructive",
-        title: "Verification Failed",
-        description: "The OTP entered is incorrect or expired.",
-      });
-    } finally {
-      setIsLoading(false);
+  try {
+    const confirmation = (window as any).confirmationResult;
+
+    if (!confirmation) {
+      throw new Error("No confirmation found");
     }
-  };
+
+    const result = await confirmation.confirm(otp);
+
+    const user = result.user;
+
+    await syncUser.mutateAsync({
+      firebaseUid: user.uid,
+      phone: user.phoneNumber || phone,
+    });
+
+    setLocation("/profile");
+
+  } catch (error: any) {
+    console.error(error);
+    alert(error.message);
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 to-accent/5 flex items-center justify-center p-4">

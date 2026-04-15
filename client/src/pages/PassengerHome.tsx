@@ -27,6 +27,9 @@ import { socket } from "@/lib/socket";
 import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@shared/routes";
 
+import { Geolocation } from '@capacitor/geolocation';
+import { getLocation } from "@/utils/platform";
+
 // Helper for coordinates
 
 export default function PassengerHome() {
@@ -453,59 +456,31 @@ queryClient.setQueryData(
     fetchEstimates();
   }, [distanceKm]);
 
-  useEffect(() => {
-    if (!user) return;
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
+useEffect(() => {
+  if (!user) return;
 
-        console.log("Passenger GPS:", latitude, longitude);
+  const loadLocation = async () => {
+    const loc = await getLocation();
 
-        // Update DB
-        await fetch(`/api/users/${user.id}/location`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            lat: latitude,
-            lng: longitude,
-          }),
-        });
+    if (!loc) return;
 
-        // Also update pickup location on map
-        setPickup({ lat: latitude, lng: longitude });
-        setPickupSearchText("Current Location");
-        // Reverse geocode to get readable location
-        try {
-          const geoRes = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
-          );
+    const { lat, lng } = loc;
 
-          const geoData = await geoRes.json();
-          console.log("Reverse Geo Data:", geoData);
+    console.log("Passenger Location:", lat, lng);
 
-          const address = geoData.address;
+    await fetch(`/api/users/${user.id}/location`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lat, lng }),
+    });
 
-          const locationName = [
-            address.city || address.town || address.village || address.county,
-            address.state,
-          ]
-            .filter(Boolean)
-            .join(", ");
+    setPickup({ lat, lng });
+    setPickupSearchText("Current Location");
+  };
 
-          setCurrentLocationName(locationName || "Current Location");
-        } catch (err) {
-          console.log("Reverse geocode failed", err);
-          setCurrentLocationName("Current Location");
-        }
-      },
-      (error) => {
-        console.error("GPS error:", error);
-      },
-    );
-  }, [user]);
+  loadLocation();
+}, [user]);
 
   // Handlers
   const handleMapClick = (lat: number, lng: number) => {

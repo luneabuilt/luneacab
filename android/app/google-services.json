@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "736709697784",
+    "project_id": "luneacabs",
+    "storage_bucket": "luneacabs.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:736709697784:android:a5cbe11e9412a8bb27db0d",
+        "android_client_info": {
+          "package_name": "com.luneacab.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAv8HHhw9wb2-v35Og-pS2genqAQQUJkH0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -4,6 +4,8 @@ import { User, Ride, InsertRide } from "@shared/schema";
 import { useAuth } from "./use-auth";
 import { useToast } from "./use-toast";
 
+import { BASE_URL } from "@/lib/config";
+
 // --- Users ---
 export function useUser(id?: number) {
   return useQuery({
@@ -11,7 +13,7 @@ export function useUser(id?: number) {
     queryFn: async () => {
       if (!id) return null;
       const url = buildUrl(api.users.get.path, { id });
-      const res = await fetch(url);
+      const res = await fetch(`${BASE_URL}${url}`);
       if (!res.ok) {
   const error = await res.json().catch(() => ({}));
   throw new Error(error.message || "Failed to fetch user");
@@ -28,7 +30,7 @@ export function useSyncUser() {
 
   return useMutation({
     mutationFn: async (data: { firebaseUid: string; phone: string }) => {
-      const res = await fetch(`/api/users/sync`, {
+      const res = await fetch(`${BASE_URL}/api/users/sync`, {
         method: api.users.sync.method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -65,7 +67,7 @@ export function useUpdateProfile() {
     mutationFn: async (data: Partial<User>) => {
       if (!user) throw new Error("Not logged in");
       const url = buildUrl(api.users.updateProfile.path, { id: user.id });
-      const res = await fetch(url, {
+      const res = await fetch(`${BASE_URL}${url}`, {
         method: api.users.updateProfile.method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -111,9 +113,7 @@ export function useNearestDrivers(
         lng,
         ...(vehicleType ? { vehicleType } : {}),
       });
-      const res = await fetch(
-        `${api.users.nearestDrivers.path}?${queryParams}`,
-      );
+      const res = await fetch(`${BASE_URL}${api.users.nearestDrivers.path}?${queryParams}`);
       if (!res.ok) {
   const error = await res.json().catch(() => ({}));
   throw new Error(error.message || "Failed to fetch drivers");
@@ -157,7 +157,7 @@ export function useToggleOnline() {
 
       const url = buildUrl(api.users.toggleOnline.path, { id: user.id });
 
-      const res = await fetch(url, {
+      const res = await fetch(`${BASE_URL}${url}`, {
         method: api.users.toggleOnline.method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isOnline, lat, lng }),
@@ -195,7 +195,7 @@ export function useRequestRide() {
 
   return useMutation({
     mutationFn: async (data: InsertRide) => {
-      const res = await fetch(api.rides.request.path, {
+      const res = await fetch(`${BASE_URL}${api.rides.request.path}`, {
         method: api.rides.request.method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -233,7 +233,7 @@ export function useActiveRide(userId?: number) {
 
       const url = buildUrl(api.rides.getActiveForUser.path, { userId });
 
-      const res = await fetch(url);
+      const res = await fetch(`${BASE_URL}${url}`);
 
       if (!res.ok) {
   const error = await res.json().catch(() => ({}));
@@ -276,7 +276,7 @@ export function useAcceptRide() {
       driverId: number;
     }) => {
       const url = buildUrl(api.rides.accept.path, { id: rideId });
-      const res = await fetch(url, {
+      const res = await fetch(`${BASE_URL}${url}`, {
         method: api.rides.accept.method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ driverId }),
@@ -315,7 +315,7 @@ export function useUpdateRideStatus() {
     mutationFn: async ({ rideId, status, paymentMethod }: any) => {
       const url = buildUrl(api.rides.updateStatus.path, { id: rideId });
 
-      const res = await fetch(url, {
+      const res = await fetch(`${BASE_URL}${url}`, {
         method: api.rides.updateStatus.method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status, paymentMethod }),
@@ -351,7 +351,7 @@ export function useRideHistory(userId?: number) {
     queryFn: async () => {
       if (!userId) return [];
 
-      const res = await fetch(`/api/users/${userId}/rides`);
+      const res = await fetch(`${BASE_URL}/api/users/${userId}/rides`);
       if (!res.ok) {
   const error = await res.json().catch(() => ({}));
   throw new Error(error.message || "Failed to fetch history");
