@@ -16,9 +16,25 @@ export default function Admin() {
   const [stats, setStats] = useState<any>(null);
   const [revenueData, setRevenueData] = useState<any[]>([]);
   const [rides, setRides] = useState<any[]>([]);
+  const [pendingDrivers, setPendingDrivers] = useState<any[]>([]);
 
   useEffect(() => {
     if (!user || user.role !== "admin") return;
+
+    fetch("/api/admin/drivers/pending", {
+  headers: {
+    "x-user-id": user.id.toString(),
+  },
+})
+  .then((res) => res.json())
+  .then((data) => {
+    if (Array.isArray(data)) {
+      setPendingDrivers(data);
+    } else {
+      setPendingDrivers([]);
+    }
+  })
+  .catch(() => setPendingDrivers([]));
 
     // Fetch stats
     fetch("/api/admin/stats", {
@@ -60,6 +76,32 @@ export default function Admin() {
       })
       .catch(() => setRevenueData([]));
   }, [user]);
+
+  const approveDriver = async (id: number) => {
+  if (!user) return; // ✅ ADD THIS LINE
+
+  await fetch(`/api/admin/drivers/${id}/approve`, {
+    method: "PATCH",
+    headers: {
+      "x-user-id": user.id.toString(),
+    },
+  });
+
+  setPendingDrivers((prev) => prev.filter((d) => d.id !== id));
+};
+
+const rejectDriver = async (id: number) => {
+  if (!user) return; // ✅ ADD THIS LINE
+
+  await fetch(`/api/admin/drivers/${id}/reject`, {
+    method: "PATCH",
+    headers: {
+      "x-user-id": user.id.toString(),
+    },
+  });
+
+  setPendingDrivers((prev) => prev.filter((d) => d.id !== id));
+};
 
   if (!user || user.role !== "admin") {
     return <div className="p-6 text-center">Unauthorized</div>;
@@ -180,6 +222,54 @@ export default function Admin() {
             </div>
           </CardContent>
         </Card>
+        <Card className="col-span-2">
+  <CardContent className="p-6">
+    <h2 className="text-xl font-semibold mb-4">
+      Pending Driver Approvals
+    </h2>
+
+    {pendingDrivers.length === 0 && (
+      <p className="text-sm text-muted-foreground">
+        No pending drivers
+      </p>
+    )}
+
+    <div className="space-y-4">
+      {pendingDrivers.map((driver) => (
+        <div
+          key={driver.id}
+          className="flex justify-between items-center border p-4 rounded-lg"
+        >
+          <div>
+            <p className="font-semibold">{driver.name}</p>
+            <p className="text-sm text-muted-foreground">
+              {driver.phone}
+            </p>
+            <p className="text-xs">
+              Vehicle: {driver.vehicleType || "-"}
+            </p>
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => approveDriver(driver.id)}
+              className="bg-green-600 text-white px-3 py-1 rounded"
+            >
+              Approve
+            </button>
+
+            <button
+              onClick={() => rejectDriver(driver.id)}
+              className="bg-red-600 text-white px-3 py-1 rounded"
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </CardContent>
+</Card>
       </div>
     </div>
   );
