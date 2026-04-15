@@ -245,23 +245,6 @@ export async function registerRoutes(
   }
 });
 
-app.patch("/api/users/:id/documents", async (req, res) => {
-  try {
-    const userId = Number(req.params.id);
-    const { licenseUrl, vehicleImageUrl, profileImageUrl } = req.body;
-
-    const user = await storage.updateUser(userId, {
-      licenseUrl,
-      vehicleImageUrl,
-      profileImageUrl,
-    });
-
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ message: "Failed to save documents" });
-  }
-});
-
 
   app.post("/api/users/:id/push-token", async (req, res) => {
     try {
@@ -291,7 +274,14 @@ user = await storage.createUser({
   firebaseUid: input.firebaseUid,
   phone: input.phone,
   name: "New User",
-  role: input.phone === ADMIN_PHONE ? "admin" : "passenger",
+  role:
+  input.phone === ADMIN_PHONE
+    ? "admin"
+    : req.body.role === "driver"
+    ? "driver"
+    : "passenger",
+
+isApproved: false,
 });
         res.status(201).json(user);
       } else {
@@ -357,6 +347,7 @@ user = await storage.createUser({
       name,
       vehicleNumber,
       role,
+      isApproved: false,
     });
 
     res.json(user);
@@ -480,6 +471,50 @@ currentLng: input.lng ? input.lng.toString() : null,
       res.status(500).json({ message: "Failed to fetch rides" });
     }
   });
+
+  app.get("/api/admin/drivers/pending", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const users = await storage.getAllUsers();
+
+    const pendingDrivers = users.filter(
+      (u: any) => u.role === "driver" && !u.isApproved
+    );
+
+    res.json(pendingDrivers);
+  } catch (err) {
+    console.error("Pending drivers error:", err);
+    res.status(500).json({ message: "Failed to fetch pending drivers" });
+  }
+});
+
+app.patch("/api/admin/drivers/:id/approve", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+
+    const user = await storage.updateUser(userId, {
+      isApproved: true,
+    });
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: "Approve failed" });
+  }
+});
+
+app.patch("/api/admin/drivers/:id/reject", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+
+    const user = await storage.updateUser(userId, {
+      role: "passenger",
+      isApproved: false,
+    });
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: "Reject failed" });
+  }
+});
 
   app.get(api.users.nearestDrivers.path, async (req, res) => {
     try {
