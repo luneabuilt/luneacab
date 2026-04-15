@@ -60,12 +60,26 @@ export default function Profile() {
 
       <Card className="border-0 shadow-lg mb-6">
         <CardHeader className="flex flex-row items-center gap-4 pb-2">
-          <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-            <User className="h-8 w-8" />
-          </div>
+<div className="h-16 w-16 rounded-full overflow-hidden bg-gray-100">
+  {user.profileImageUrl ? (
+    <img
+      src={user.profileImageUrl}
+      className="h-full w-full object-cover"
+    />
+  ) : (
+    <div className="flex items-center justify-center h-full">
+      <User className="h-8 w-8 text-gray-400" />
+    </div>
+  )}
+</div>
           <div>
             <CardTitle className="text-xl">{user.phone}</CardTitle>
             <p className="text-sm text-muted-foreground capitalize">{user.role}</p>
+{user.role === "driver" && (
+  <p className={`text-xs mt-1 ${user.isApproved ? "text-green-600" : "text-yellow-600"}`}>
+    {user.isApproved ? "✅ Approved Driver" : "⏳ Pending Approval"}
+  </p>
+)}
           </div>
         </CardHeader>
         <CardContent>
@@ -141,6 +155,28 @@ export default function Profile() {
                 </div>
               </div>
             )}
+
+            {user.role === "driver" && (
+  <div className="space-y-4 pt-6 border-t">
+    <h3 className="font-semibold">Documents</h3>
+
+    {/* License */}
+    {user.licenseUrl && (
+      <div>
+        <p className="text-sm mb-1">Driving License</p>
+        <img src={user.licenseUrl} className="w-full h-32 object-cover rounded" />
+      </div>
+    )}
+
+    {/* Vehicle */}
+    {user.vehicleImageUrl && (
+      <div>
+        <p className="text-sm mb-1">Vehicle Photo</p>
+        <img src={user.vehicleImageUrl} className="w-full h-32 object-cover rounded" />
+      </div>
+    )}
+  </div>
+)}
 
             <Button 
               type="submit" 
