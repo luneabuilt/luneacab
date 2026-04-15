@@ -18,6 +18,9 @@ import Admin from "@/pages/Admin";
 import DriverSignup from "@/pages/DriverSignup";
 import { useAuth } from "@/hooks/use-auth";
 
+import { useEffect } from "react";
+import { BASE_URL } from "@/lib/config";
+
 function Router() {
   const { user } = useAuth();
 
@@ -79,6 +82,42 @@ function Router() {
 }
 
 function App() {
+  const { user, setUser } = useAuth(); // ✅ ADD THIS
+
+  useEffect(() => {
+    if (!user) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/api/users/${user.id}`);
+        const updatedUser = await res.json();
+
+        setUser(updatedUser);
+      } catch (err) {
+        console.error("Auto refresh error:", err);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [user]);
+
+  useEffect(() => {
+  if (!user) return;
+
+  const interval = setInterval(async () => {
+    try {
+      const res = await fetch(`${BASE_URL}/api/users/${user.id}`);
+      const updatedUser = await res.json();
+
+      setUser(updatedUser);
+    } catch (err) {
+      console.error("Auto refresh error:", err);
+    }
+  }, 5000); // every 5 sec
+
+  return () => clearInterval(interval);
+}, [user]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -88,5 +127,6 @@ function App() {
     </QueryClientProvider>
   );
 }
+
 
 export default App;

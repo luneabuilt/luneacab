@@ -492,6 +492,7 @@ app.patch("/api/admin/drivers/:id/approve", requireAuth, requireAdmin, async (re
     const userId = Number(req.params.id);
 
     const user = await storage.updateUser(userId, {
+      role: "driver",
       isApproved: true,
     });
 
