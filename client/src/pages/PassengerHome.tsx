@@ -192,6 +192,10 @@ queryClient.invalidateQueries({
       rideId: activeRide.id,
     });
 
+    setTimeout(() => {
+  setStage("search");
+}, 1500);
+
     toast({
       title: "Payment Successful",
     });
