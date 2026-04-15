@@ -481,9 +481,7 @@ queryClient.setQueryData(
       const fares: any = {};
 
       for (const type of types) {
-        const res = await fetch(
-          `/api/rides/estimate?distanceKm=${distanceKm}&vehicleType=${type}`,
-        );
+        const res = await fetch(`${BASE_URL}/api/rides/estimate?distanceKm=${distanceKm}&vehicleType=${type}`);
         const data = await res.json();
         fares[type] = Math.round(Number(data.fare));
       }
