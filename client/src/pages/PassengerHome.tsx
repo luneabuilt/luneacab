@@ -140,7 +140,7 @@ const driver = activeRide?.driver;
     if (!activeRide) return;
 
     try {
-      await fetch(`/api/rides/${activeRide.id}/cancel`, {
+      await fetch(`${BASE_URL}/api/rides/${activeRide.id}/cancel`, {
         method: "PATCH",
       });
 
@@ -155,53 +155,77 @@ const driver = activeRide?.driver;
       console.error("Cancel error:", err);
     }
   };
-  const handlePayment = async () => {
-    if (!activeRide) return;
+const handlePayment = async () => {
+  if (!activeRide) return;
 
-    setPaymentProcessing(true);
+  setPaymentProcessing(true);
 
+  try {
     const res = await fetch(
-  `/api/rides/${activeRide.id}/payment`,
-  {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ role: "passenger" }),
-  }
-);
+      `${BASE_URL}/api/rides/${activeRide.id}/payment`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: "passenger" }),
+      }
+    );
+
+    if (!res.ok) throw new Error("Payment failed");
 
     const updatedRide = await res.json();
 
-    console.log("Updated Ride After Payment:", updatedRide);
+    console.log("Updated Ride:", updatedRide);
 
     await refetch();
 
-// ✅ ADD THIS
-socket.emit("passenger-paid", {
-  rideId: activeRide.id,
-});
+    socket.emit("passenger-paid", {
+      rideId: activeRide.id,
+    });
 
-setPaymentProcessing(false);
-  };
+    toast({
+      title: "Payment Successful",
+    });
+
+  } catch (err) {
+    console.error(err);
+
+    toast({
+      title: "Payment Failed",
+      variant: "destructive",
+    });
+  }
+
+  setPaymentProcessing(false);
+};
   const handleUPIPayment = () => {
-    if (!activeRide) return;
-    setPaymentProcessing(true);
+  if (!activeRide) return;
 
-    const upiId = "7002491493@kotak811";
-    const amount = activeRide.fare;
-    const name = "Lunea Ride";
-    const note = `Ride Payment ${activeRide.id}`;
+  const upiId = "7002491493@kotak811";
+  const amount = activeRide.fare;
+  const name = "Lunea Ride";
+  const note = `Ride Payment ${activeRide.id}`;
 
-    const upiLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+  const upiLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
 
-    setPaymentMethod("upi");
+  setPaymentMethod("upi");
 
-    window.location.href = upiLink;
+  // ✅ Open UPI app
+  window.open(upiLink, "_system");
 
-    // wait for UPI payment app to open
-    setTimeout(() => {
-      handlePayment();
-    }, 4000);
-  };
+  // ✅ Ask confirmation instead of auto success
+  setTimeout(() => {
+    const confirm = window.confirm("Did you complete the payment?");
+
+    if (confirm) {
+      handlePayment(); // only then call backend
+    } else {
+      toast({
+        title: "Payment not completed",
+        variant: "destructive",
+      });
+    }
+  }, 3000);
+};
 
   // Effects
   useEffect(() => {
@@ -522,27 +546,26 @@ useEffect(() => {
   };
 
   const handleRequestRide = () => {
-    if (!drop || !pickup || !user || !distanceKm) return;
+  if (!drop || !pickup || !user || !distanceKm) return;
 
-    // Calculate mock fare
-    const fare =
-      vehicleType === "bike" ? 40 : vehicleType === "auto" ? 70 : 120;
+  const fare = estimatedFares[vehicleType]; // ✅ FIX
 
-    requestRide.mutate({
-      passengerId: user.id,
-      vehicleType,
-      pickupLat: String(pickup.lat),
-      pickupLng: String(pickup.lng),
-      dropLat: String(drop.lat),
-      dropLng: String(drop.lng),
-      distanceKm: (distanceKm ?? 0).toString(),
-      paymentMethod: paymentMethod as "cash" | "upi",
-      fare: "",
-      commission: "",
-      driverEarning: ""
-    });
-    setStage("searching");
-  };
+  requestRide.mutate({
+    passengerId: user.id,
+    vehicleType,
+    pickupLat: String(pickup.lat),
+    pickupLng: String(pickup.lng),
+    dropLat: String(drop.lat),
+    dropLng: String(drop.lng),
+    distanceKm: distanceKm.toString(),
+    paymentMethod,
+    fare: String(fare), // ✅ FIX
+    commission: "0",
+    driverEarning: String(fare),
+  });
+
+  setStage("searching");
+};
 
   // Render Helpers
 
