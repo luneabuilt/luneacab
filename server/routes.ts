@@ -856,6 +856,10 @@ app.patch("/api/rides/:id/payment", async (req, res) => {
     if (!ride) {
       return res.status(404).json({ message: "Ride not found" });
     }
+    // 🔥 ADD HERE (IMPORTANT)
+if (ride.status === "completed") {
+  return res.json(ride); // ✅ prevent duplicate payment error
+}
 
 console.log("🔥 PAYMENT API CALLED");
 console.log("🔥 PAYMENT STATUS:", ride.status);

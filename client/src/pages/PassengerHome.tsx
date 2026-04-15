@@ -157,6 +157,9 @@ const driver = activeRide?.driver;
   };
 const handlePayment = async () => {
   if (!activeRide) return;
+  if (activeRide?.status === "completed") {
+  return; // 🚫 stop duplicate payment
+}
 
   setPaymentProcessing(true);
 
@@ -180,6 +183,10 @@ const handlePayment = async () => {
     console.log("Updated Ride:", updatedRide);
 
     await refetch();
+
+queryClient.invalidateQueries({
+  queryKey: ["/api/rides/active", user?.id],
+});
 
     socket.emit("passenger-paid", {
       rideId: activeRide.id,
@@ -935,7 +942,7 @@ useEffect(() => {
               className="bg-white/95 backdrop-blur-md rounded-t-3xl shadow-xl p-4 pb-16"
             >
               <div className="max-h-[37vh] overflow-y-auto">
-                {activeRide.status === "payment_pending" ? (
+                {activeRide.status === "payment_pending" && !paymentProcessing ? (
                   <div className="text-center space-y-4">
                     <div className="h-16 w-16 bg-green-100 rounded-full flex items-center justify-center mx-auto text-green-600">
                       <CheckCircle className="w-8 h-8" />
