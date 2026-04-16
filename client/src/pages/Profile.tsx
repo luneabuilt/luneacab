@@ -52,26 +52,6 @@ if (data.role === "passenger") {
     });
   };
 
-  useEffect(() => {
-  const loadUser = async () => {
-    if (!user?.id) return;
-
-    const res = await fetch(`/api/users/${user.id}`);
-    const freshUser = await res.json();
-
-    // 🔥 IMPORTANT
-    localStorage.setItem("auth-storage", JSON.stringify({
-      state: {
-        user: freshUser,
-        isAuthenticated: true
-      }
-    }));
-
-    window.location.reload(); // temporary fix
-  };
-
-  loadUser();
-}, []);
 
   const handleLogout = () => {
     logout();
@@ -79,9 +59,8 @@ if (data.role === "passenger") {
   };
 
   if (!user) {
-    setLocation("/auth");
-    return null;
-  }
+  return <div>Loading...</div>;
+}
 
   return (
     <div className="pb-24 pt-6 px-4 max-w-2xl mx-auto">

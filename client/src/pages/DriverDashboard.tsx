@@ -29,26 +29,22 @@ const rideAlertSound = new Audio(
 // Helper for coordinates
 
 export default function DriverDashboard() {
-  const { user, setUser } = useAuth();
+  const { user } = useAuth();
 
-  if (user?.role === "driver" && !user?.isApproved) {
-  return (
-    <div className="h-screen flex items-center justify-center">
-      <div className="text-center space-y-4">
-        <h2 className="text-2xl font-bold">⏳ Waiting for Approval</h2>
-        <p className="text-muted-foreground">
-          Your documents are under review by admin.
-        </p>
-      </div>
-    </div>
-  );
-}
-const [isOnlineLocal, setIsOnlineLocal] = useState(user?.isOnline || false);
+  const [isOnlineLocal, setIsOnlineLocal] = useState(false);
   const queryClient = useQueryClient();
   const { data: activeRide, refetch } = useActiveRide(user?.id);
 
+  const { toast } = useToast();
+  const toggleOnline = useToggleOnline();
+  const acceptRide = useAcceptRide();
+  const updateStatus = useUpdateRideStatus();
 
-  useEffect(() => {
+  const [incomingRequest, setIncomingRequest] = useState<any>(null);
+  const [requestTimer, setRequestTimer] = useState<number>(10);
+  const [enteredOtp, setEnteredOtp] = useState("");
+
+    useEffect(() => {
   if (user) {
     setIsOnlineLocal(user.isOnline ?? false);
   }
@@ -63,40 +59,28 @@ const [isOnlineLocal, setIsOnlineLocal] = useState(user?.isOnline || false);
   console.log("Driver socket registered:", user.id);
 }, [user?.id, user?.isOnline]);
 
+
 useEffect(() => {
   if (!user) return;
 
   setupPush(user.id, BASE_URL);
 }, [user]);
 
-  const { toast } = useToast();
+useEffect(() => {
+  if (!user) return;
 
-  // Mutations
-  const toggleOnline = useToggleOnline();
-  const acceptRide = useAcceptRide();
-  const updateStatus = useUpdateRideStatus();
+  socket.on("new-ride-request", (ride) => {
+    if (!user?.isOnline) return;
 
-  // Polling for active rides assigned to this driver OR nearby requests (simulated)
-  // In a real app, we'd use a separate hook to poll for 'requested' rides nearby
-  const [incomingRequest, setIncomingRequest] = useState<any>(null);
-  const [requestTimer, setRequestTimer] = useState<number>(10);
-  const [enteredOtp, setEnteredOtp] = useState("");
+    console.log("🚕 New ride received:", ride);
+    setIncomingRequest(ride);
+    rideAlertSound.play().catch(() => {});
+  });
 
-  useEffect(() => {
-socket.on("new-ride-request", (ride) => {
-  if (!user?.isOnline) return;
-
-  console.log("🚕 New ride received:", ride);
-
-  setIncomingRequest(ride);
-
-  rideAlertSound.play().catch(() => {});
-});
-
-    return () => {
-      socket.off("new-ride-request");
-    };
-  }, []);
+  return () => {
+    socket.off("new-ride-request");
+  };
+}, [user]);
 
   useEffect(() => {
     if (!navigator.serviceWorker) return;
@@ -375,6 +359,23 @@ const handleGoOnline = (checked: boolean) => {
 
   setIncomingRequest(null);
 };
+
+  if (!user) {
+  return <div>Loading...</div>;
+}
+
+  if (user?.role === "driver" && !user?.isApproved) {
+  return (
+    <div className="h-screen flex items-center justify-center">
+      <div className="text-center space-y-4">
+        <h2 className="text-2xl font-bold">⏳ Waiting for Approval</h2>
+        <p className="text-muted-foreground">
+          Your documents are under review by admin.
+        </p>
+      </div>
+    </div>
+  );
+}
 
   return (
     <div className="h-screen w-full relative flex flex-col bg-background">
