@@ -13,19 +13,24 @@ import { Loader2, User, Save, LogOut } from "lucide-react";
 
 export default function Profile() {
   const { user, logout } = useAuth();
+  console.log("USER DATA:", user);
   const [, setLocation] = useLocation();
   const updateProfile = useUpdateProfile();
   const { toast } = useToast();
   
-  const form = useForm({
-    defaultValues: {
-      name: user?.name || "",
-      role: user?.role || "passenger",
-      vehicleType: user?.vehicleType || "bike",
-      vehicleNumber: user?.vehicleNumber || "",
-      upiId: user?.upiId || "",
-    }
-  });
+const form = useForm();
+
+useEffect(() => {
+  if (user) {
+    form.reset({
+      name: user.name || "",
+      role: user.role || "passenger",
+      vehicleType: user.vehicleType || "bike",
+      vehicleNumber: user.vehicleNumber || "",
+      upiId: user.upiId || "",
+    });
+  }
+}, [user]);
 
   const selectedRole = form.watch("role");
   useEffect(() => {
@@ -46,6 +51,27 @@ if (data.role === "passenger") {
       }
     });
   };
+
+  useEffect(() => {
+  const loadUser = async () => {
+    if (!user?.id) return;
+
+    const res = await fetch(`/api/users/${user.id}`);
+    const freshUser = await res.json();
+
+    // 🔥 IMPORTANT
+    localStorage.setItem("auth-storage", JSON.stringify({
+      state: {
+        user: freshUser,
+        isAuthenticated: true
+      }
+    }));
+
+    window.location.reload(); // temporary fix
+  };
+
+  loadUser();
+}, []);
 
   const handleLogout = () => {
     logout();
