@@ -15,12 +15,21 @@ export default function Profile() {
   const [, setLocation] = useLocation();
   const updateProfile = useUpdateProfile();
 
-  const form = useForm();
+  const form = useForm({
+  defaultValues: {
+    name: "",
+    role: "passenger",
+    vehicleType: "bike",
+    vehicleNumber: "",
+    upiId: "",
+  },
+});
 
   // ✅ Reset form when user loads
-  useEffect(() => {
-    if (!user || !user.id) return;
+useEffect(() => {
+  if (!user || !user.id) return;
 
+  setTimeout(() => {
     form.reset({
       name: user.name || "",
       role: user.role || "passenger",
@@ -28,7 +37,8 @@ export default function Profile() {
       vehicleNumber: user.vehicleNumber || "",
       upiId: user.upiId || "",
     });
-  }, [user]);
+  }, 0);
+}, [user]);
 
   // ✅ SAFE redirect (no infinite loop)
   useEffect(() => {
@@ -40,7 +50,7 @@ export default function Profile() {
   }, [user]);
 
   // ✅ safer role watch
-  const selectedRole = form.watch("role") || user?.role;
+  const selectedRole = form.watch("role");
 
   const onSubmit = (data: any) => {
     updateProfile.mutate(data, {
@@ -125,7 +135,7 @@ export default function Profile() {
             <div className="space-y-3">
               <Label>I am a...</Label>
               <RadioGroup
-                value={selectedRole}
+                value={selectedRole || "passenger"}
                 onValueChange={(val) => form.setValue("role", val as any)}
                 className="grid grid-cols-2 gap-4"
               >
