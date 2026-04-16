@@ -304,11 +304,20 @@ isApproved: false,
     }
   });
 
-  app.get(api.users.get.path, async (req, res) => {
-    const user = await storage.getUser(Number(req.params.id));
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.json(user);
-  });
+app.get("/api/users/:id", async (req, res) => {
+  const id = Number(req.params.id);
+
+  // ✅ HANDLE undefined / NaN safely
+  if (!id || isNaN(id)) {
+    return res.status(200).json(null); // don't crash app
+  }
+
+  const user = await storage.getUser(id);
+
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  res.json(user);
+});
 
   app.put(api.users.updateProfile.path, async (req, res) => {
     try {

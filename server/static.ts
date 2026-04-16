@@ -8,8 +8,8 @@ export function serveStatic(app: express.Express) {
 
   app.use(express.static(distPath));
 
-  // 🔥 handle ALL frontend routes
-  app.get("*", (req, res) => {
+  // ✅ SAFE fallback (NO "*")
+  app.use((req, res) => {
     res.sendFile(path.join(distPath, "index.html"));
   });
 }
