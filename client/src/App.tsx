@@ -9,7 +9,6 @@ import Home from "@/pages/Home";
 import Auth from "@/pages/Auth";
 import DriverDashboard from "@/pages/DriverDashboard";
 import Profile from "@/pages/Profile";
-import NotFound from "@/pages/not-found";
 import History from "@/pages/History";
 
 import Earnings from "@/pages/Earnings";
@@ -28,6 +27,8 @@ function Router() {
     <div className="min-h-screen bg-background text-foreground antialiased font-sans pb-16 md:pb-0">
       <Switch>
 
+        <Route path="/driver-signup" component={DriverSignup} />
+
   {/* 🔥 NOT LOGGED IN */}
   {!user && <Route path="*" component={Auth} />}
 
@@ -38,14 +39,16 @@ function Router() {
       <Route path="/home" component={Home} />
       <Route path="/profile" component={Profile} />
       <Route path="/history" component={History} />
-      <Route path="/driver-signup" component={DriverSignup} />
     </>
   )}
 
   {/* 🔥 DRIVER NOT APPROVED */}
 {user && user.role === "driver" && !user.isApproved && (
   <>
-    <Route path="/driver-signup" component={DriverSignup} />
+    {/* ✅ Allow profile page */}
+    <Route path="/profile" component={Profile} />
+
+    {/* 🔒 Block everything else */}
     <Route path="*">
       <div className="p-6 text-center">
         <h2 className="text-xl font-bold">Waiting for Approval</h2>
@@ -107,23 +110,6 @@ function App() {
 
     return () => clearInterval(interval);
   }, [user]);
-
-  useEffect(() => {
-  if (!user) return;
-
-  const interval = setInterval(async () => {
-    try {
-      const res = await fetch(`${BASE_URL}/api/users/${user.id}`);
-      const updatedUser = await res.json();
-
-      setUser(updatedUser);
-    } catch (err) {
-      console.error("Auto refresh error:", err);
-    }
-  }, 5000); // every 5 sec
-
-  return () => clearInterval(interval);
-}, [user]);
 
   return (
     <QueryClientProvider client={queryClient}>
