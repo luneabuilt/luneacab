@@ -224,13 +224,16 @@ function MapEventsHandler({ onMapClick }: any) {
   const map = useMap();
 
   useEffect(() => {
-    const handler = (e: any) => {
-      onMapClick(e.latlng.lat, e.latlng.lng);
-    };
+  const handler = (e: any) => {
+    onMapClick(e.latlng.lat, e.latlng.lng);
+  };
 
-    map.on("click", handler);
-    return () => map.off("click", handler);
-  }, [map, onMapClick]);
+  map.on("click", handler);
+
+  return () => {
+    map.off("click", handler); // ✅ no return value
+  };
+}, [map, onMapClick]);
 
   return null;
 }
