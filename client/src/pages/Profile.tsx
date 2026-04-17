@@ -41,16 +41,18 @@ useEffect(() => {
 }, [user]);
 
   // ✅ SAFE redirect (no infinite loop)
-  useEffect(() => {
-    if (!user || !user.id) return;
+useEffect(() => {
+  if (!user || !user.id) return;
 
-    if (user.role === "driver" && !user.licenseUrl) {
+  if (user.role === "driver" && !user.licenseUrl) {
+    setTimeout(() => {
       setLocation("/driver-signup");
-    }
-  }, [user]);
+    }, 0);
+  }
+}, [user]);
 
   // ✅ safer role watch
-  const selectedRole = form.watch("role");
+  const selectedRole = form.getValues("role") || user?.role || "passenger";
 
   const onSubmit = (data: any) => {
     updateProfile.mutate(data, {
@@ -158,14 +160,14 @@ useEffect(() => {
             </div>
 
             {/* Driver Fields */}
-            {selectedRole === "driver" && (
+            {(selectedRole || user?.role) === "driver" && (
               <div className="space-y-4 pt-4 border-t">
                 <h3 className="font-semibold">Vehicle Details</h3>
 
                 <div className="space-y-3">
                   <Label>Vehicle Type</Label>
                   <RadioGroup
-                    value={form.getValues("vehicleType") || "bike"}
+                    value={form.getValues("vehicleType") ?? "bike"}
                     onValueChange={(val) =>
                       form.setValue("vehicleType", val as any)
                     }
