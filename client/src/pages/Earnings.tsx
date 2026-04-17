@@ -94,16 +94,16 @@ export default function Earnings() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pb-24">
 
       {/* 🔥 HEADER */}
-      <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-6 rounded-b-3xl shadow-lg">
-        <h1 className="text-2xl font-bold">💰 Earnings</h1>
-        <p className="text-sm opacity-90">Track your income & performance</p>
+      <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-6 rounded-b-3xl shadow-md">
+        <h1 className="text-2xl font-semibold">Earnings</h1>
+        <p className="text-sm opacity-90">Overview of your income</p>
 
         <div className="mt-4">
-          <p className="text-sm">Total Earnings</p>
-          <p className="text-3xl font-bold">
+          <p className="text-xs opacity-80">Total Earnings</p>
+          <p className="text-3xl font-bold tracking-tight">
             ₹{totalDriver.toFixed(0)}
           </p>
         </div>
@@ -113,16 +113,16 @@ export default function Earnings() {
 
         {/* TODAY */}
         <div className="grid grid-cols-2 gap-4">
-          <Card className="p-4 rounded-xl shadow border">
+          <Card className="p-4 rounded-xl border shadow-sm bg-white">
             <p className="text-xs text-muted-foreground">Today Total</p>
-            <p className="text-xl font-bold">
+            <p className="text-lg font-semibold">
               ₹{todayTotal.toFixed(0)}
             </p>
           </Card>
 
-          <Card className="p-4 rounded-xl shadow border bg-green-50">
+          <Card className="p-4 rounded-xl border shadow-sm bg-green-50">
             <p className="text-xs text-muted-foreground">You Earned</p>
-            <p className="text-2xl font-bold text-green-600">
+            <p className="text-xl font-bold text-green-600">
               ₹{todayDriver.toFixed(0)}
             </p>
           </Card>
@@ -130,14 +130,14 @@ export default function Earnings() {
 
         {/* WEEK / MONTH */}
         <div className="grid grid-cols-2 gap-4">
-          <Card className="p-4 rounded-xl shadow border">
+          <Card className="p-4 rounded-xl border shadow-sm bg-white">
             <p className="text-xs text-muted-foreground">Last 7 Days</p>
             <p className="text-lg font-semibold">
               ₹{weeklyDriver.toFixed(0)}
             </p>
           </Card>
 
-          <Card className="p-4 rounded-xl shadow border">
+          <Card className="p-4 rounded-xl border shadow-sm bg-white">
             <p className="text-xs text-muted-foreground">This Month</p>
             <p className="text-lg font-semibold">
               ₹{monthlyDriver.toFixed(0)}
@@ -146,9 +146,11 @@ export default function Earnings() {
         </div>
 
         {/* LIFETIME */}
-        <Card className="p-5 rounded-2xl shadow-lg border bg-white">
-          <p className="text-sm text-muted-foreground">Lifetime Earnings</p>
-          <p className="text-2xl font-bold text-primary">
+        <Card className="p-5 rounded-2xl border shadow-sm bg-white">
+          <p className="text-sm text-muted-foreground">
+            Lifetime Earnings
+          </p>
+          <p className="text-2xl font-bold text-gray-900">
             ₹{totalDriver.toFixed(0)}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
@@ -157,12 +159,12 @@ export default function Earnings() {
         </Card>
 
         {/* CHART */}
-        <Card className="p-5 rounded-2xl shadow border">
+        <Card className="p-5 rounded-2xl border shadow-sm bg-white">
           <p className="text-sm font-medium mb-3">
-            Last 7 Days Performance
+            Last 7 Days Trend
           </p>
 
-          <div style={{ width: "100%", height: 250 }}>
+          <div style={{ width: "100%", height: 240 }}>
             <ResponsiveContainer>
               <LineChart data={last7DaysData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -172,7 +174,7 @@ export default function Earnings() {
                 <Line
                   type="monotone"
                   dataKey="earnings"
-                  stroke="#22c55e"
+                  stroke="#16a34a"
                   strokeWidth={3}
                 />
               </LineChart>
@@ -183,7 +185,7 @@ export default function Earnings() {
         {/* RIDES */}
         <div>
           <h2 className="text-lg font-semibold mb-3">
-            Completed Rides
+            Recent Rides
           </h2>
 
           {!rides || rides.length === 0 ? (
@@ -195,7 +197,7 @@ export default function Earnings() {
               {rides.map((ride: any) => (
                 <Card
                   key={ride.id}
-                  className="p-4 rounded-xl shadow-sm border hover:shadow-md transition"
+                  className="p-4 rounded-xl border shadow-sm bg-white hover:shadow-md transition"
                 >
                   <div className="flex justify-between items-center">
                     <div>
@@ -210,12 +212,11 @@ export default function Earnings() {
                     </div>
 
                     <div className="text-right">
-                      <p className="font-bold text-green-600">
+                      <p className="font-semibold text-green-600">
                         ₹{Number(ride.driverEarning).toFixed(0)}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Commission ₹
-                        {Number(ride.commission).toFixed(0)}
+                        ₹{Number(ride.commission).toFixed(0)} fee
                       </p>
                     </div>
                   </div>
