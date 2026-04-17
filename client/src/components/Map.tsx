@@ -49,57 +49,60 @@ const userIcon = new L.Icon({
   iconAnchor: [18, 18],
 });
 
-// 🚀 Smart Camera Follow
-function SmartFollow({
-  center,
-  active,
+// ✅ ORIGINAL SAFE RECENTER (RESTORED)
+function MapRecenter({
+  lat,
+  lng,
+  follow = false,
 }: {
-  center: { lat: number; lng: number };
-  active: boolean;
+  lat: number;
+  lng: number;
+  follow?: boolean;
 }) {
   const map = useMap();
 
   useEffect(() => {
-    if (!active) return;
+    if (!follow) return;
 
-    map.flyTo([center.lat, center.lng], map.getZoom(), {
+    map.flyTo([lat, lng], map.getZoom(), {
       animate: true,
       duration: 0.8,
     });
-  }, [center, active]);
+  }, [lat, lng, follow, map]);
 
   return null;
 }
 
-// 📍 Center Button
+// ✅ FIXED CENTER BUTTON (SAFE POSITION)
 function CenterButton({ center }: any) {
   const map = useMap();
 
   return (
-    <div className="absolute bottom-6 right-4 z-[1000]">
+    <div className="absolute bottom-6 right-4 z-[500]">
       <button
         onClick={() => map.flyTo([center.lat, center.lng], 16)}
-        className="bg-white shadow-xl px-4 py-2 rounded-full text-sm font-medium hover:scale-105 transition"
+        className="bg-white shadow-lg px-4 py-2 rounded-full text-sm font-medium"
       >
-        📍 Center
+        📍
       </button>
     </div>
   );
 }
 
-// 🗺 Map Switcher
+// ✅ FIXED MAP SWITCH (NO CLICK BLOCK)
 function MapSwitcher({ setType }: any) {
   return (
-    <div className="absolute top-4 left-4 z-[1000]">
+    <div className="absolute top-4 left-4 z-[500] pointer-events-auto">
       <button
-        onClick={() =>
+        onClick={(e) => {
+          e.stopPropagation(); // 🔥 IMPORTANT FIX
           setType((prev: any) =>
             prev === "light" ? "satellite" : "light"
-          )
-        }
-        className="bg-white shadow-md px-3 py-1 rounded-lg text-xs"
+          );
+        }}
+        className="bg-white shadow px-3 py-1 rounded-md text-xs"
       >
-        🗺 Switch
+        🗺
       </button>
     </div>
   );
@@ -108,11 +111,16 @@ function MapSwitcher({ setType }: any) {
 interface MapProps {
   center: { lat: number; lng: number };
   zoom?: number;
-  markers?: any[];
+  markers?: Array<{
+    lat: number;
+    lng: number;
+    type: "user" | "driver" | "pickup" | "drop";
+    vehicleType?: "bike" | "auto" | "car";
+    id: string | number;
+  }>;
   className?: string;
   onMapClick?: (lat: number, lng: number) => void;
   route?: [number, number][];
-  isRideActive?: boolean; // 🔥 NEW
 }
 
 export default function Map({
@@ -122,7 +130,6 @@ export default function Map({
   className = "h-full w-full",
   onMapClick,
   route = [],
-  isRideActive = false,
 }: MapProps) {
   const [mapType, setMapType] = useState("light");
 
@@ -138,22 +145,28 @@ export default function Map({
         zoom={zoom}
         scrollWheelZoom={true}
         zoomControl={false}
-        className="h-full w-full rounded-2xl overflow-hidden"
+        className="h-full w-full rounded-2xl overflow-hidden z-0"
       >
         <TileLayer url={tileUrl} />
 
         <ZoomControl position="topright" />
 
-        {/* 🚀 Smart follow ONLY during ride */}
-        <SmartFollow center={center} active={isRideActive} />
+        {/* ✅ RESTORED FOLLOW LOGIC */}
+        <MapRecenter
+          lat={center.lat}
+          lng={center.lng}
+          follow={route.length > 0}
+        />
 
         {/* Markers */}
         {markers.map((marker) => {
           let iconToUse = userIcon;
 
           if (marker.type === "driver") {
-            if (marker.vehicleType === "bike") iconToUse = bikeIcon;
-            else if (marker.vehicleType === "auto") iconToUse = autoIcon;
+            const type = (marker.vehicleType || "car").toLowerCase();
+
+            if (type === "bike") iconToUse = bikeIcon;
+            else if (type === "auto") iconToUse = autoIcon;
             else iconToUse = carIcon;
           }
 
@@ -183,18 +196,20 @@ export default function Map({
               pathOptions={{
                 color: "#2563eb",
                 weight: 6,
-                opacity: 0.95,
+                opacity: 0.9,
               }}
             />
           </>
         )}
 
+        {/* ✅ IMPORTANT RESTORED LOGIC */}
         {route.length > 0 ? (
           <RouteFitBounds route={route} />
         ) : markers.length > 1 ? (
           <FitBounds markers={markers} />
         ) : null}
 
+        {/* ✅ CLICK FIXED */}
         {onMapClick && <MapEventsHandler onMapClick={onMapClick} />}
 
         <CenterButton center={center} />
@@ -204,7 +219,7 @@ export default function Map({
   );
 }
 
-// 🔥 Click handler
+// ✅ FIXED CLICK HANDLER
 function MapEventsHandler({ onMapClick }: any) {
   const map = useMap();
 
@@ -215,12 +230,12 @@ function MapEventsHandler({ onMapClick }: any) {
 
     map.on("click", handler);
     return () => map.off("click", handler);
-  }, []);
+  }, [map, onMapClick]);
 
   return null;
 }
 
-// 🔥 Fit markers
+// Fit markers
 function FitBounds({ markers }: any) {
   const map = useMap();
 
@@ -232,12 +247,12 @@ function FitBounds({ markers }: any) {
     );
 
     map.fitBounds(bounds, { padding: [50, 50] });
-  }, [markers]);
+  }, [markers, map]);
 
   return null;
 }
 
-// 🔥 Fit route
+// Fit route
 function RouteFitBounds({ route }: any) {
   const map = useMap();
 
@@ -247,15 +262,15 @@ function RouteFitBounds({ route }: any) {
     const bounds = L.latLngBounds(route);
 
     map.fitBounds(bounds, {
-      padding: [70, 70],
+      padding: [60, 60],
       maxZoom: 16,
     });
-  }, [route]);
+  }, [route, map]);
 
   return null;
 }
 
-// 🚗 Smooth + rotation
+// Smooth marker with rotation
 function SmoothMarker({ position, icon, smooth }: any) {
   const markerRef = useRef<any>(null);
   const prev = useRef(position);
@@ -268,7 +283,6 @@ function SmoothMarker({ position, icon, smooth }: any) {
     const start = L.latLng(prev.current[0], prev.current[1]);
     const end = L.latLng(position[0], position[1]);
 
-    // 🔥 Calculate direction
     const angle =
       Math.atan2(end.lng - start.lng, end.lat - start.lat) *
       (180 / Math.PI);
