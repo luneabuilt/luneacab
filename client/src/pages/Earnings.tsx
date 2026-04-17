@@ -2,6 +2,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useRideHistory } from "@/hooks/use-api";
 import { Card } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import { useState } from "react";
 
 import {
   LineChart,
@@ -16,6 +17,8 @@ import {
 export default function Earnings() {
   const { user } = useAuth();
   const { data: rides, isLoading } = useRideHistory(user?.id);
+
+  const [filter, setFilter] = useState("all");
 
   if (!user?.isOnline && (!rides || rides.length === 0)) {
     return (
@@ -47,6 +50,26 @@ export default function Earnings() {
   let monthlyDriver = 0;
   let totalDriver = 0;
   let totalCommission = 0;
+
+  let filteredRides = rides || [];
+
+  filteredRides = filteredRides.filter((ride: any) => {
+    const rideDate = new Date(ride.createdAt);
+
+    if (filter === "today") {
+      return rideDate.toDateString() === todayStr;
+    }
+
+    if (filter === "week") {
+      return rideDate >= startOfWeek;
+    }
+
+    if (filter === "month") {
+      return rideDate >= startOfMonth;
+    }
+
+    return true;
+  });
 
   rides?.forEach((ride: any) => {
     const rideDate = new Date(ride.createdAt);
@@ -94,77 +117,75 @@ export default function Earnings() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pb-24">
+    <div className="min-h-screen bg-gray-50 pb-24">
 
-      {/* 🔥 HEADER */}
-      <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-6 rounded-b-3xl shadow-md">
-        <h1 className="text-2xl font-semibold">Earnings</h1>
-        <p className="text-sm opacity-90">Overview of your income</p>
+      {/* HEADER */}
+      <div className="bg-gradient-to-r from-emerald-500 to-green-600 text-white p-6 rounded-b-3xl shadow">
+        <h1 className="text-2xl font-bold">💰 Earnings</h1>
+        <p className="text-sm opacity-90">Your performance overview</p>
 
-        <div className="mt-4">
-          <p className="text-xs opacity-80">Total Earnings</p>
-          <p className="text-3xl font-bold tracking-tight">
-            ₹{totalDriver.toFixed(0)}
-          </p>
-        </div>
+        <p className="mt-3 text-3xl font-bold">
+          ₹{totalDriver.toFixed(0)}
+        </p>
       </div>
 
       <div className="p-4 space-y-6">
 
-        {/* TODAY */}
-        <div className="grid grid-cols-2 gap-4">
-          <Card className="p-4 rounded-xl border shadow-sm bg-white">
-            <p className="text-xs text-muted-foreground">Today Total</p>
-            <p className="text-lg font-semibold">
-              ₹{todayTotal.toFixed(0)}
-            </p>
-          </Card>
+        {/* FILTERS */}
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {["all", "today", "week", "month"].map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-4 py-1.5 rounded-full text-sm whitespace-nowrap ${
+                filter === f
+                  ? "bg-green-600 text-white"
+                  : "bg-white border"
+              }`}
+            >
+              {f.toUpperCase()}
+            </button>
+          ))}
+        </div>
 
-          <Card className="p-4 rounded-xl border shadow-sm bg-green-50">
-            <p className="text-xs text-muted-foreground">You Earned</p>
-            <p className="text-xl font-bold text-green-600">
+        {/* STATS */}
+        <div className="grid grid-cols-2 gap-4">
+          <Card className="p-4 rounded-xl shadow-sm border bg-white">
+            <p className="text-xs text-muted-foreground">Today</p>
+            <p className="text-lg font-semibold">
               ₹{todayDriver.toFixed(0)}
             </p>
           </Card>
-        </div>
 
-        {/* WEEK / MONTH */}
-        <div className="grid grid-cols-2 gap-4">
-          <Card className="p-4 rounded-xl border shadow-sm bg-white">
-            <p className="text-xs text-muted-foreground">Last 7 Days</p>
+          <Card className="p-4 rounded-xl shadow-sm border bg-white">
+            <p className="text-xs text-muted-foreground">This Week</p>
             <p className="text-lg font-semibold">
               ₹{weeklyDriver.toFixed(0)}
             </p>
           </Card>
 
-          <Card className="p-4 rounded-xl border shadow-sm bg-white">
+          <Card className="p-4 rounded-xl shadow-sm border bg-white">
             <p className="text-xs text-muted-foreground">This Month</p>
             <p className="text-lg font-semibold">
               ₹{monthlyDriver.toFixed(0)}
             </p>
           </Card>
+
+          <Card className="p-4 rounded-xl shadow-sm border bg-white">
+            <p className="text-xs text-muted-foreground">Commission</p>
+            <p className="text-lg font-semibold text-red-500">
+              ₹{totalCommission.toFixed(0)}
+            </p>
+          </Card>
         </div>
 
-        {/* LIFETIME */}
-        <Card className="p-5 rounded-2xl border shadow-sm bg-white">
-          <p className="text-sm text-muted-foreground">
-            Lifetime Earnings
-          </p>
-          <p className="text-2xl font-bold text-gray-900">
-            ₹{totalDriver.toFixed(0)}
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Commission Paid: ₹{totalCommission.toFixed(0)}
-          </p>
-        </Card>
-
         {/* CHART */}
-        <Card className="p-5 rounded-2xl border shadow-sm bg-white">
+        <Card className="p-5 rounded-2xl shadow-sm border bg-white">
           <p className="text-sm font-medium mb-3">
-            Last 7 Days Trend
+            Last 7 Days Earnings
           </p>
 
-          <div style={{ width: "100%", height: 240 }}>
+          <div style={{ width: "100%", height: 220 }}>
             <ResponsiveContainer>
               <LineChart data={last7DaysData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -185,19 +206,19 @@ export default function Earnings() {
         {/* RIDES */}
         <div>
           <h2 className="text-lg font-semibold mb-3">
-            Recent Rides
+            Ride History
           </h2>
 
-          {!rides || rides.length === 0 ? (
-            <p className="text-muted-foreground">
-              No rides completed yet.
+          {filteredRides.length === 0 ? (
+            <p className="text-muted-foreground text-sm">
+              No rides found
             </p>
           ) : (
             <div className="space-y-3">
-              {rides.map((ride: any) => (
+              {filteredRides.map((ride: any) => (
                 <Card
                   key={ride.id}
-                  className="p-4 rounded-xl border shadow-sm bg-white hover:shadow-md transition"
+                  className="p-4 rounded-xl border bg-white hover:shadow-md transition"
                 >
                   <div className="flex justify-between items-center">
                     <div>
@@ -212,11 +233,12 @@ export default function Earnings() {
                     </div>
 
                     <div className="text-right">
-                      <p className="font-semibold text-green-600">
+                      <p className="font-bold text-green-600">
                         ₹{Number(ride.driverEarning).toFixed(0)}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        ₹{Number(ride.commission).toFixed(0)} fee
+                        Fee ₹
+                        {Number(ride.commission).toFixed(0)}
                       </p>
                     </div>
                   </div>
