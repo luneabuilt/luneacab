@@ -142,7 +142,9 @@ export default function Map({
         <TileLayer url={tileUrl} />
 
         {/* Zoom control (safe position) */}
-        <ZoomControl position="topright" />
+        <div className="absolute top-24 right-4 z-[400]">
+  <ZoomControl position="topright" />
+</div>
 
         <MapRecenter
           lat={center.lat}
