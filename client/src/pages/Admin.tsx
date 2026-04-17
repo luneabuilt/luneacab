@@ -13,6 +13,7 @@ import {
 
 export default function Admin() {
   const { user } = useAuth();
+
   const [stats, setStats] = useState<any>(null);
   const [revenueData, setRevenueData] = useState<any[]>([]);
   const [rides, setRides] = useState<any[]>([]);
@@ -23,86 +24,54 @@ export default function Admin() {
     if (!user || user.role !== "admin") return;
 
     fetch("/api/admin/drivers/pending", {
-  headers: {
-    "x-user-id": user.id.toString(),
-  },
-})
-  .then((res) => res.json())
-  .then((data) => {
-    if (Array.isArray(data)) {
-      setPendingDrivers(data);
-    } else {
-      setPendingDrivers([]);
-    }
-  })
-  .catch(() => setPendingDrivers([]));
+      headers: { "x-user-id": user.id.toString() },
+    })
+      .then((res) => res.json())
+      .then((data) => setPendingDrivers(Array.isArray(data) ? data : []))
+      .catch(() => setPendingDrivers([]));
 
-    // Fetch stats
     fetch("/api/admin/stats", {
-      headers: {
-        "x-user-id": user.id.toString(),
-      },
+      headers: { "x-user-id": user.id.toString() },
     })
       .then((res) => res.json())
       .then(setStats);
 
     fetch("/api/admin/rides", {
-      headers: {
-        "x-user-id": user.id.toString(),
-      },
+      headers: { "x-user-id": user.id.toString() },
     })
       .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setRides(data);
-        } else {
-          setRides([]);
-        }
-      })
+      .then((data) => setRides(Array.isArray(data) ? data : []))
       .catch(() => setRides([]));
 
-    // Fetch daily revenue
     fetch("/api/admin/revenue-daily", {
-      headers: {
-        "x-user-id": user.id.toString(),
-      },
+      headers: { "x-user-id": user.id.toString() },
     })
       .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setRevenueData(data);
-        } else {
-          setRevenueData([]);
-        }
-      })
+      .then((data) => setRevenueData(Array.isArray(data) ? data : []))
       .catch(() => setRevenueData([]));
   }, [user]);
 
   const approveDriver = async (id: number) => {
-  if (!user) return; // ✅ ADD THIS LINE
+    if (!user) return;
 
-  await fetch(`/api/admin/drivers/${id}/approve`, {
-    method: "PATCH",
-    headers: {
-      "x-user-id": user.id.toString(),
-    },
-  });
+    await fetch(`/api/admin/drivers/${id}/approve`, {
+      method: "PATCH",
+      headers: { "x-user-id": user.id.toString() },
+    });
 
-  setPendingDrivers((prev) => prev.filter((d) => d.id !== id));
-};
+    setPendingDrivers((prev) => prev.filter((d) => d.id !== id));
+  };
 
-const rejectDriver = async (id: number) => {
-  if (!user) return; // ✅ ADD THIS LINE
+  const rejectDriver = async (id: number) => {
+    if (!user) return;
 
-  await fetch(`/api/admin/drivers/${id}/reject`, {
-    method: "PATCH",
-    headers: {
-      "x-user-id": user.id.toString(),
-    },
-  });
+    await fetch(`/api/admin/drivers/${id}/reject`, {
+      method: "PATCH",
+      headers: { "x-user-id": user.id.toString() },
+    });
 
-  setPendingDrivers((prev) => prev.filter((d) => d.id !== id));
-};
+    setPendingDrivers((prev) => prev.filter((d) => d.id !== id));
+  };
 
   if (!user || user.role !== "admin") {
     return <div className="p-6 text-center">Unauthorized</div>;
@@ -114,225 +83,209 @@ const rejectDriver = async (id: number) => {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-3xl font-bold tracking-tight">
-  🚀 Admin Dashboard
-</h1>
 
-      <div className="grid grid-cols-2 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold">{stats.totalUsers}</div>
-            <div>Total Users</div>
+      {/* 🔥 HEADER */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">🚀 Admin Dashboard</h1>
+          <p className="text-sm text-muted-foreground">
+            Manage drivers, rides & earnings
+          </p>
+        </div>
+
+        <div className="bg-white px-4 py-2 rounded-xl shadow text-sm">
+          👤 {user.phone}
+        </div>
+      </div>
+
+      {/* 🔥 STATS */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card className="rounded-2xl shadow">
+          <CardContent className="p-5">
+            <p className="text-sm text-muted-foreground">Users</p>
+            <p className="text-2xl font-bold">{stats.totalUsers}</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold">{stats.totalDrivers}</div>
-            <div>Total Drivers</div>
+        <Card className="rounded-2xl shadow">
+          <CardContent className="p-5">
+            <p className="text-sm text-muted-foreground">Drivers</p>
+            <p className="text-2xl font-bold">{stats.totalDrivers}</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold">{stats.totalPassengers}</div>
-            <div>Total Passengers</div>
+        <Card className="rounded-2xl shadow">
+          <CardContent className="p-5">
+            <p className="text-sm text-muted-foreground">Passengers</p>
+            <p className="text-2xl font-bold">{stats.totalPassengers}</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold">{stats.totalCompleted}</div>
-            <div>Completed Rides</div>
+        <Card className="rounded-2xl shadow">
+          <CardContent className="p-5">
+            <p className="text-sm text-muted-foreground">Completed</p>
+            <p className="text-2xl font-bold">{stats.totalCompleted}</p>
           </CardContent>
         </Card>
+      </div>
 
-        <Card className="col-span-2">
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold">
+      {/* 🔥 REVENUE */}
+      <Card className="rounded-2xl shadow-lg">
+        <CardContent className="p-6">
+          <div className="flex justify-between mb-4">
+            <h2 className="text-xl font-semibold">Revenue</h2>
+            <p className="text-lg font-bold text-green-600">
               ₹{Number(stats.totalCommission).toFixed(2)}
-            </div>
-            <div>Total Commission Earned</div>
-          </CardContent>
-        </Card>
+            </p>
+          </div>
 
-        <Card className="col-span-2">
-          <CardContent className="p-6">
-            <h2 className="text-xl font-semibold mb-4">
-              Daily Commission Revenue
-            </h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={revenueData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip />
+              <Line type="monotone" dataKey="revenue" strokeWidth={3} />
+            </LineChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
 
-            {revenueData.length === 0 && (
-              <p className="text-sm text-muted-foreground mb-4">
-                No revenue data available yet.
-              </p>
-            )}
+      {/* 🔥 RIDE HISTORY */}
+      <Card className="rounded-2xl shadow">
+        <CardContent className="p-6">
+          <h2 className="text-xl font-semibold mb-4">Ride History</h2>
 
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={revenueData || []}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Line
-                  type="monotone"
-                  dataKey="revenue"
-                  stroke="#6366f1"
-                  strokeWidth={3}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border rounded-xl overflow-hidden">
+              <thead>
+                <tr className="border-b bg-gray-50">
+                  <th className="py-2 text-left">Ride</th>
+                  <th className="text-left">Passenger</th>
+                  <th className="text-left">Driver</th>
+                  <th className="text-left">Status</th>
+                  <th className="text-left">Fare</th>
+                  <th className="text-left">Commission</th>
+                  <th className="text-left">Date</th>
+                </tr>
+              </thead>
 
-        <Card className="col-span-2">
-          <CardContent className="p-6">
-            <h2 className="text-xl font-semibold mb-4">All Ride History</h2>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-2">Ride ID</th>
-                    <th className="text-left py-2">Passenger</th>
-                    <th className="text-left py-2">Driver</th>
-                    <th className="text-left py-2">Status</th>
-                    <th className="text-left py-2">Fare</th>
-                    <th className="text-left py-2">Commission</th>
-                    <th className="text-left py-2">Date</th>
+              <tbody>
+                {rides.map((ride) => (
+                  <tr key={ride.id} className="border-b hover:bg-gray-50">
+                    <td className="py-2">{ride.id}</td>
+                    <td>{ride.passengerId}</td>
+                    <td>{ride.driverId || "-"}</td>
+                    <td>{ride.status}</td>
+                    <td>₹{Number(ride.fare).toFixed(2)}</td>
+                    <td>₹{Number(ride.commission).toFixed(2)}</td>
+                    <td>
+                      {ride.createdAt
+                        ? new Date(ride.createdAt).toLocaleDateString()
+                        : "-"}
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {rides.map((ride) => (
-                    <tr key={ride.id} className="border-b">
-                      <td className="py-2">{ride.id}</td>
-                      <td className="py-2">{ride.passengerId}</td>
-                      <td className="py-2">{ride.driverId || "-"}</td>
-                      <td className="py-2">{ride.status}</td>
-                      <td className="py-2">₹{Number(ride.fare).toFixed(2)}</td>
-                      <td className="py-2">
-                        ₹{Number(ride.commission).toFixed(2)}
-                      </td>
-                      <td className="py-2">
-                        {ride.createdAt
-                          ? new Date(ride.createdAt).toLocaleDateString()
-                          : "-"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 🔥 DRIVER APPROVALS */}
+      <Card className="rounded-2xl shadow">
+        <CardContent className="p-6">
+          <h2 className="text-xl font-bold mb-4 flex justify-between">
+            Pending Drivers
+            <span className="text-sm text-muted-foreground">
+              {pendingDrivers.length}
+            </span>
+          </h2>
+
+          {pendingDrivers.length === 0 && (
+            <div className="text-center py-10 text-muted-foreground">
+              🚫 No pending driver requests
             </div>
-          </CardContent>
-        </Card>
-        <Card className="col-span-2">
-  <CardContent className="p-6 max-h-[400px] overflow-y-auto">
-    <h2 className="text-xl font-bold mb-4 flex items-center justify-between">
-  Pending Driver Approvals
-  <span className="text-sm text-muted-foreground">
-    {pendingDrivers.length} requests
-  </span>
-</h2>
+          )}
 
-    {pendingDrivers.length === 0 && (
-      <p className="text-sm text-muted-foreground">
-        No pending drivers
-      </p>
-    )}
+          <div className="space-y-3">
+            {pendingDrivers.map((driver) => (
+              <div
+                key={driver.id}
+                className="border rounded-2xl p-4 bg-white shadow-sm hover:shadow-xl transition"
+              >
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="font-semibold">{driver.name}</p>
+                    <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full">
+                      Pending
+                    </span>
+                    <p className="text-sm text-muted-foreground">
+                      {driver.phone}
+                    </p>
+                  </div>
 
-    <div className="space-y-3">
-      {pendingDrivers.map((driver) => (
-<div
-  key={driver.id}
-  className="border p-4 rounded-2xl shadow-md bg-white hover:shadow-xl transition-all duration-300 space-y-3"
->
-  {/* 🔹 DRIVER BASIC INFO */}
-  <div className="flex justify-between items-center">
-    <div>
-      <p className="font-semibold text-base">{driver.name}</p>
-      <p className="text-xs text-yellow-600 font-medium">
-  Pending Verification
-</p>
-      <p className="text-sm text-muted-foreground">{driver.phone}</p>
-      <p className="text-xs">
-        Vehicle: {driver.vehicleType || "-"}
-      </p>
-    </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => approveDriver(driver.id)}
+                      className="bg-green-500 text-white px-4 py-2 rounded-xl"
+                    >
+                      Approve
+                    </button>
 
-    <div className="flex gap-2">
-      <button
-        onClick={() => approveDriver(driver.id)}
-        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl text-sm shadow"
-      >
-        Approve
-      </button>
+                    <button
+                      onClick={() => rejectDriver(driver.id)}
+                      className="bg-red-500 text-white px-4 py-2 rounded-xl"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </div>
 
-      <button
-        onClick={() => rejectDriver(driver.id)}
-        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl text-sm shadow"
-      >
-        Reject
-      </button>
-    </div>
-  </div>
+                {/* DOCUMENTS */}
+                <div className="grid grid-cols-3 gap-3 mt-3">
+                  {driver.profileImageUrl && (
+                    <img
+                      src={driver.profileImageUrl}
+                      onClick={() => setPreviewImage(driver.profileImageUrl)}
+                      className="h-24 w-full object-cover rounded-lg cursor-pointer"
+                    />
+                  )}
 
-  {/* 🔥 DOCUMENTS SECTION */}
-  <div className="grid grid-cols-3 gap-3 mt-3">
+                  {driver.licenseUrl && (
+                    <img
+                      src={driver.licenseUrl}
+                      onClick={() => setPreviewImage(driver.licenseUrl)}
+                      className="h-24 w-full object-cover rounded-lg cursor-pointer"
+                    />
+                  )}
 
-    {/* Profile */}
-    {driver.profileImageUrl && (
-      <div>
-        <p className="text-xs mb-1">Profile</p>
-<img
-  src={driver.profileImageUrl}
-  onClick={() => setPreviewImage(driver.profileImageUrl)}
-  className="h-24 w-full object-cover rounded-lg border cursor-pointer hover:scale-105 transition"
-/>
-      </div>
-    )}
+                  {driver.vehicleImageUrl && (
+                    <img
+                      src={driver.vehicleImageUrl}
+                      onClick={() => setPreviewImage(driver.vehicleImageUrl)}
+                      className="h-24 w-full object-cover rounded-lg cursor-pointer"
+                    />
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
-    {/* License */}
-    {driver.licenseUrl && (
-      <div>
-        <p className="text-xs mb-1">License</p>
-        <img
-  src={driver.licenseUrl}
-  onClick={() => setPreviewImage(driver.licenseUrl)}
-  className="h-24 w-full object-cover rounded-lg border cursor-pointer hover:scale-105 transition"
-/>
-      </div>
-    )}
-
-    {/* Vehicle */}
-    {driver.vehicleImageUrl && (
-      <div>
-        <p className="text-xs mb-1">Vehicle</p>
-<img
-  src={driver.vehicleImageUrl}
-  onClick={() => setPreviewImage(driver.vehicleImageUrl)}
-  className="h-24 w-full object-cover rounded-lg border cursor-pointer hover:scale-105 transition"
-/>
-      </div>
-    )}
-
-  </div>
-</div>
-      ))}
-    </div>
-  </CardContent>
-</Card>
-      </div>
+      {/* 🔥 IMAGE PREVIEW */}
       {previewImage && (
-  <div
-    className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-    onClick={() => setPreviewImage(null)}
-  >
-    <img
-      src={previewImage}
-      className="max-h-[90%] max-w-[90%] rounded-lg shadow-2xl"
-    />
-  </div>
-)}
+        <div
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+          onClick={() => setPreviewImage(null)}
+        >
+          <img
+            src={previewImage}
+            className="max-h-[90%] max-w-[90%] rounded-lg"
+          />
+        </div>
+      )}
     </div>
   );
 }
