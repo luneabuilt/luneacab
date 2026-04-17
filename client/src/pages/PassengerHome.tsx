@@ -696,19 +696,21 @@ useEffect(() => {
       </div>
 
       {/* Floating Header */}
-<div className="absolute top-4 left-4 right-4 z-[500]">
+ <div className="absolute top-4 left-4 right-4 z-[500]">
   <div className="bg-white/90 backdrop-blur-md shadow-[0_8px_30px_rgba(0,0,0,0.08)] rounded-xl px-4 py-2 flex items-center gap-3 border border-gray-200">
     
+    {/* ICON */}
     <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-      📍
+      <MapPin className="text-primary w-4 h-4" />
     </div>
 
-    <div className="flex flex-col leading-tight">
+    {/* TEXT */}
+    <div className="flex flex-col leading-tight flex-1">
       <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
         Current Location
       </span>
-      <span className="text-sm font-medium">
-        Current Location
+      <span className="text-sm font-medium truncate">
+        {currentLocationName || "Fetching location..."}
       </span>
     </div>
 
