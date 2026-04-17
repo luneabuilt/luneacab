@@ -4,7 +4,6 @@ import {
   Marker,
   useMap,
   Polyline,
-  ZoomControl,
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -140,11 +139,6 @@ export default function Map({
         className="h-full w-full rounded-none z-0"
       >
         <TileLayer url={tileUrl} />
-
-        {/* Zoom control (safe position) */}
-        <div className="absolute top-32 right-4 z-[400]">
-  <ZoomControl position="topright" />
-</div>
 
         <MapRecenter
           lat={center.lat}
