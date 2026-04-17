@@ -540,12 +540,15 @@ try {
 
   const data = await res.json();
 
-  const city =
-    data.address.city ||
-    data.address.town ||
-    data.address.village ||
-    data.address.state;
-
+const city =
+  data.address.city ||
+  data.address.town ||
+  data.address.municipality ||
+  data.address.county ||
+  data.address.village ||
+  data.address.state_district || // ⭐ VERY IMPORTANT
+  data.address.state;
+  
   setCurrentLocationName(city || "Unknown location");
 } catch (err) {
   console.error("Reverse geocode error:", err);
