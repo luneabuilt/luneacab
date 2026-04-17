@@ -49,16 +49,8 @@ const userIcon = new L.Icon({
   iconAnchor: [18, 18],
 });
 
-// ✅ ORIGINAL SAFE RECENTER (RESTORED)
-function MapRecenter({
-  lat,
-  lng,
-  follow = false,
-}: {
-  lat: number;
-  lng: number;
-  follow?: boolean;
-}) {
+// Recenter
+function MapRecenter({ lat, lng, follow = false }: any) {
   const map = useMap();
 
   useEffect(() => {
@@ -73,15 +65,15 @@ function MapRecenter({
   return null;
 }
 
-// ✅ FIXED CENTER BUTTON (SAFE POSITION)
+// ✅ FIXED POSITION (ABOVE BOTTOM NAV)
 function CenterButton({ center }: any) {
   const map = useMap();
 
   return (
-    <div className="absolute bottom-6 right-4 z-[500]">
+    <div className="absolute bottom-24 right-4 z-[500]">
       <button
         onClick={() => map.flyTo([center.lat, center.lng], 16)}
-        className="bg-white shadow-lg px-4 py-2 rounded-full text-sm font-medium"
+        className="bg-white/90 backdrop-blur-md shadow-xl px-4 py-2 rounded-full text-sm font-medium border"
       >
         📍
       </button>
@@ -89,20 +81,20 @@ function CenterButton({ center }: any) {
   );
 }
 
-// ✅ FIXED MAP SWITCH (NO CLICK BLOCK)
+// ✅ FIXED POSITION (BELOW TOP BAR)
 function MapSwitcher({ setType }: any) {
   return (
-    <div className="absolute top-4 left-4 z-[500] pointer-events-auto">
+    <div className="absolute top-20 left-4 z-[500]">
       <button
         onClick={(e) => {
-          e.stopPropagation(); // 🔥 IMPORTANT FIX
+          e.stopPropagation();
           setType((prev: any) =>
             prev === "light" ? "satellite" : "light"
           );
         }}
-        className="bg-white shadow px-3 py-1 rounded-md text-xs"
+        className="bg-white/90 backdrop-blur-md shadow-lg px-3 py-1.5 rounded-lg text-xs border"
       >
-        🗺
+        🗺 Map
       </button>
     </div>
   );
@@ -145,13 +137,13 @@ export default function Map({
         zoom={zoom}
         scrollWheelZoom={true}
         zoomControl={false}
-        className="h-full w-full rounded-2xl overflow-hidden z-0"
+        className="h-full w-full rounded-none z-0"
       >
         <TileLayer url={tileUrl} />
 
+        {/* Zoom control (safe position) */}
         <ZoomControl position="topright" />
 
-        {/* ✅ RESTORED FOLLOW LOGIC */}
         <MapRecenter
           lat={center.lat}
           lng={center.lng}
@@ -202,16 +194,15 @@ export default function Map({
           </>
         )}
 
-        {/* ✅ IMPORTANT RESTORED LOGIC */}
         {route.length > 0 ? (
           <RouteFitBounds route={route} />
         ) : markers.length > 1 ? (
           <FitBounds markers={markers} />
         ) : null}
 
-        {/* ✅ CLICK FIXED */}
         {onMapClick && <MapEventsHandler onMapClick={onMapClick} />}
 
+        {/* Floating Controls */}
         <CenterButton center={center} />
         <MapSwitcher setType={setMapType} />
       </MapContainer>
@@ -219,21 +210,21 @@ export default function Map({
   );
 }
 
-// ✅ FIXED CLICK HANDLER
+// Click handler
 function MapEventsHandler({ onMapClick }: any) {
   const map = useMap();
 
   useEffect(() => {
-  const handler = (e: any) => {
-    onMapClick(e.latlng.lat, e.latlng.lng);
-  };
+    const handler = (e: any) => {
+      onMapClick(e.latlng.lat, e.latlng.lng);
+    };
 
-  map.on("click", handler);
+    map.on("click", handler);
 
-  return () => {
-    map.off("click", handler); // ✅ no return value
-  };
-}, [map, onMapClick]);
+    return () => {
+      map.off("click", handler);
+    };
+  }, [map, onMapClick]);
 
   return null;
 }
@@ -273,7 +264,7 @@ function RouteFitBounds({ route }: any) {
   return null;
 }
 
-// Smooth marker with rotation
+// Smooth marker
 function SmoothMarker({ position, icon, smooth }: any) {
   const markerRef = useRef<any>(null);
   const prev = useRef(position);
