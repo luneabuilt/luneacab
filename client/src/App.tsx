@@ -61,6 +61,7 @@ function Router() {
       <Route path="/driver" component={DriverDashboard} />
       <Route path="/earnings" component={Earnings} />
       <Route path="/history" component={History} />
+      <Route path="/profile" component={Profile} />
     </>
   )}
 
