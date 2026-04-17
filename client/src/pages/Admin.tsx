@@ -17,6 +17,7 @@ export default function Admin() {
   const [revenueData, setRevenueData] = useState<any[]>([]);
   const [rides, setRides] = useState<any[]>([]);
   const [pendingDrivers, setPendingDrivers] = useState<any[]>([]);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user || user.role !== "admin") return;
@@ -113,7 +114,9 @@ const rejectDriver = async (id: number) => {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+      <h1 className="text-3xl font-bold tracking-tight">
+  🚀 Admin Dashboard
+</h1>
 
       <div className="grid grid-cols-2 gap-4">
         <Card>
@@ -241,12 +244,15 @@ const rejectDriver = async (id: number) => {
       {pendingDrivers.map((driver) => (
 <div
   key={driver.id}
-  className="border p-4 rounded-xl shadow-sm bg-white space-y-3"
+  className="border p-4 rounded-2xl shadow-md bg-white hover:shadow-xl transition-all duration-300 space-y-3"
 >
   {/* 🔹 DRIVER BASIC INFO */}
   <div className="flex justify-between items-center">
     <div>
       <p className="font-semibold text-base">{driver.name}</p>
+      <p className="text-xs text-yellow-600 font-medium">
+  Pending Verification
+</p>
       <p className="text-sm text-muted-foreground">{driver.phone}</p>
       <p className="text-xs">
         Vehicle: {driver.vehicleType || "-"}
@@ -256,14 +262,14 @@ const rejectDriver = async (id: number) => {
     <div className="flex gap-2">
       <button
         onClick={() => approveDriver(driver.id)}
-        className="bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded-lg text-sm"
+        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl text-sm shadow"
       >
         Approve
       </button>
 
       <button
         onClick={() => rejectDriver(driver.id)}
-        className="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg text-sm"
+        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl text-sm shadow"
       >
         Reject
       </button>
@@ -277,11 +283,11 @@ const rejectDriver = async (id: number) => {
     {driver.profileImageUrl && (
       <div>
         <p className="text-xs mb-1">Profile</p>
-        <img
-          src={driver.profileImageUrl}
-          alt="profile"
-          className="h-24 w-full object-cover rounded-lg border"
-        />
+<img
+  src={driver.profileImageUrl}
+  onClick={() => setPreviewImage(driver.profileImageUrl)}
+  className="h-24 w-full object-cover rounded-lg border cursor-pointer hover:scale-105 transition"
+/>
       </div>
     )}
 
@@ -290,10 +296,10 @@ const rejectDriver = async (id: number) => {
       <div>
         <p className="text-xs mb-1">License</p>
         <img
-          src={driver.licenseUrl}
-          alt="license"
-          className="h-24 w-full object-cover rounded-lg border"
-        />
+  src={driver.licenseUrl}
+  onClick={() => setPreviewImage(driver.licenseUrl)}
+  className="h-24 w-full object-cover rounded-lg border cursor-pointer hover:scale-105 transition"
+/>
       </div>
     )}
 
@@ -301,11 +307,11 @@ const rejectDriver = async (id: number) => {
     {driver.vehicleImageUrl && (
       <div>
         <p className="text-xs mb-1">Vehicle</p>
-        <img
-          src={driver.vehicleImageUrl}
-          alt="vehicle"
-          className="h-24 w-full object-cover rounded-lg border"
-        />
+<img
+  src={driver.vehicleImageUrl}
+  onClick={() => setPreviewImage(driver.vehicleImageUrl)}
+  className="h-24 w-full object-cover rounded-lg border cursor-pointer hover:scale-105 transition"
+/>
       </div>
     )}
 
@@ -316,6 +322,17 @@ const rejectDriver = async (id: number) => {
   </CardContent>
 </Card>
       </div>
+      {previewImage && (
+  <div
+    className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+    onClick={() => setPreviewImage(null)}
+  >
+    <img
+      src={previewImage}
+      className="max-h-[90%] max-w-[90%] rounded-lg shadow-2xl"
+    />
+  </div>
+)}
     </div>
   );
 }
