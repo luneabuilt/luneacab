@@ -24,9 +24,9 @@ export default function BottomNav() {
   const links = user.role === "driver" ? driverLinks : passengerLinks;
 
   return (
-    <div className="fixed bottom-4 left-0 right-0 z-50 flex justify-center px-4">
-      {/* 🔥 Floating Container */}
-      <div className="w-full max-w-md bg-white/90 backdrop-blur-lg border border-gray-200 shadow-2xl rounded-2xl flex justify-between items-center px-2 py-2">
+    <div className="fixed bottom-3 left-0 right-0 z-50 flex justify-center px-3">
+      {/* 🔥 Slim Floating Container */}
+      <div className="w-full max-w-md bg-white/90 backdrop-blur-lg border border-gray-200 shadow-xl rounded-2xl flex justify-between items-center px-2 py-1.5">
         
         {links.map((link) => {
           const isActive =
@@ -41,7 +41,7 @@ export default function BottomNav() {
             >
               <div
                 className={cn(
-                  "flex flex-col items-center justify-center px-4 py-2 rounded-xl transition-all duration-300",
+                  "flex flex-col items-center justify-center px-3 py-1 rounded-lg transition-all duration-300",
                   isActive
                     ? "bg-primary/10 text-primary scale-105"
                     : "text-muted-foreground hover:text-foreground"
@@ -49,11 +49,11 @@ export default function BottomNav() {
               >
                 <link.icon
                   className={cn(
-                    "w-5 h-5 mb-1 transition-all",
+                    "w-4.5 h-4.5 mb-0.5",
                     isActive ? "stroke-[2.5]" : "stroke-[2]"
                   )}
                 />
-                <span className="text-[11px] font-medium">
+                <span className="text-[10px] font-medium leading-none">
                   {link.label}
                 </span>
               </div>
