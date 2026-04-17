@@ -4,13 +4,13 @@ import {
   Marker,
   useMap,
   Polyline,
-  useMapEvents,
+  ZoomControl,
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useRef } from "react";
 
-// 🔥 FIX DEFAULT ICON
+// Fix default marker
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 
@@ -47,29 +47,40 @@ const userIcon = new L.Icon({
   iconAnchor: [18, 18],
 });
 
-// 🔥 RECENTER
+// 🔥 Recenter helper
 function MapRecenter({ lat, lng }: { lat: number; lng: number }) {
   const map = useMap();
 
   useEffect(() => {
     map.flyTo([lat, lng], map.getZoom(), {
-      duration: 0.8,
+      animate: true,
+      duration: 0.7,
     });
   }, [lat, lng]);
 
   return null;
 }
 
+// 🔥 Floating center button
+function CenterButton({ center }: { center: { lat: number; lng: number } }) {
+  const map = useMap();
+
+  return (
+    <div className="absolute bottom-6 right-4 z-[1000]">
+      <button
+        onClick={() => map.flyTo([center.lat, center.lng], 16)}
+        className="bg-white shadow-lg px-4 py-2 rounded-full text-sm font-medium hover:scale-105 transition"
+      >
+        📍 Center
+      </button>
+    </div>
+  );
+}
+
 interface MapProps {
   center: { lat: number; lng: number };
   zoom?: number;
-  markers?: Array<{
-    lat: number;
-    lng: number;
-    type: "user" | "driver" | "pickup" | "drop";
-    vehicleType?: "bike" | "auto" | "car";
-    id: string | number;
-  }>;
+  markers?: any[];
   className?: string;
   onMapClick?: (lat: number, lng: number) => void;
   route?: [number, number][];
@@ -84,33 +95,32 @@ export default function Map({
   route = [],
 }: MapProps) {
   return (
-    <div className={className}>
+    <div className={`relative ${className}`}>
       <MapContainer
         center={[center.lat, center.lng]}
         zoom={zoom}
-        scrollWheelZoom
-        className="h-full w-full rounded-2xl shadow-lg z-0"
+        scrollWheelZoom={true}
+        zoomControl={false}
+        className="h-full w-full rounded-2xl overflow-hidden"
       >
-        {/* ✅ PREMIUM LIGHT MAP (NOT DARK) */}
+        {/* 🔥 LIGHT PREMIUM MAP (not dark) */}
         <TileLayer
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         />
 
-        {/* 🔄 RECENTER */}
+        {/* Zoom Controls */}
+        <ZoomControl position="topright" />
+
+        {/* Recenter */}
         <MapRecenter lat={center.lat} lng={center.lng} />
 
-        {/* 🔥 CLICK HANDLER (FIXED) */}
-        {onMapClick && <MapClickHandler onMapClick={onMapClick} />}
-
-        {/* 🚗 MARKERS */}
+        {/* Markers */}
         {markers.map((marker) => {
           let iconToUse = userIcon;
 
           if (marker.type === "driver") {
-            const type = marker.vehicleType || "car";
-
-            if (type === "bike") iconToUse = bikeIcon;
-            else if (type === "auto") iconToUse = autoIcon;
+            if (marker.vehicleType === "bike") iconToUse = bikeIcon;
+            else if (marker.vehicleType === "auto") iconToUse = autoIcon;
             else iconToUse = carIcon;
           }
 
@@ -124,91 +134,85 @@ export default function Map({
           );
         })}
 
-        {/* 🛣 ROUTE */}
+        {/* 🔥 ROUTE */}
         {route.length > 0 && (
           <>
-            {/* Glow */}
+            {/* Soft shadow */}
             <Polyline
               positions={route}
               pathOptions={{
-                color: "#2563eb",
+                color: "#000",
                 weight: 10,
-                opacity: 0.15,
+                opacity: 0.08,
               }}
             />
 
-            {/* Main */}
+            {/* Main line */}
             <Polyline
               positions={route}
               pathOptions={{
-                color: "#2563eb",
-                weight: 5,
+                color: "#3b82f6",
+                weight: 6,
+                opacity: 0.9,
               }}
             />
           </>
         )}
 
-        {/* 🔄 AUTO FIT */}
         {route.length > 0 && <RouteFitBounds route={route} />}
+
+        {onMapClick && <MapEventsHandler onMapClick={onMapClick} />}
+
+        {/* 🔥 Floating Button */}
+        <CenterButton center={center} />
       </MapContainer>
     </div>
   );
 }
 
-// ✅ CLICK HANDLER (PROPER FIX)
-function MapClickHandler({
-  onMapClick,
-}: {
-  onMapClick: (lat: number, lng: number) => void;
-}) {
-  useMapEvents({
-    click(e) {
+// 🔥 Map click
+function MapEventsHandler({ onMapClick }: any) {
+  const map = useMap();
+
+  useEffect(() => {
+    map.on("click", (e: any) => {
       onMapClick(e.latlng.lat, e.latlng.lng);
-    },
-  });
+    });
+
+    return () => map.off("click");
+  }, []);
 
   return null;
 }
 
-// 🔄 FIT ROUTE
+// 🔥 Fit route
 function RouteFitBounds({ route }: { route: [number, number][] }) {
   const map = useMap();
 
   useEffect(() => {
     const bounds = L.latLngBounds(route);
-    map.fitBounds(bounds, {
-      padding: [60, 60],
-      maxZoom: 16,
-    });
+    map.fitBounds(bounds, { padding: [60, 60] });
   }, [route]);
 
   return null;
 }
 
-// 🚗 SMOOTH DRIVER
-function SmoothMarker({
-  position,
-  icon,
-  smooth,
-}: {
-  position: [number, number];
-  icon: L.Icon;
-  smooth: boolean;
-}) {
-  const markerRef = useRef<L.Marker | null>(null);
+// 🔥 Smooth marker animation
+function SmoothMarker({ position, icon, smooth }: any) {
+  const ref = useRef<L.Marker | null>(null);
 
   useEffect(() => {
-    if (!markerRef.current || !smooth) return;
+    if (!ref.current || !smooth) return;
 
-    const marker = markerRef.current;
+    const marker = ref.current;
     const start = marker.getLatLng();
     const end = L.latLng(position[0], position[1]);
 
     const duration = 800;
     const startTime = performance.now();
 
-    function animate(time: number) {
-      const progress = Math.min((time - startTime) / duration, 1);
+    function animate(t: number) {
+      const progress = Math.min((t - startTime) / duration, 1);
 
       const lat = start.lat + (end.lat - start.lat) * progress;
       const lng = start.lng + (end.lng - start.lng) * progress;
@@ -221,5 +225,5 @@ function SmoothMarker({
     requestAnimationFrame(animate);
   }, [position]);
 
-  return <Marker ref={markerRef} position={position} icon={icon} />;
+  return <Marker ref={ref} position={position} icon={icon} />;
 }
