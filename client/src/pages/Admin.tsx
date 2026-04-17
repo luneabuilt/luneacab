@@ -240,7 +240,7 @@ export default function Admin() {
 
           <div className="overflow-x-auto max-h-[350px] overflow-y-auto">
             <table className="w-full text-sm border rounded-xl overflow-hidden">
-              <thead>
+              <thead className="sticky top-0 bg-white z-10">
                 <tr className="border-b bg-gray-50">
                   <th className="py-2 text-left">Ride</th>
                   <th className="text-left">Passenger</th>
