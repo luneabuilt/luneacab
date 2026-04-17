@@ -239,36 +239,78 @@ const rejectDriver = async (id: number) => {
 
     <div className="space-y-3">
       {pendingDrivers.map((driver) => (
-        <div
+<div
   key={driver.id}
-  className="flex justify-between items-center border p-4 rounded-xl shadow-sm bg-white hover:shadow-md transition"
+  className="border p-4 rounded-xl shadow-sm bg-white space-y-3"
 >
-          <div className="space-y-1">
-  <p className="font-semibold text-base">{driver.name}</p>
-            <p className="text-sm text-muted-foreground">
-              {driver.phone}
-            </p>
-            <p className="text-xs">
-              Vehicle: {driver.vehicleType || "-"}
-            </p>
-          </div>
+  {/* 🔹 DRIVER BASIC INFO */}
+  <div className="flex justify-between items-center">
+    <div>
+      <p className="font-semibold text-base">{driver.name}</p>
+      <p className="text-sm text-muted-foreground">{driver.phone}</p>
+      <p className="text-xs">
+        Vehicle: {driver.vehicleType || "-"}
+      </p>
+    </div>
 
-          <div className="flex gap-2">
-            <button
-              onClick={() => approveDriver(driver.id)}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded-lg text-sm"
-            >
-              Approve
-            </button>
+    <div className="flex gap-2">
+      <button
+        onClick={() => approveDriver(driver.id)}
+        className="bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded-lg text-sm"
+      >
+        Approve
+      </button>
 
-            <button
-              onClick={() => rejectDriver(driver.id)}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg text-sm"
-            >
-              Reject
-            </button>
-          </div>
-        </div>
+      <button
+        onClick={() => rejectDriver(driver.id)}
+        className="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg text-sm"
+      >
+        Reject
+      </button>
+    </div>
+  </div>
+
+  {/* 🔥 DOCUMENTS SECTION */}
+  <div className="grid grid-cols-3 gap-3 mt-3">
+
+    {/* Profile */}
+    {driver.profileImageUrl && (
+      <div>
+        <p className="text-xs mb-1">Profile</p>
+        <img
+          src={driver.profileImageUrl}
+          alt="profile"
+          className="h-24 w-full object-cover rounded-lg border"
+        />
+      </div>
+    )}
+
+    {/* License */}
+    {driver.licenseUrl && (
+      <div>
+        <p className="text-xs mb-1">License</p>
+        <img
+          src={driver.licenseUrl}
+          alt="license"
+          className="h-24 w-full object-cover rounded-lg border"
+        />
+      </div>
+    )}
+
+    {/* Vehicle */}
+    {driver.vehicleImageUrl && (
+      <div>
+        <p className="text-xs mb-1">Vehicle</p>
+        <img
+          src={driver.vehicleImageUrl}
+          alt="vehicle"
+          className="h-24 w-full object-cover rounded-lg border"
+        />
+      </div>
+    )}
+
+  </div>
+</div>
       ))}
     </div>
   </CardContent>
