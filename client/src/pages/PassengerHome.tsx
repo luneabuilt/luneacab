@@ -527,7 +527,30 @@ useEffect(() => {
 
       setPickup({ lat, lng });
       setPickupSearchText("Current Location");
-      setCurrentLocationName("Current Location");
+      // 🔥 Get city name from lat/lng
+try {
+  const res = await fetch(
+    `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
+    {
+      headers: {
+        "User-Agent": "cab-app",
+      },
+    }
+  );
+
+  const data = await res.json();
+
+  const city =
+    data.address.city ||
+    data.address.town ||
+    data.address.village ||
+    data.address.state;
+
+  setCurrentLocationName(city || "Unknown location");
+} catch (err) {
+  console.error("Reverse geocode error:", err);
+  setCurrentLocationName("Location not found");
+}
     } catch (err) {
       console.error("❌ Backend update failed", err);
     }
