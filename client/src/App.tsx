@@ -43,16 +43,19 @@ function Router() {
   )}
 
   {/* 🔥 DRIVER NOT APPROVED */}
-  {user && user.role === "driver" && !user.isApproved && (
+{user && user.role === "driver" && !user.isApproved && (
+  <>
+    <Route path="/driver-signup" component={DriverSignup} />
     <Route path="*">
       <div className="p-6 text-center">
         <h2 className="text-xl font-bold">Waiting for Approval</h2>
         <p className="text-muted-foreground">
-          Your account is under review
+          Your account is under review by admin.
         </p>
       </div>
     </Route>
-  )}
+  </>
+)}
 
   {/* 🔥 APPROVED DRIVER */}
   {user && user.role === "driver" && user.isApproved && (

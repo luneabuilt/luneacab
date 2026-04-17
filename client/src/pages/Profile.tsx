@@ -34,9 +34,12 @@ export default function Profile() {
   useEffect(() => {
     if (!user || !user.id) return;
 
-    if (user.role === "driver" && !user.licenseUrl) {
-      setLocation("/driver-signup");
-    }
+if (
+  user.role === "driver" &&
+  (!user.licenseUrl || !user.vehicleImageUrl || !user.profileImageUrl)
+) {
+  setLocation("/driver-signup");
+}
   }, [user]);
 
   // ✅ safer role watch
