@@ -8,8 +8,9 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { useEffect, useRef, useState } from "react";
 import "leaflet-rotatedmarker";
+
+import { useEffect, useRef, useState } from "react";
 
 // Default marker fix
 import icon from "leaflet/dist/images/marker-icon.png";
@@ -48,23 +49,29 @@ const userIcon = new L.Icon({
   iconAnchor: [18, 18],
 });
 
-// 🔥 Map Recenter
-function MapRecenter({ lat, lng, follow = false }: any) {
+// 🚀 Smart Camera Follow
+function SmartFollow({
+  center,
+  active,
+}: {
+  center: { lat: number; lng: number };
+  active: boolean;
+}) {
   const map = useMap();
 
   useEffect(() => {
-    if (!follow) return;
+    if (!active) return;
 
-    map.flyTo([lat, lng], map.getZoom(), {
+    map.flyTo([center.lat, center.lng], map.getZoom(), {
       animate: true,
       duration: 0.8,
     });
-  }, [lat, lng, follow]);
+  }, [center, active]);
 
   return null;
 }
 
-// 🔥 Center Button
+// 📍 Center Button
 function CenterButton({ center }: any) {
   const map = useMap();
 
@@ -72,7 +79,7 @@ function CenterButton({ center }: any) {
     <div className="absolute bottom-6 right-4 z-[1000]">
       <button
         onClick={() => map.flyTo([center.lat, center.lng], 16)}
-        className="bg-white shadow-lg px-4 py-2 rounded-full text-sm font-medium hover:scale-105 transition"
+        className="bg-white shadow-xl px-4 py-2 rounded-full text-sm font-medium hover:scale-105 transition"
       >
         📍 Center
       </button>
@@ -80,7 +87,7 @@ function CenterButton({ center }: any) {
   );
 }
 
-// 🔥 Map Switch Button
+// 🗺 Map Switcher
 function MapSwitcher({ setType }: any) {
   return (
     <div className="absolute top-4 left-4 z-[1000]">
@@ -92,7 +99,7 @@ function MapSwitcher({ setType }: any) {
         }
         className="bg-white shadow-md px-3 py-1 rounded-lg text-xs"
       >
-        🗺 Switch Map
+        🗺 Switch
       </button>
     </div>
   );
@@ -105,6 +112,7 @@ interface MapProps {
   className?: string;
   onMapClick?: (lat: number, lng: number) => void;
   route?: [number, number][];
+  isRideActive?: boolean; // 🔥 NEW
 }
 
 export default function Map({
@@ -114,6 +122,7 @@ export default function Map({
   className = "h-full w-full",
   onMapClick,
   route = [],
+  isRideActive = false,
 }: MapProps) {
   const [mapType, setMapType] = useState("light");
 
@@ -135,11 +144,8 @@ export default function Map({
 
         <ZoomControl position="topright" />
 
-        <MapRecenter
-          lat={center.lat}
-          lng={center.lng}
-          follow={route.length > 0}
-        />
+        {/* 🚀 Smart follow ONLY during ride */}
+        <SmartFollow center={center} active={isRideActive} />
 
         {/* Markers */}
         {markers.map((marker) => {
@@ -177,7 +183,7 @@ export default function Map({
               pathOptions={{
                 color: "#2563eb",
                 weight: 6,
-                opacity: 0.9,
+                opacity: 0.95,
               }}
             />
           </>
@@ -241,7 +247,7 @@ function RouteFitBounds({ route }: any) {
     const bounds = L.latLngBounds(route);
 
     map.fitBounds(bounds, {
-      padding: [60, 60],
+      padding: [70, 70],
       maxZoom: 16,
     });
   }, [route]);
@@ -249,7 +255,7 @@ function RouteFitBounds({ route }: any) {
   return null;
 }
 
-// 🔥 Smooth + rotation
+// 🚗 Smooth + rotation
 function SmoothMarker({ position, icon, smooth }: any) {
   const markerRef = useRef<any>(null);
   const prev = useRef(position);
@@ -262,11 +268,12 @@ function SmoothMarker({ position, icon, smooth }: any) {
     const start = L.latLng(prev.current[0], prev.current[1]);
     const end = L.latLng(position[0], position[1]);
 
+    // 🔥 Calculate direction
     const angle =
       Math.atan2(end.lng - start.lng, end.lat - start.lat) *
       (180 / Math.PI);
 
-    marker.setRotationAngle?.(angle);
+    marker.setRotationAngle(angle);
 
     const duration = 800;
     const startTime = performance.now();
