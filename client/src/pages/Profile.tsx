@@ -44,11 +44,11 @@ useEffect(() => {
 useEffect(() => {
   if (!user || !user.id) return;
 
-  if (user.role === "driver" && !user.licenseUrl) {
-    setTimeout(() => {
-      setLocation("/driver-signup");
-    }, 0);
-  }
+  // ❌ TEMP DISABLE REDIRECT
+  // if (user.role === "driver" && !user.licenseUrl) {
+  //   setLocation("/driver-signup");
+  // }
+
 }, [user]);
 
   // ✅ safer role watch
