@@ -142,7 +142,7 @@ export default function Map({
         <TileLayer url={tileUrl} />
 
         {/* Zoom control (safe position) */}
-        <div className="absolute top-24 right-4 z-[400]">
+        <div className="absolute top-32 right-4 z-[400]">
   <ZoomControl position="topright" />
 </div>
 
