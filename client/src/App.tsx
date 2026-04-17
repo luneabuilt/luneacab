@@ -24,7 +24,7 @@ function Router() {
   const { user } = useAuth();
 
   return (
-    <div className="h-screen overflow-hidden bg-background text-foreground antialiased font-sans">
+    <div className="min-h-screen bg-background text-foreground antialiased font-sans pb-16 md:pb-0">
       <Switch>
 
         <Route path="/driver-signup" component={DriverSignup} />
