@@ -4,6 +4,7 @@ import {
   Marker,
   useMap,
   Polyline,
+  useMapEvents,
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -46,7 +47,7 @@ const userIcon = new L.Icon({
   iconAnchor: [18, 18],
 });
 
-// 🔥 RECENTER (SMOOTH)
+// 🔥 RECENTER
 function MapRecenter({ lat, lng }: { lat: number; lng: number }) {
   const map = useMap();
 
@@ -88,29 +89,29 @@ export default function Map({
         center={[center.lat, center.lng]}
         zoom={zoom}
         scrollWheelZoom
-        className="h-full w-full rounded-2xl shadow-lg"
-        zoomControl={false}
+        className="h-full w-full rounded-2xl shadow-lg z-0"
       >
-        {/* 🔥 PREMIUM MAP STYLE */}
+        {/* ✅ PREMIUM LIGHT MAP (NOT DARK) */}
         <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         />
 
-        {/* 🔥 RECENTER */}
+        {/* 🔄 RECENTER */}
         <MapRecenter lat={center.lat} lng={center.lng} />
 
-        {/* 🔥 MARKERS */}
+        {/* 🔥 CLICK HANDLER (FIXED) */}
+        {onMapClick && <MapClickHandler onMapClick={onMapClick} />}
+
+        {/* 🚗 MARKERS */}
         {markers.map((marker) => {
           let iconToUse = userIcon;
 
           if (marker.type === "driver") {
             const type = marker.vehicleType || "car";
-            iconToUse =
-              type === "bike"
-                ? bikeIcon
-                : type === "auto"
-                ? autoIcon
-                : carIcon;
+
+            if (type === "bike") iconToUse = bikeIcon;
+            else if (type === "auto") iconToUse = autoIcon;
+            else iconToUse = carIcon;
           }
 
           return (
@@ -123,62 +124,53 @@ export default function Map({
           );
         })}
 
-        {/* 🔥 PREMIUM ROUTE */}
+        {/* 🛣 ROUTE */}
         {route.length > 0 && (
           <>
-            {/* Glow effect */}
+            {/* Glow */}
             <Polyline
               positions={route}
               pathOptions={{
-                color: "#22c55e",
-                weight: 12,
-                opacity: 0.2,
+                color: "#2563eb",
+                weight: 10,
+                opacity: 0.15,
               }}
             />
 
-            {/* Main line */}
+            {/* Main */}
             <Polyline
               positions={route}
               pathOptions={{
-                color: "#22c55e",
-                weight: 6,
+                color: "#2563eb",
+                weight: 5,
               }}
             />
           </>
         )}
 
-        {/* 🔥 AUTO FIT */}
+        {/* 🔄 AUTO FIT */}
         {route.length > 0 && <RouteFitBounds route={route} />}
-
-        {/* CLICK */}
-        {onMapClick && <MapClickHandler onMapClick={onMapClick} />}
       </MapContainer>
     </div>
   );
 }
 
-// 🔥 CLICK HANDLER
+// ✅ CLICK HANDLER (PROPER FIX)
 function MapClickHandler({
   onMapClick,
 }: {
   onMapClick: (lat: number, lng: number) => void;
 }) {
-  const map = useMap();
-
-  useEffect(() => {
-    map.on("click", (e: any) => {
+  useMapEvents({
+    click(e) {
       onMapClick(e.latlng.lat, e.latlng.lng);
-    });
-
-    return () => {
-      map.off("click");
-    };
-  }, [map]);
+    },
+  });
 
   return null;
 }
 
-// 🔥 FIT ROUTE
+// 🔄 FIT ROUTE
 function RouteFitBounds({ route }: { route: [number, number][] }) {
   const map = useMap();
 
@@ -193,7 +185,7 @@ function RouteFitBounds({ route }: { route: [number, number][] }) {
   return null;
 }
 
-// 🔥 SMOOTH DRIVER MOVEMENT
+// 🚗 SMOOTH DRIVER
 function SmoothMarker({
   position,
   icon,
