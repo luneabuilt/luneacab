@@ -238,7 +238,7 @@ export default function Admin() {
         <CardContent className="p-6">
           <h2 className="text-xl font-semibold mb-4">Ride History</h2>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto max-h-[350px] overflow-y-auto">
             <table className="w-full text-sm border rounded-xl overflow-hidden">
               <thead>
                 <tr className="border-b bg-gray-50">
@@ -254,11 +254,24 @@ export default function Admin() {
 
               <tbody>
                 {rides.map((ride) => (
-                  <tr key={ride.id} className="border-b hover:bg-gray-50">
-                    <td className="py-2">{ride.id}</td>
+                  <tr key={ride.id} className="border-b hover:bg-gray-50 text-xs">
+                    <td className="py-1.5">{ride.id}</td>
                     <td>{ride.passengerId}</td>
                     <td>{ride.driverId || "-"}</td>
-                    <td>{ride.status}</td>
+                    <td>
+  <span
+    className={`px-2 py-1 rounded-full text-xs font-medium
+    ${
+      ride.status === "completed"
+        ? "bg-green-100 text-green-700"
+        : ride.status === "cancelled"
+        ? "bg-red-100 text-red-700"
+        : "bg-yellow-100 text-yellow-700"
+    }`}
+  >
+    {ride.status}
+  </span>
+</td>
                     <td>₹{Number(ride.fare).toFixed(2)}</td>
                     <td>₹{Number(ride.commission).toFixed(2)}</td>
                     <td>
