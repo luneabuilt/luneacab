@@ -151,48 +151,7 @@ export default function Admin() {
         </CardContent>
       </Card>
 
-      {/* 🔥 RIDE HISTORY */}
-      <Card className="rounded-2xl shadow">
-        <CardContent className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Ride History</h2>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm border rounded-xl overflow-hidden">
-              <thead>
-                <tr className="border-b bg-gray-50">
-                  <th className="py-2 text-left">Ride</th>
-                  <th className="text-left">Passenger</th>
-                  <th className="text-left">Driver</th>
-                  <th className="text-left">Status</th>
-                  <th className="text-left">Fare</th>
-                  <th className="text-left">Commission</th>
-                  <th className="text-left">Date</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {rides.map((ride) => (
-                  <tr key={ride.id} className="border-b hover:bg-gray-50">
-                    <td className="py-2">{ride.id}</td>
-                    <td>{ride.passengerId}</td>
-                    <td>{ride.driverId || "-"}</td>
-                    <td>{ride.status}</td>
-                    <td>₹{Number(ride.fare).toFixed(2)}</td>
-                    <td>₹{Number(ride.commission).toFixed(2)}</td>
-                    <td>
-                      {ride.createdAt
-                        ? new Date(ride.createdAt).toLocaleDateString()
-                        : "-"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 🔥 DRIVER APPROVALS */}
+            {/* 🔥 DRIVER APPROVALS */}
       <Card className="rounded-2xl shadow">
         <CardContent className="p-6">
           <h2 className="text-xl font-bold mb-4 flex justify-between">
@@ -273,6 +232,48 @@ export default function Admin() {
           </div>
         </CardContent>
       </Card>
+
+      {/* 🔥 RIDE HISTORY */}
+      <Card className="rounded-2xl shadow">
+        <CardContent className="p-6">
+          <h2 className="text-xl font-semibold mb-4">Ride History</h2>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border rounded-xl overflow-hidden">
+              <thead>
+                <tr className="border-b bg-gray-50">
+                  <th className="py-2 text-left">Ride</th>
+                  <th className="text-left">Passenger</th>
+                  <th className="text-left">Driver</th>
+                  <th className="text-left">Status</th>
+                  <th className="text-left">Fare</th>
+                  <th className="text-left">Commission</th>
+                  <th className="text-left">Date</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {rides.map((ride) => (
+                  <tr key={ride.id} className="border-b hover:bg-gray-50">
+                    <td className="py-2">{ride.id}</td>
+                    <td>{ride.passengerId}</td>
+                    <td>{ride.driverId || "-"}</td>
+                    <td>{ride.status}</td>
+                    <td>₹{Number(ride.fare).toFixed(2)}</td>
+                    <td>₹{Number(ride.commission).toFixed(2)}</td>
+                    <td>
+                      {ride.createdAt
+                        ? new Date(ride.createdAt).toLocaleDateString()
+                        : "-"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
 
       {/* 🔥 IMAGE PREVIEW */}
       {previewImage && (
