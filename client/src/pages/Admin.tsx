@@ -253,7 +253,13 @@ export default function Admin() {
               </thead>
 
               <tbody>
-                {rides.map((ride) => (
+                {[...rides]
+  .sort(
+    (a, b) =>
+      new Date(b.createdAt).getTime() -
+      new Date(a.createdAt).getTime()
+  )
+  .map((ride) => (
                   <tr key={ride.id} className="border-b hover:bg-gray-50 text-xs">
                     <td className="py-1.5">{ride.id}</td>
                     <td>{ride.passengerId}</td>
