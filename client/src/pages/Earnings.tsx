@@ -44,16 +44,8 @@ export default function Earnings() {
 
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  let todayTotal = 0;
-  let todayDriver = 0;
-  let weeklyDriver = 0;
-  let monthlyDriver = 0;
-  let totalDriver = 0;
-  let totalCommission = 0;
-
-  let filteredRides = rides || [];
-
-  filteredRides = filteredRides.filter((ride: any) => {
+  // 🔥 APPLY FILTER TO RIDES
+  const filteredRides = (rides || []).filter((ride: any) => {
     const rideDate = new Date(ride.createdAt);
 
     if (filter === "today") {
@@ -71,29 +63,18 @@ export default function Earnings() {
     return true;
   });
 
-  rides?.forEach((ride: any) => {
-    const rideDate = new Date(ride.createdAt);
-    const fare = Number(ride.fare || 0);
-    const driverEarning = Number(ride.driverEarning || 0);
-    const commission = Number(ride.commission || 0);
+  // 🔥 CALCULATE BASED ON FILTERED DATA
+  let totalDriver = 0;
+  let totalCommission = 0;
+  let totalFare = 0;
 
-    totalDriver += driverEarning;
-    totalCommission += commission;
-
-    if (rideDate.toDateString() === todayStr) {
-      todayTotal += fare;
-      todayDriver += driverEarning;
-    }
-
-    if (rideDate >= startOfWeek) {
-      weeklyDriver += driverEarning;
-    }
-
-    if (rideDate >= startOfMonth) {
-      monthlyDriver += driverEarning;
-    }
+  filteredRides.forEach((ride: any) => {
+    totalDriver += Number(ride.driverEarning || 0);
+    totalCommission += Number(ride.commission || 0);
+    totalFare += Number(ride.fare || 0);
   });
 
+  // 🔥 LAST 7 DAYS CHART (ALSO FILTER AWARE)
   const last7DaysData: { day: string; earnings: number }[] = [];
 
   for (let i = 6; i >= 0; i--) {
@@ -103,7 +84,7 @@ export default function Earnings() {
     const dayString = date.toDateString();
     let dailyEarning = 0;
 
-    rides?.forEach((ride: any) => {
+    filteredRides.forEach((ride: any) => {
       const rideDate = new Date(ride.createdAt).toDateString();
       if (rideDate === dayString) {
         dailyEarning += Number(ride.driverEarning || 0);
@@ -122,7 +103,9 @@ export default function Earnings() {
       {/* HEADER */}
       <div className="bg-gradient-to-r from-emerald-500 to-green-600 text-white p-6 rounded-b-3xl shadow">
         <h1 className="text-2xl font-bold">💰 Earnings</h1>
-        <p className="text-sm opacity-90">Your performance overview</p>
+        <p className="text-sm opacity-90 capitalize">
+          {filter} summary
+        </p>
 
         <p className="mt-3 text-3xl font-bold">
           ₹{totalDriver.toFixed(0)}
@@ -150,39 +133,39 @@ export default function Earnings() {
 
         {/* STATS */}
         <div className="grid grid-cols-2 gap-4">
-          <Card className="p-4 rounded-xl shadow-sm border bg-white">
-            <p className="text-xs text-muted-foreground">Today</p>
+          <Card className="p-4 rounded-xl border bg-white">
+            <p className="text-xs text-muted-foreground">Your Earnings</p>
             <p className="text-lg font-semibold">
-              ₹{todayDriver.toFixed(0)}
+              ₹{totalDriver.toFixed(0)}
             </p>
           </Card>
 
-          <Card className="p-4 rounded-xl shadow-sm border bg-white">
-            <p className="text-xs text-muted-foreground">This Week</p>
+          <Card className="p-4 rounded-xl border bg-white">
+            <p className="text-xs text-muted-foreground">Total Fare</p>
             <p className="text-lg font-semibold">
-              ₹{weeklyDriver.toFixed(0)}
+              ₹{totalFare.toFixed(0)}
             </p>
           </Card>
 
-          <Card className="p-4 rounded-xl shadow-sm border bg-white">
-            <p className="text-xs text-muted-foreground">This Month</p>
-            <p className="text-lg font-semibold">
-              ₹{monthlyDriver.toFixed(0)}
-            </p>
-          </Card>
-
-          <Card className="p-4 rounded-xl shadow-sm border bg-white">
+          <Card className="p-4 rounded-xl border bg-white">
             <p className="text-xs text-muted-foreground">Commission</p>
             <p className="text-lg font-semibold text-red-500">
               ₹{totalCommission.toFixed(0)}
             </p>
           </Card>
+
+          <Card className="p-4 rounded-xl border bg-white">
+            <p className="text-xs text-muted-foreground">Rides</p>
+            <p className="text-lg font-semibold">
+              {filteredRides.length}
+            </p>
+          </Card>
         </div>
 
         {/* CHART */}
-        <Card className="p-5 rounded-2xl shadow-sm border bg-white">
+        <Card className="p-5 rounded-2xl border bg-white">
           <p className="text-sm font-medium mb-3">
-            Last 7 Days Earnings
+            Earnings Trend
           </p>
 
           <div style={{ width: "100%", height: 220 }}>
