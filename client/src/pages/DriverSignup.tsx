@@ -9,6 +9,8 @@ import { UploadCloud, Loader2 } from "lucide-react";
 export default function DriverSignup() {
   const { setUser, user } = useAuth();
 
+  const [step, setStep] = useState(1);
+
   const [name, setName] = useState("");
   const [vehicleNumber, setVehicleNumber] = useState("");
 
@@ -37,17 +39,9 @@ export default function DriverSignup() {
     setLoading(true);
 
     try {
-      const licenseUrl = licenseFile
-        ? await uploadFile(licenseFile)
-        : null;
-
-      const vehicleImageUrl = vehicleFile
-        ? await uploadFile(vehicleFile)
-        : null;
-
-      const profileImageUrl = profileFile
-        ? await uploadFile(profileFile)
-        : null;
+      const licenseUrl = await uploadFile(licenseFile!);
+      const vehicleImageUrl = await uploadFile(vehicleFile!);
+      const profileImageUrl = await uploadFile(profileFile!);
 
       await fetch(`${BASE_URL}/api/users/${user.id}/documents`, {
         method: "PATCH",
@@ -104,6 +98,22 @@ export default function DriverSignup() {
     </div>
   );
 
+  const ProgressBar = () => (
+    <div className="flex gap-2 mb-6">
+      {[1, 2, 3].map((s) => (
+        <div
+          key={s}
+          className={`flex-1 h-2 rounded-full ${
+            step >= s ? "bg-indigo-500" : "bg-gray-200"
+          }`}
+        />
+      ))}
+    </div>
+  );
+
+  const canGoStep2 = name && vehicleNumber;
+  const canSubmit = licenseFile && vehicleFile && profileFile;
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
 
@@ -111,72 +121,120 @@ export default function DriverSignup() {
         <CardContent className="p-6 space-y-6">
 
           {/* HEADER */}
-          <div className="text-center space-y-1">
+          <div className="text-center">
             <h1 className="text-2xl font-bold">
-              🚗 Become a Driver
+              🚗 Driver Onboarding
             </h1>
             <p className="text-sm text-muted-foreground">
-              Start earning by accepting rides
+              Step {step} of 3
             </p>
           </div>
 
-          {/* INPUTS */}
-          <div className="space-y-4">
+          <ProgressBar />
 
-            <Input
-              placeholder="Full Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="h-11"
-            />
+          {/* STEP 1 */}
+          {step === 1 && (
+            <div className="space-y-4">
 
-            <Input
-              placeholder="Vehicle Number"
-              value={vehicleNumber}
-              onChange={(e) => setVehicleNumber(e.target.value)}
-              className="h-11 uppercase"
-            />
-          </div>
+              <Input
+                placeholder="Full Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="h-11"
+              />
 
-          {/* FILE UPLOADS */}
-          <div className="space-y-4">
+              <Input
+                placeholder="Vehicle Number"
+                value={vehicleNumber}
+                onChange={(e) => setVehicleNumber(e.target.value)}
+                className="h-11 uppercase"
+              />
 
-            <FileUpload
-              label="Driving License"
-              file={licenseFile}
-              setFile={setLicenseFile}
-            />
+              <Button
+                className="w-full h-11"
+                disabled={!canGoStep2}
+                onClick={() => setStep(2)}
+              >
+                Continue
+              </Button>
+            </div>
+          )}
 
-            <FileUpload
-              label="Vehicle Photo"
-              file={vehicleFile}
-              setFile={setVehicleFile}
-            />
+          {/* STEP 2 */}
+          {step === 2 && (
+            <div className="space-y-4">
 
-            <FileUpload
-              label="Profile Photo"
-              file={profileFile}
-              setFile={setProfileFile}
-            />
-          </div>
+              <FileUpload
+                label="Driving License"
+                file={licenseFile}
+                setFile={setLicenseFile}
+              />
 
-          {/* SUBMIT */}
-          <Button
-            onClick={handleSubmit}
-            className="w-full h-12 text-lg rounded-xl"
-            disabled={loading}
-          >
-            {loading ? (
-              <Loader2 className="animate-spin" />
-            ) : (
-              "Submit & Apply"
-            )}
-          </Button>
+              <FileUpload
+                label="Vehicle Photo"
+                file={vehicleFile}
+                setFile={setVehicleFile}
+              />
 
-          {/* INFO */}
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setStep(1)}
+                >
+                  Back
+                </Button>
+
+                <Button
+                  className="w-full"
+                  disabled={!licenseFile || !vehicleFile}
+                  onClick={() => setStep(3)}
+                >
+                  Continue
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 3 */}
+          {step === 3 && (
+            <div className="space-y-4">
+
+              <FileUpload
+                label="Profile Photo"
+                file={profileFile}
+                setFile={setProfileFile}
+              />
+
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setStep(2)}
+                >
+                  Back
+                </Button>
+
+                <Button
+                  className="w-full h-11"
+                  disabled={!canSubmit || loading}
+                  onClick={handleSubmit}
+                >
+                  {loading ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    "Submit Application"
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* FOOTER */}
           <p className="text-xs text-center text-muted-foreground">
-            Your account will be reviewed before approval
+            Your account will be verified before going online
           </p>
+
         </CardContent>
       </Card>
     </div>
