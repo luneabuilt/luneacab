@@ -14,6 +14,7 @@ export default function Profile() {
   const { user, logout } = useAuth();
   const [, setLocation] = useLocation();
   const updateProfile = useUpdateProfile();
+console.log("PROFILE PAGE LOAD:", user?.role);
 
   const form = useForm({
   defaultValues: {
@@ -40,16 +41,6 @@ useEffect(() => {
   }, 0);
 }, [user]);
 
-  // ✅ SAFE redirect (no infinite loop)
-useEffect(() => {
-  if (!user || !user.id) return;
-
-  // ❌ TEMP DISABLE REDIRECT
-  // if (user.role === "driver" && !user.licenseUrl) {
-  //   setLocation("/driver-signup");
-  // }
-
-}, [user]);
 
   // ✅ safer role watch
   const selectedRole = form.getValues("role") || user?.role || "passenger";
@@ -75,6 +66,19 @@ useEffect(() => {
   if (!user || !user.id) {
     return <div className="p-6 text-center">Loading...</div>;
   }
+  // 🚨 DRIVER WITHOUT SETUP
+if (user.role === "driver" && !user.licenseUrl) {
+  return (
+    <div style={{ padding: 20 }}>
+      <h2>Driver Setup Required</h2>
+      <p>You need to complete signup first</p>
+
+      <button onClick={() => setLocation("/driver-signup")}>
+        Go to Driver Signup
+      </button>
+    </div>
+  );
+}
 
   return (
   <div style={{ padding: 20 }}>
