@@ -74,6 +74,9 @@ function Router() {
       </Route>
     </>
   )}
+  <Route path="*">
+  <div className="p-6 text-center">Page Not Found</div>
+</Route>
 
 </Switch>
 
