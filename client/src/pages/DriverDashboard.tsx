@@ -638,24 +638,29 @@ if (res.ok) {
       )}
 
       {/* Top Bar */}
-      <div className="absolute top-0 left-0 right-0 p-4 z-10">
-        <Card className="border-0 shadow-lg bg-white/95 backdrop-blur">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div
-                className={`h-3 w-3 rounded-full ${isOnlineLocal ? "bg-green-500 animate-pulse" : "bg-red-500"}`}
-              />
-              <span className="font-semibold">
-                {isOnlineLocal ? "You are Online" : "You are Offline"}
-              </span>
-            </div>
-            <Switch
-  checked={isOnlineLocal}
-  onCheckedChange={handleGoOnline}
-/>
-          </CardContent>
-        </Card>
-      </div>
+<div className="absolute top-4 left-4 right-4 z-[500]">
+  <div className="bg-white/90 backdrop-blur-md shadow-[0_8px_30px_rgba(0,0,0,0.08)] rounded-xl px-4 py-2 flex items-center justify-between border border-gray-200">
+    
+    {/* LEFT SIDE */}
+    <div className="flex items-center gap-2">
+      <div
+        className={`h-2.5 w-2.5 rounded-full ${
+          isOnlineLocal ? "bg-green-500 animate-pulse" : "bg-red-500"
+        }`}
+      />
+      <span className="text-sm font-medium">
+        {isOnlineLocal ? "You are Online" : "You are Offline"}
+      </span>
+    </div>
+
+    {/* RIGHT SIDE → KEEP YOUR SWITCH */}
+    <Switch
+      checked={isOnlineLocal}
+      onCheckedChange={handleGoOnline}
+    />
+
+  </div>
+</div>
 
       {/* Ride Status Pill */}
       {activeRide && (

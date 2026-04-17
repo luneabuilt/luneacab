@@ -696,19 +696,24 @@ useEffect(() => {
       </div>
 
       {/* Floating Header */}
-      <div className="absolute top-4 left-4 right-4 z-10">
-        <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-4 flex items-center gap-3">
-          <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
-            <MapPin className="text-primary w-5 h-5" />
-          </div>
-          <div className="flex-1">
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
-              Current Location
-            </p>
-            <p className="font-bold text-sm truncate">{currentLocationName}</p>
-          </div>
-        </div>
-      </div>
+<div className="absolute top-4 left-4 right-4 z-[500]">
+  <div className="bg-white/90 backdrop-blur-md shadow-[0_8px_30px_rgba(0,0,0,0.08)] rounded-xl px-4 py-2 flex items-center gap-3 border border-gray-200">
+    
+    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+      📍
+    </div>
+
+    <div className="flex flex-col leading-tight">
+      <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
+        Current Location
+      </span>
+      <span className="text-sm font-medium">
+        Current Location
+      </span>
+    </div>
+
+  </div>
+</div>
 
       {/* Bottom Sheet UI */}
       <div className="mt-auto z-10 w-full max-h-[40vh]">
