@@ -967,6 +967,13 @@ const city =
   transition={{ type: "spring", stiffness: 120, damping: 20 }}
   className="bg-white/90 backdrop-blur-xl border-t border-gray-200 rounded-t-3xl shadow-2xl px-4 pt-3 pb-10"
 >
+  <div
+  onClick={toggleSheet}
+  className="flex flex-col items-center mb-2 cursor-pointer"
+>
+  <div className="w-12 h-1.5 bg-gray-400/60 rounded-full mb-2" />
+  <span className="text-xs text-gray-500">Swipe up</span>
+</div>
     
              <div className="h-full overflow-y-auto pr-1">
                 <div className="mx-auto w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-4 relative">
@@ -996,6 +1003,13 @@ const city =
   transition={{ type: "spring", stiffness: 120, damping: 20 }}
   className="bg-white/90 backdrop-blur-xl border-t border-gray-200 rounded-t-3xl shadow-2xl px-4 pt-3 pb-10"
 >
+  <div
+  onClick={toggleSheet}
+  className="flex flex-col items-center mb-2 cursor-pointer"
+>
+  <div className="w-12 h-1.5 bg-gray-400/60 rounded-full mb-2" />
+  <span className="text-xs text-gray-500">Swipe up</span>
+</div>
               <div className="h-full overflow-y-auto pr-1">
                 {activeRide.status === "payment_pending" && !paymentProcessing ? (
                   <div className="text-center space-y-4">

@@ -380,38 +380,43 @@ const handleGoOnline = (checked: boolean) => {
   return (
     <div className="h-screen w-full relative flex flex-col bg-background">
       {activeRide && (
-        <div className="absolute bottom-0 left-0 right-0 z-30 bg-white rounded-t-3xl shadow-2xl flex flex-col max-h-[45%]">
+        <div className="absolute bottom-[70px] left-3 right-3 z-30 
+bg-white/90 backdrop-blur-xl 
+rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.12)] 
+flex flex-col max-h-[40%] border border-gray-200">
           {/* 🔹 SCROLLABLE CONTENT */}
           <div className="flex-1 overflow-y-auto p-5">
-            <h2 className="text-xl font-bold mb-2">Active Ride</h2>
-            <p className="text-muted-foreground mb-4">
-              Passenger ID: {activeRide.passengerId}
-            </p>
+<div className="flex items-center justify-between mb-3">
+  <h2 className="text-lg font-semibold">Active Ride</h2>
+  <span className="text-xs bg-primary/10 text-primary px-3 py-1 rounded-full font-medium">
+    ID: {activeRide.passengerId}
+  </span>
+</div>
 
-            <div className="space-y-4">
-              {/* Pickup */}
-              <div className="flex items-start gap-3">
-                <div className="h-3 w-3 rounded-full bg-green-500 mt-2" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Pickup</p>
-                  <p className="font-medium text-sm">
-                    {pickupName || "Loading pickup..."}
-                  </p>
-                </div>
-              </div>
+<div className="space-y-3">
+  <div className="flex items-start gap-3">
+    <div className="h-2.5 w-2.5 rounded-full bg-green-500 mt-2" />
+    <div>
+      <p className="text-xs text-gray-500">Pickup</p>
+      <p className="text-sm font-medium leading-tight line-clamp-2">
+        {pickupName || "Loading pickup..."}
+      </p>
+    </div>
+  </div>
 
-              {/* Drop */}
-              <div className="flex items-start gap-3">
-                <div className="h-3 w-3 rounded-full bg-red-500 mt-2" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Drop</p>
-                  <p className="font-medium text-sm">
-                    {dropName || "Loading drop..."}
-                  </p>
-                </div>
-              </div>
+  <div className="flex items-start gap-3">
+    <div className="h-2.5 w-2.5 rounded-full bg-red-500 mt-2" />
+    <div>
+      <p className="text-xs text-gray-500">Drop</p>
+      <p className="text-sm font-medium leading-tight line-clamp-2">
+        {dropName || "Loading drop..."}
+      </p>
+    </div>
+  </div>
 
-              <div className="pt-3 border-t text-sm space-y-1">
+              <div className="pt-3 mt-3 border-t text-xs text-gray-600 flex justify-between">
+  <span>💳 {activeRide.paymentMethod}</span>
+  <span className="capitalize">🚦 {activeRide.status}</span>
                 <p>
                   <strong>Payment:</strong> {activeRide.paymentMethod}
                 </p>
@@ -423,12 +428,12 @@ const handleGoOnline = (checked: boolean) => {
           </div>
 
           {/* 🔹 FIXED BUTTON AREA */}
-          <div className="p-4 border-t bg-white space-y-3">
+          <div className="p-3 border-t bg-white/80 backdrop-blur space-y-2">
             {activeRide?.status === "accepted" && (
               <>
                 <Button
-                  variant="outline"
-                  className="w-full"
+  variant="outline"
+  className="w-full h-11 rounded-xl"
                   onClick={() => {
                     const lat = activeRide.pickupLat;
                     const lng = activeRide.pickupLng;
@@ -442,8 +447,8 @@ const handleGoOnline = (checked: boolean) => {
                   Navigate to Pickup (Google Maps)
                 </Button>
 
-                <Button
-                  className="w-full"
+<Button
+  className="w-full h-11 rounded-xl"
                   onClick={async () => {
   await updateStatus.mutateAsync({
     rideId: activeRide.id,
@@ -459,9 +464,9 @@ const handleGoOnline = (checked: boolean) => {
                   Mark Arrived
                 </Button>
 
-                <Button
-                  variant="destructive"
-                  className="w-full"
+<Button
+  variant="destructive"
+  className="w-full h-11 rounded-xl"
                   onClick={async () => {
                     await fetch(`${BASE_URL}/api/rides/${activeRide.id}/cancel`, {
                       method: "PATCH",
@@ -489,8 +494,7 @@ const handleGoOnline = (checked: boolean) => {
                   className="w-full border rounded p-2"
                 />
 
-                <Button
-                  className="w-full"
+<Button className="w-full h-11 rounded-xl"
                   onClick={async () => {
                     const res = await fetch(`${BASE_URL}/api/rides/${activeRide.id}/verify-otp`,
                       {
@@ -528,8 +532,7 @@ if (res.ok) {
 
             {activeRide?.status === "ongoing" && (
               <>
-                <Button
-                  className="w-full"
+<Button className="w-full h-11 rounded-xl"
                   onClick={async () => {
   await updateStatus.mutateAsync({
     rideId: activeRide.id,
@@ -543,8 +546,7 @@ if (res.ok) {
             )}
 
             {activeRide?.status === "payment_pending" && (
-              <Button
-                className="w-full"
+<Button className="w-full h-11 rounded-xl"
                 onClick={async () => {
                   const res = await fetch(`${BASE_URL}/api/rides/${activeRide.id}/payment`, {
   method: "PATCH",
