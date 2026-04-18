@@ -67,6 +67,7 @@ useEffect(() => {
   const [activeField, setActiveField] = useState<"pickup" | "drop" | null>(
     null,
   );
+  const [sheetHeight, setSheetHeight] = useState(30); // starts small
 
   const [isSearching, setIsSearching] = useState(false);
   const [distanceKm, setDistanceKm] = useState<number | null>(null);
@@ -744,16 +745,27 @@ const city =
 </div>
 
       {/* Bottom Sheet UI */}
-      <div className="mt-auto z-10 w-full max-h-[40vh]">
+      <div className="absolute bottom-0 left-0 right-0 z-10">
         <AnimatePresence mode="wait">
           {stage === "search" && (
             <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              className="bg-white/95 backdrop-blur-md rounded-t-3xl shadow-xl p-4 pb-16"
-            >
-              <div className="max-h-[37vh] overflow-y-auto">
+  drag="y"
+  dragConstraints={{ top: -300, bottom: 0 }}
+  onDragEnd={(e, info) => {
+    if (info.offset.y < -100) {
+      setSheetHeight(75); // expand
+    } else if (info.offset.y > 100) {
+      setSheetHeight(30); // collapse
+    }
+  }}
+  animate={{ height: `${sheetHeight}vh` }}
+  transition={{ type: "spring", stiffness: 120 }}
+  className="bg-white/95 backdrop-blur-xl rounded-t-3xl shadow-2xl p-4 pb-20"
+>
+  <div className="flex justify-center mb-2">
+  <div className="w-10 h-1.5 bg-gray-300 rounded-full"></div>
+</div>
+              <div className="h-full overflow-y-auto">
                 <h2 className="text-xl font-bold mb-4">Where to?</h2>
                 <div className="space-y-3">
                   <div className="relative">
@@ -941,13 +953,22 @@ const city =
           )}
 
           {stage === "searching" && (
-            <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              className="bg-white/95 backdrop-blur-md rounded-t-3xl shadow-xl p-4 pb-16"
-            >
-              <div className="max-h-[37vh] overflow-y-auto">
+<motion.div
+  drag="y"
+  dragConstraints={{ top: -300, bottom: 0 }}
+  onDragEnd={(e, info) => {
+    if (info.offset.y < -100) {
+      setSheetHeight(75); // expand
+    } else if (info.offset.y > 100) {
+      setSheetHeight(30); // collapse
+    }
+  }}
+  animate={{ height: `${sheetHeight}vh` }}
+  transition={{ type: "spring", stiffness: 120 }}
+  className="bg-white/95 backdrop-blur-xl rounded-t-3xl shadow-2xl p-4 pb-20"
+>
+    
+              <div className="h-full overflow-y-auto">
                 <div className="mx-auto w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-4 relative">
                   <div className="absolute inset-0 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />
                   <Navigation className="w-8 h-8 text-primary" />
@@ -970,13 +991,21 @@ const city =
           )}
 
           {stage === "ride" && activeRide && (
-            <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              className="bg-white/95 backdrop-blur-md rounded-t-3xl shadow-xl p-4 pb-16"
-            >
-              <div className="max-h-[37vh] overflow-y-auto">
+<motion.div
+  drag="y"
+  dragConstraints={{ top: -300, bottom: 0 }}
+  onDragEnd={(e, info) => {
+    if (info.offset.y < -100) {
+      setSheetHeight(75); // expand
+    } else if (info.offset.y > 100) {
+      setSheetHeight(30); // collapse
+    }
+  }}
+  animate={{ height: `${sheetHeight}vh` }}
+  transition={{ type: "spring", stiffness: 120 }}
+  className="bg-white/95 backdrop-blur-xl rounded-t-3xl shadow-2xl p-4 pb-20"
+>
+              <div className="h-full overflow-y-auto">
                 {activeRide.status === "payment_pending" && !paymentProcessing ? (
                   <div className="text-center space-y-4">
                     <div className="h-16 w-16 bg-green-100 rounded-full flex items-center justify-center mx-auto text-green-600">
