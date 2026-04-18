@@ -141,7 +141,7 @@ export default function Earnings() {
   {/* UPI Button */}
   <button
     onClick={() => {
-      window.location.href = `upi://pay?pa=yourupi@upi&pn=CabApp&am=${user?.walletBalance || 0}`;
+      window.location.href = `upi://pay?pa=7002491493@kotak811&pn=CabApp&am=${user?.walletBalance || 0}`;
     }}
     className="mt-4 w-full bg-black text-white py-2 rounded-xl"
   >
