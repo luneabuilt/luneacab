@@ -759,7 +759,7 @@ const city =
 </div>
 
       {/* Bottom Sheet UI */}
-      <div className="absolute bottom-0 left-0 right-0 z-[100]">
+      <div className="absolute bottom-0 left-0 right-0 z-10">
         <AnimatePresence mode="wait">
           {stage === "search" && (
 <motion.div
