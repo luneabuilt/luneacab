@@ -19,6 +19,7 @@ export default function Admin() {
   const [rides, setRides] = useState<any[]>([]);
   const [pendingDrivers, setPendingDrivers] = useState<any[]>([]);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [walletDrivers, setWalletDrivers] = useState<any[]>([]);
 
   useEffect(() => {
     if (!user || user.role !== "admin") return;
@@ -43,6 +44,13 @@ export default function Admin() {
       .then((data) => setRides(Array.isArray(data) ? data : []))
       .catch(() => setRides([]));
 
+      fetch("/api/admin/wallet/pending", {
+  headers: { "x-user-id": user.id.toString() },
+})
+  .then((res) => res.json())
+  .then((data) => setWalletDrivers(Array.isArray(data) ? data : []))
+  .catch(() => setWalletDrivers([]));
+
     fetch("/api/admin/revenue-daily", {
       headers: { "x-user-id": user.id.toString() },
     })
@@ -61,6 +69,20 @@ export default function Admin() {
 
     setPendingDrivers((prev) => prev.filter((d) => d.id !== id));
   };
+
+
+  const markWalletPaid = async (id: number) => {
+  if (!user) return;
+
+  await fetch(`/api/admin/wallet/${id}/pay`, {
+    method: "PATCH",
+    headers: { "x-user-id": user.id.toString() },
+  });
+
+  setWalletDrivers((prev) => prev.filter((d) => d.id !== id));
+};
+
+
 
   const rejectDriver = async (id: number) => {
     if (!user) return;
@@ -232,6 +254,51 @@ export default function Admin() {
           </div>
         </CardContent>
       </Card>
+
+      {/* 🔥 DRIVER WALLET CONTROL */}
+<Card className="rounded-2xl shadow">
+  <CardContent className="p-6">
+    <h2 className="text-xl font-bold mb-4 flex justify-between">
+      Driver Wallet (Pending Payments)
+      <span className="text-sm text-muted-foreground">
+        {walletDrivers.length}
+      </span>
+    </h2>
+
+    {walletDrivers.length === 0 && (
+      <div className="text-center py-8 text-muted-foreground">
+        ✅ All drivers cleared
+      </div>
+    )}
+
+    <div className="space-y-3">
+      {walletDrivers.map((driver) => (
+        <div
+          key={driver.id}
+          className="border rounded-xl p-4 bg-white flex justify-between items-center"
+        >
+          <div>
+            <p className="font-semibold">{driver.name}</p>
+            <p className="text-sm text-muted-foreground">
+              {driver.phone}
+            </p>
+
+            <p className="text-red-600 font-bold mt-1">
+              ₹{Number(driver.walletBalance).toFixed(0)} pending
+            </p>
+          </div>
+
+          <button
+            onClick={() => markWalletPaid(driver.id)}
+            className="bg-green-600 text-white px-4 py-2 rounded-xl"
+          >
+            Mark Paid
+          </button>
+        </div>
+      ))}
+    </div>
+  </CardContent>
+</Card>
 
       {/* 🔥 RIDE HISTORY */}
       <Card className="rounded-2xl shadow">

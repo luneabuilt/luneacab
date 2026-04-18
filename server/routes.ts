@@ -219,6 +219,47 @@ export async function registerRoutes(
 
     next();
   });
+
+  // 🔥 GET DRIVERS WITH PENDING WALLET
+app.get("/api/admin/wallet/pending", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const users = await storage.getAllUsers();
+
+    const driversWithDue = users.filter(
+      (u) => u.role === "driver" && Number(u.walletBalance || 0) > 0
+    );
+
+    res.json(driversWithDue);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch wallet drivers" });
+  }
+});
+
+
+// 🔥 MARK WALLET AS PAID
+app.patch("/api/admin/wallet/:id/pay", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+
+    const driver = await storage.getUser(userId);
+    if (!driver) {
+      return res.status(404).json({ message: "Driver not found" });
+    }
+
+    const walletBalance = Number(driver.walletBalance || 0);
+    const walletPaid = Number(driver.walletPaid || 0);
+
+    await storage.updateUser(userId, {
+      walletBalance: "0",
+      walletPaid: (walletPaid + walletBalance).toString(),
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ message: "Payment update failed" });
+  }
+});
+
   // -- Users API --
 
   app.post("/api/upload", upload.single("file"), async (req: any, res) => {
