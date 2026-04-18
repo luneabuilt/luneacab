@@ -16,15 +16,27 @@ import Earnings from "@/pages/Earnings";
 import Admin from "@/pages/Admin";
 import DriverSignup from "@/pages/DriverSignup";
 import { useAuth } from "@/hooks/use-auth";
-
 import { useEffect } from "react";
 import { BASE_URL } from "@/lib/config";
 
+
+import { useLocation } from "wouter";
+
 function Router() {
   const { user } = useAuth();
+  const [location] = useLocation(); // ✅ ADD THIS
+
+  const noScrollRoutes = ["/", "/home", "/driver"];
+const isNoScroll = noScrollRoutes.includes(location);
 
   return (
-    <div className="min-h-screen bg-background text-foreground antialiased font-sans pb-16 md:pb-0">
+    <div
+  className={`bg-background text-foreground antialiased font-sans ${
+    isNoScroll
+      ? "h-screen overflow-hidden"
+      : "min-h-screen overflow-y-auto pb-20 md:pb-0"
+  }`}
+>
       <Switch>
 
         <Route path="/driver-signup" component={DriverSignup} />
