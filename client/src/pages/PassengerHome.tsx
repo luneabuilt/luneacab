@@ -73,6 +73,15 @@ useEffect(() => {
   medium: 55,
   large: 75, // max height
 };
+const toggleSheet = () => {
+  if (sheetHeight === SNAP.small) {
+    setSheetHeight(SNAP.medium);
+  } else if (sheetHeight === SNAP.medium) {
+    setSheetHeight(SNAP.large);
+  } else {
+    setSheetHeight(SNAP.small);
+  }
+};
 
   const [isSearching, setIsSearching] = useState(false);
   const [distanceKm, setDistanceKm] = useState<number | null>(null);
@@ -753,28 +762,18 @@ const city =
       <div className="absolute bottom-0 left-0 right-0 z-10">
         <AnimatePresence mode="wait">
           {stage === "search" && (
-            <motion.div
-  drag="y"
-  dragConstraints={{ top: -300, bottom: 0 }}
-onDragEnd={(e, info) => {
-  const y = info.offset.y;
-
-  if (y < -120) {
-    setSheetHeight(SNAP.large);   // 75%
-  } else if (y < -40) {
-    setSheetHeight(SNAP.medium);  // 55%
-  } else {
-    setSheetHeight(SNAP.small);   // 30%
-  }
-}}
+<motion.div
   animate={{ height: `${sheetHeight}vh` }}
-  transition={{ type: "spring", stiffness: 120 }}
-  className="bg-white/80 backdrop-blur-xl border-t border-gray-200/50 rounded-t-3xl shadow-2xl p-4 pb-9"
+  transition={{ type: "spring", stiffness: 120, damping: 20 }}
+  className="bg-white/90 backdrop-blur-xl border-t border-gray-200 rounded-t-3xl shadow-2xl px-4 pt-3 pb-6"
 >
-  <div className="flex justify-center mb-2">
-  <div className="w-12 h-1.5 bg-gray-400/60 rounded-full"></div>
+<div className="flex justify-center mb-2">
+  <div
+    onClick={toggleSheet}
+    className="w-12 h-1.5 bg-gray-400/60 rounded-full cursor-pointer"
+  />
 </div>
-              <div className="h-full overflow-y-auto">
+              <div className="h-full overflow-y-auto pr-1">
                 <h2 className="text-xl font-bold mb-4">Where to?</h2>
                 <div className="space-y-3">
                   <div className="relative">
@@ -963,25 +962,12 @@ onDragEnd={(e, info) => {
 
           {stage === "searching" && (
 <motion.div
-  drag="y"
-  dragConstraints={{ top: -300, bottom: 0 }}
-onDragEnd={(e, info) => {
-  const y = info.offset.y;
-
-  if (y < -120) {
-    setSheetHeight(SNAP.large);   // 75%
-  } else if (y < -40) {
-    setSheetHeight(SNAP.medium);  // 55%
-  } else {
-    setSheetHeight(SNAP.small);   // 30%
-  }
-}}
   animate={{ height: `${sheetHeight}vh` }}
-  transition={{ type: "spring", stiffness: 120 }}
-  className="bg-white/80 backdrop-blur-xl border-t border-gray-200/50 rounded-t-3xl shadow-2xl p-4 pb-9"
+  transition={{ type: "spring", stiffness: 120, damping: 20 }}
+  className="bg-white/90 backdrop-blur-xl border-t border-gray-200 rounded-t-3xl shadow-2xl px-4 pt-3 pb-6"
 >
     
-              <div className="h-full overflow-y-auto">
+             <div className="h-full overflow-y-auto pr-1">
                 <div className="mx-auto w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-4 relative">
                   <div className="absolute inset-0 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />
                   <Navigation className="w-8 h-8 text-primary" />
@@ -1005,24 +991,11 @@ onDragEnd={(e, info) => {
 
           {stage === "ride" && activeRide && (
 <motion.div
-  drag="y"
-  dragConstraints={{ top: -300, bottom: 0 }}
-onDragEnd={(e, info) => {
-  const y = info.offset.y;
-
-  if (y < -120) {
-    setSheetHeight(SNAP.large);   // 75%
-  } else if (y < -40) {
-    setSheetHeight(SNAP.medium);  // 55%
-  } else {
-    setSheetHeight(SNAP.small);   // 30%
-  }
-}}
   animate={{ height: `${sheetHeight}vh` }}
-  transition={{ type: "spring", stiffness: 120 }}
-  className="bg-white/80 backdrop-blur-xl border-t border-gray-200/50 rounded-t-3xl shadow-2xl p-4 pb-9"
+  transition={{ type: "spring", stiffness: 120, damping: 20 }}
+  className="bg-white/90 backdrop-blur-xl border-t border-gray-200 rounded-t-3xl shadow-2xl px-4 pt-3 pb-6"
 >
-              <div className="h-full overflow-y-auto">
+              <div className="h-full overflow-y-auto pr-1">
                 {activeRide.status === "payment_pending" && !paymentProcessing ? (
                   <div className="text-center space-y-4">
                     <div className="h-16 w-16 bg-green-100 rounded-full flex items-center justify-center mx-auto text-green-600">
