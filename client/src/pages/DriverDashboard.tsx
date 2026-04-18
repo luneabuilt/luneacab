@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import {
   useToggleOnline,
@@ -7,7 +7,7 @@ import {
   useUpdateRideStatus,
 } from "@/hooks/use-api";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import Map from "@/components/Map";
@@ -48,7 +48,7 @@ export default function DriverDashboard() {
   if (user) {
     setIsOnlineLocal(user.isOnline ?? false);
   }
-}, [user]);
+}, [user?.id, user?.isOnline]);
 
   
 
@@ -64,7 +64,7 @@ useEffect(() => {
   if (!user) return;
 
   setupPush(user.id, BASE_URL);
-}, [user]);
+}, [user?.id, user?.isOnline]);
 
 useEffect(() => {
   if (!user) return;
@@ -72,15 +72,16 @@ useEffect(() => {
   socket.on("new-ride-request", (ride) => {
     if (!user?.isOnline) return;
 
-    console.log("🚕 New ride received:", ride);
+    console.log("🚕 DRIVER RECEIVED:", ride);
     setIncomingRequest(ride);
-    rideAlertSound.play().catch(() => {});
+    rideAlertSound.currentTime = 0;
+rideAlertSound.play().catch(() => {});
   });
 
   return () => {
     socket.off("new-ride-request");
   };
-}, [user]);
+}, [user?.id, user?.isOnline]);
 
   useEffect(() => {
     if (!navigator.serviceWorker) return;
@@ -89,10 +90,12 @@ useEffect(() => {
       if (event.data?.type === "ACCEPT_RIDE") {
         const rideId = event.data.rideId;
 
-        acceptRide.mutate({
-          rideId: rideId,
-          driverId: user!.id,
-        });
+if (!user) return;
+
+acceptRide.mutate({
+  rideId: rideId,
+  driverId: user.id,
+});
       }
     };
 
@@ -101,7 +104,7 @@ useEffect(() => {
     return () => {
       navigator.serviceWorker.removeEventListener("message", handler);
     };
-  }, [user]);
+ }, [user?.id, user?.isOnline]);
 
   useEffect(() => {
   const handler = (data: any) => {
@@ -137,12 +140,12 @@ useEffect(() => {
   return () => {
     socket.off("ride-updated", handler);
   };
-}, [user]);
+}, [user?.id, user?.isOnline]);
 
   const [routeCoords, setRouteCoords] = useState<any[]>([]);
   const [etaMinutes, setEtaMinutes] = useState<number | null>(null);
   const [distanceKm, setDistanceKm] = useState<number | null>(null);
-  const [pickupDistanceKm, setPickupDistanceKm] = useState<number | null>(null);
+
   const [pickupName, setPickupName] = useState<string | null>(null);
   const [dropName, setDropName] = useState<string | null>(null);
 
@@ -417,12 +420,6 @@ flex flex-col max-h-[40%] border border-gray-200">
               <div className="pt-3 mt-3 border-t text-xs text-gray-600 flex justify-between">
   <span>💳 {activeRide.paymentMethod}</span>
   <span className="capitalize">🚦 {activeRide.status}</span>
-                <p>
-                  <strong>Payment:</strong> {activeRide.paymentMethod}
-                </p>
-                <p>
-                  <strong>Status:</strong> {activeRide.status}
-                </p>
               </div>
             </div>
           </div>
@@ -757,7 +754,9 @@ if (res.ok) {
     <div>
       <p className="text-xs text-gray-500">Pickup</p>
       <p className="text-sm font-medium leading-tight line-clamp-2">
-        {incomingRequest.pickupAddress || incomingRequest.pickup || "Pickup location"}
+        {incomingRequest.pickupAddress
+  ? incomingRequest.pickupAddress.split(",").slice(0, 2).join(", ")
+  : "Pickup location"}
       </p>
     </div>
 
@@ -765,7 +764,9 @@ if (res.ok) {
     <div>
       <p className="text-xs text-gray-500">Drop</p>
       <p className="text-sm font-medium leading-tight line-clamp-2">
-        {incomingRequest.dropAddress || incomingRequest.drop || "Drop location"}
+        {incomingRequest.dropAddress
+  ? incomingRequest.dropAddress.split(",").slice(0, 2).join(", ")
+  : "Drop location"}
       </p>
     </div>
 

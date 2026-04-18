@@ -17,16 +17,23 @@ import { v2 as cloudinary } from "cloudinary";
 
     const getAddress = async (lat: number, lng: number) => {
   try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
-    );
+const res = await fetch(
+  `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+  {
+    headers: {
+      "User-Agent": "Lunea Cab (luneabuilt@gmail.com)",
+    },
+  }
+);
     const data = await res.json();
+    console.log("📍 Address:", data.display_name);
     return data.display_name;
   } catch (err) {
     console.error("Reverse geocode failed");
     return null;
   }
 };
+
 
     const upload = multer({ storage: multer.memoryStorage() });
 
@@ -690,6 +697,7 @@ const newRide = await storage.createRide({
   driverQueue: JSON.stringify(driverQueueIds),
   queueIndex: 0,
 });
+console.log("🚀 NEW RIDE:", newRide);
 
       // 🚀 SEND SOCKET EVENT TO FIRST DRIVER
 
