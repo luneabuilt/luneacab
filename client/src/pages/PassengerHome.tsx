@@ -759,19 +759,20 @@ const city =
 </div>
 
       {/* Bottom Sheet UI */}
-      <div className="absolute bottom-0 left-0 right-0 z-10">
+      <div className="absolute bottom-0 left-0 right-0 z-[100]">
         <AnimatePresence mode="wait">
           {stage === "search" && (
 <motion.div
   animate={{ height: `${sheetHeight}vh` }}
   transition={{ type: "spring", stiffness: 120, damping: 20 }}
-  className="bg-white/90 backdrop-blur-xl border-t border-gray-200 rounded-t-3xl shadow-2xl px-4 pt-3 pb-6"
+  className="bg-white/90 backdrop-blur-xl border-t border-gray-200 rounded-t-3xl shadow-2xl px-4 pt-3 pb-10"
 >
-<div className="flex justify-center mb-2">
-  <div
-    onClick={toggleSheet}
-    className="w-12 h-1.5 bg-gray-400/60 rounded-full cursor-pointer"
-  />
+<div
+  onClick={toggleSheet}
+  className="flex flex-col items-center mb-2 cursor-pointer"
+>
+  <div className="w-12 h-1.5 bg-gray-400/60 rounded-full mb-2" />
+  <span className="text-xs text-gray-500">Swipe up</span>
 </div>
               <div className="h-full overflow-y-auto pr-1">
                 <h2 className="text-xl font-bold mb-4">Where to?</h2>
@@ -964,7 +965,7 @@ const city =
 <motion.div
   animate={{ height: `${sheetHeight}vh` }}
   transition={{ type: "spring", stiffness: 120, damping: 20 }}
-  className="bg-white/90 backdrop-blur-xl border-t border-gray-200 rounded-t-3xl shadow-2xl px-4 pt-3 pb-6"
+  className="bg-white/90 backdrop-blur-xl border-t border-gray-200 rounded-t-3xl shadow-2xl px-4 pt-3 pb-10"
 >
     
              <div className="h-full overflow-y-auto pr-1">
@@ -991,9 +992,9 @@ const city =
 
           {stage === "ride" && activeRide && (
 <motion.div
-  animate={{ height: `${sheetHeight}vh` }}
+  animate={{ height: `calc(${sheetHeight}vh - 64px)` }}
   transition={{ type: "spring", stiffness: 120, damping: 20 }}
-  className="bg-white/90 backdrop-blur-xl border-t border-gray-200 rounded-t-3xl shadow-2xl px-4 pt-3 pb-6"
+  className="bg-white/90 backdrop-blur-xl border-t border-gray-200 rounded-t-3xl shadow-2xl px-4 pt-3 pb-10"
 >
               <div className="h-full overflow-y-auto pr-1">
                 {activeRide.status === "payment_pending" && !paymentProcessing ? (
