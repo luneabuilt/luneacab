@@ -639,8 +639,12 @@ if (res.ok) {
         </div>
       )}
 
-      {/* Top Bar */}
-<div className="absolute top-4 left-4 right-4 z-[500]">
+{/* Top Bar */}
+{!(
+  activeRide &&
+  ["accepted", "ongoing", "payment_pending"].includes(activeRide.status)
+) && (
+  <div className="absolute top-4 left-4 right-4 z-[500]">
   <div className="bg-white/90 backdrop-blur-md shadow-[0_8px_30px_rgba(0,0,0,0.08)] rounded-xl px-4 py-2 flex items-center justify-between border border-gray-200">
     
     {/* LEFT SIDE */}
@@ -663,6 +667,7 @@ if (res.ok) {
 
   </div>
 </div>
+)}
 
       {/* Ride Status Pill */}
       {activeRide && (
