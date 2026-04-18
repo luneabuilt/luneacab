@@ -45,7 +45,7 @@ export const users = pgTable("users", {
 
   walletBalance: numeric("wallet_balance").default("0"),
   walletPaid: numeric("wallet_paid").default("0"),
-  
+
   createdAt: timestamp("created_at").defaultNow(),
   licenseUrl: text("license_url"),
 vehicleImageUrl: text("vehicle_image_url"),
@@ -80,6 +80,8 @@ export const rides = pgTable("rides", {
   queueIndex: integer("queue_index").default(0),
   rejectedDrivers: text("rejected_drivers"),
   createdAt: timestamp("created_at").defaultNow(),
+  pickupAddress: text("pickup_address"),
+dropAddress: text("drop_address"),
 
   
 });

@@ -15,6 +15,19 @@ import { v2 as cloudinary } from "cloudinary";
         api_secret: 'Ics21L31ReHfGOefgKLRYKjtAgM'
     });
 
+    const getAddress = async (lat: number, lng: number) => {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
+    );
+    const data = await res.json();
+    return data.display_name;
+  } catch (err) {
+    console.error("Reverse geocode failed");
+    return null;
+  }
+};
+
     const upload = multer({ storage: multer.memoryStorage() });
 
 async function requireAuth(req: any, res: any, next: any) {
@@ -153,7 +166,10 @@ await storage.updateRide(rideId, {
 }
 
     // 🔥 SOCKET (real-time)
-io.to(`driver-${driverId}`).emit("new-ride-request", ride);
+const freshRide = await storage.getRide(rideId); // 🔥 ADD THIS LINE
+
+io.to(`driver-${driverId}`).emit("new-ride-request", freshRide); // 🔥 REPLACE
+console.log("🚀 Ride sent to driver:", ride);
 
 // 🔥 PUSH NOTIFICATION (NEW)
 if (driver?.pushToken) {
@@ -652,16 +668,28 @@ const driverQueueIds = nearestDrivers.map((d: any) => d.id);
 
       const generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
 
-      const newRide = await storage.createRide({
-        ...input,
-        fare,
-        commission,
-        driverEarning,
-        status: "requested",
-        otp: generatedOtp,
-        driverQueue: JSON.stringify(driverQueueIds),
-        queueIndex: 0,
-      });
+      const pickupAddress = await getAddress(
+  Number(input.pickupLat),
+  Number(input.pickupLng)
+);
+
+const dropAddress = await getAddress(
+  Number(input.dropLat),
+  Number(input.dropLng)
+);
+
+const newRide = await storage.createRide({
+  ...input,
+  pickupAddress,   // ✅ ADD
+  dropAddress,     // ✅ ADD
+  fare,
+  commission,
+  driverEarning,
+  status: "requested",
+  otp: generatedOtp,
+  driverQueue: JSON.stringify(driverQueueIds),
+  queueIndex: 0,
+});
 
       // 🚀 SEND SOCKET EVENT TO FIRST DRIVER
 
