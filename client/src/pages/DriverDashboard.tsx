@@ -742,21 +742,35 @@ if (res.ok) {
               </div>
             </div>
 
-            <div className="space-y-4 mb-6 relative">
-              <div className="absolute left-[11px] top-3 bottom-3 w-0.5 bg-gray-200" />
-              <div className="flex items-center gap-3">
-                <div className="h-6 w-6 rounded-full bg-green-100 flex items-center justify-center z-10 border-2 border-white">
-                  <div className="h-2 w-2 rounded-full bg-green-600" />
-                </div>
-                <p className="font-medium">{incomingRequest.pickup}</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="h-6 w-6 rounded-full bg-red-100 flex items-center justify-center z-10 border-2 border-white">
-                  <div className="h-2 w-2 rounded-full bg-red-600" />
-                </div>
-                <p className="font-medium">{incomingRequest.drop}</p>
-              </div>
-            </div>
+<div className="mt-4 flex gap-3 mb-6">
+  {/* LEFT LINE (YOUR CODE HERE) */}
+  <div className="flex flex-col items-center mr-2">
+    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+    <div className="w-[1px] h-8 bg-gray-300"></div>
+    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+  </div>
+
+  {/* RIGHT TEXT */}
+  <div className="flex flex-col justify-between gap-4">
+    
+    {/* Pickup */}
+    <div>
+      <p className="text-xs text-gray-500">Pickup</p>
+      <p className="text-sm font-medium leading-tight line-clamp-2">
+        {incomingRequest.pickupAddress || incomingRequest.pickup || "Pickup location"}
+      </p>
+    </div>
+
+    {/* Drop */}
+    <div>
+      <p className="text-xs text-gray-500">Drop</p>
+      <p className="text-sm font-medium leading-tight line-clamp-2">
+        {incomingRequest.dropAddress || incomingRequest.drop || "Drop location"}
+      </p>
+    </div>
+
+  </div>
+</div>
 
             <div className="grid grid-cols-2 gap-4">
               <Button

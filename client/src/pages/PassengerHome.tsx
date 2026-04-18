@@ -1043,7 +1043,7 @@ const city =
                         {paymentProcessing ? (
                           <Loader2 className="w-4 h-4 animate-spin mx-auto" />
                         ) : (
-                          "Pay Cash"
+                          "Pay to Driver"
                         )}
                       </Button>
 
@@ -1055,7 +1055,7 @@ const city =
                         {paymentProcessing ? (
                           <Loader2 className="w-4 h-4 animate-spin mx-auto" />
                         ) : (
-                          "Pay UPI"
+                          "Pay to App"
                         )}
                       </Button>
                     </div>
