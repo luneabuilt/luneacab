@@ -163,7 +163,8 @@ await storage.updateRide(rideId, {
 
     const driverId = queue[currentIndex];
     console.log("🎯 Trying driver:", driverId);
-    const driver = await storage.getUser(driverId);
+const driver = await storage.getUser(driverId);
+
     if (!driver?.isOnline) {
   await storage.updateRide(rideId, {
     queueIndex: currentIndex + 1,
@@ -172,11 +173,30 @@ await storage.updateRide(rideId, {
   return dispatchToNextDriver(rideId);
 }
 
-    // 🔥 SOCKET (real-time)
-const freshRide = await storage.getRide(rideId); // 🔥 ADD THIS LINE
+let pickupDistanceKm = "0";
 
-io.to(`driver-${driverId}`).emit("new-ride-request", freshRide); // 🔥 REPLACE
-console.log("🚀 Ride sent to driver:", ride);
+if (
+  driver?.currentLat &&
+  driver?.currentLng &&
+  ride?.pickupLat &&
+  ride?.pickupLng
+) {
+  const distance = getDistanceFromLatLonInKm(
+    Number(driver.currentLat),
+    Number(driver.currentLng),
+    Number(ride.pickupLat),
+    Number(ride.pickupLng)
+  );
+
+  pickupDistanceKm = distance.toFixed(2);
+}
+
+io.to(`driver-${driverId}`).emit("new-ride-request", {
+  ...ride,
+  pickupDistanceKm,
+});
+
+console.log("🚀 Ride sent to driver with distance:", pickupDistanceKm);
 
 // 🔥 PUSH NOTIFICATION (NEW)
 if (driver?.pushToken) {
@@ -664,6 +684,7 @@ Number(driver.currentLng ?? 0),
       driversWithDistance.sort((a: any, b: any) => a.distance - b.distance);
 
       const nearestDrivers = driversWithDistance.slice(0, 5);
+      // ✅ pickup distance (for first driver only OR average)
       // 🔥 STEP 1: CREATE DRIVER QUEUE
 const driverQueueIds = nearestDrivers.map((d: any) => d.id);
 

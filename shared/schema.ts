@@ -82,6 +82,7 @@ export const rides = pgTable("rides", {
   createdAt: timestamp("created_at").defaultNow(),
   pickupAddress: text("pickup_address"),
 dropAddress: text("drop_address"),
+pickupDistanceKm: numeric("pickup_distance_km"),
 
   
 });
