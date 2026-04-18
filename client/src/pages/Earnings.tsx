@@ -114,6 +114,41 @@ export default function Earnings() {
 
       <div className="p-4 space-y-6">
 
+        {/* 💼 WALLET SECTION */}
+<div className="bg-white rounded-2xl shadow-md p-4 border">
+  <h2 className="text-lg font-semibold mb-3">💼 Driver Wallet</h2>
+
+  <div className="grid grid-cols-2 gap-4">
+
+    {/* Pending Commission */}
+    <div className="p-3 rounded-xl bg-red-50 border">
+      <p className="text-xs text-muted-foreground">Pending Commission</p>
+      <p className="text-xl font-bold text-red-600">
+        ₹{Number(user?.walletBalance || 0).toFixed(0)}
+      </p>
+    </div>
+
+    {/* Paid */}
+    <div className="p-3 rounded-xl bg-green-50 border">
+      <p className="text-xs text-muted-foreground">Paid to App</p>
+      <p className="text-xl font-bold text-green-600">
+        ₹{Number(user?.walletPaid || 0).toFixed(0)}
+      </p>
+    </div>
+
+  </div>
+
+  {/* UPI Button */}
+  <button
+    onClick={() => {
+      window.location.href = `upi://pay?pa=yourupi@upi&pn=CabApp&am=${user?.walletBalance || 0}`;
+    }}
+    className="mt-4 w-full bg-black text-white py-2 rounded-xl"
+  >
+    Pay Commission via UPI
+  </button>
+</div>
+
         {/* FILTERS */}
         <div className="flex gap-2 overflow-x-auto pb-1">
           {["all", "today", "week", "month"].map((f) => (

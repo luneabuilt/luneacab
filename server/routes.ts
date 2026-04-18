@@ -964,9 +964,17 @@ res.json(updatedRide);
             const newEarnings =
               currentEarnings + parseFloat((ride.driverEarning ?? "0").toString());
 
-            await storage.updateUser(ride.driverId, {
-              totalEarnings: newEarnings.toString(),
-            });
+            const currentWallet = parseFloat(
+  (driver.walletBalance ?? "0").toString()
+);
+
+const newWallet =
+  currentWallet + parseFloat((ride.commission ?? "0").toString());
+
+await storage.updateUser(ride.driverId, {
+  totalEarnings: newEarnings.toString(),
+  walletBalance: newWallet.toString(),
+});
           }
         }
       }
