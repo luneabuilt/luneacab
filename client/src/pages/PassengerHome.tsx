@@ -68,6 +68,11 @@ useEffect(() => {
     null,
   );
   const [sheetHeight, setSheetHeight] = useState(30); // starts small
+  const SNAP = {
+  small: 30,
+  medium: 55,
+  large: 75, // max height
+};
 
   const [isSearching, setIsSearching] = useState(false);
   const [distanceKm, setDistanceKm] = useState<number | null>(null);
@@ -751,19 +756,23 @@ const city =
             <motion.div
   drag="y"
   dragConstraints={{ top: -300, bottom: 0 }}
-  onDragEnd={(e, info) => {
-    if (info.offset.y < -100) {
-      setSheetHeight(75); // expand
-    } else if (info.offset.y > 100) {
-      setSheetHeight(30); // collapse
-    }
-  }}
+onDragEnd={(e, info) => {
+  const y = info.offset.y;
+
+  if (y < -120) {
+    setSheetHeight(SNAP.large);   // 75%
+  } else if (y < -40) {
+    setSheetHeight(SNAP.medium);  // 55%
+  } else {
+    setSheetHeight(SNAP.small);   // 30%
+  }
+}}
   animate={{ height: `${sheetHeight}vh` }}
   transition={{ type: "spring", stiffness: 120 }}
-  className="bg-white/95 backdrop-blur-xl rounded-t-3xl shadow-2xl p-4 pb-20"
+  className="bg-white/80 backdrop-blur-xl border-t border-gray-200/50 rounded-t-3xl shadow-2xl p-4 pb-9"
 >
   <div className="flex justify-center mb-2">
-  <div className="w-10 h-1.5 bg-gray-300 rounded-full"></div>
+  <div className="w-12 h-1.5 bg-gray-400/60 rounded-full"></div>
 </div>
               <div className="h-full overflow-y-auto">
                 <h2 className="text-xl font-bold mb-4">Where to?</h2>
@@ -956,16 +965,20 @@ const city =
 <motion.div
   drag="y"
   dragConstraints={{ top: -300, bottom: 0 }}
-  onDragEnd={(e, info) => {
-    if (info.offset.y < -100) {
-      setSheetHeight(75); // expand
-    } else if (info.offset.y > 100) {
-      setSheetHeight(30); // collapse
-    }
-  }}
+onDragEnd={(e, info) => {
+  const y = info.offset.y;
+
+  if (y < -120) {
+    setSheetHeight(SNAP.large);   // 75%
+  } else if (y < -40) {
+    setSheetHeight(SNAP.medium);  // 55%
+  } else {
+    setSheetHeight(SNAP.small);   // 30%
+  }
+}}
   animate={{ height: `${sheetHeight}vh` }}
   transition={{ type: "spring", stiffness: 120 }}
-  className="bg-white/95 backdrop-blur-xl rounded-t-3xl shadow-2xl p-4 pb-20"
+  className="bg-white/80 backdrop-blur-xl border-t border-gray-200/50 rounded-t-3xl shadow-2xl p-4 pb-9"
 >
     
               <div className="h-full overflow-y-auto">
@@ -994,16 +1007,20 @@ const city =
 <motion.div
   drag="y"
   dragConstraints={{ top: -300, bottom: 0 }}
-  onDragEnd={(e, info) => {
-    if (info.offset.y < -100) {
-      setSheetHeight(75); // expand
-    } else if (info.offset.y > 100) {
-      setSheetHeight(30); // collapse
-    }
-  }}
+onDragEnd={(e, info) => {
+  const y = info.offset.y;
+
+  if (y < -120) {
+    setSheetHeight(SNAP.large);   // 75%
+  } else if (y < -40) {
+    setSheetHeight(SNAP.medium);  // 55%
+  } else {
+    setSheetHeight(SNAP.small);   // 30%
+  }
+}}
   animate={{ height: `${sheetHeight}vh` }}
   transition={{ type: "spring", stiffness: 120 }}
-  className="bg-white/95 backdrop-blur-xl rounded-t-3xl shadow-2xl p-4 pb-20"
+  className="bg-white/80 backdrop-blur-xl border-t border-gray-200/50 rounded-t-3xl shadow-2xl p-4 pb-9"
 >
               <div className="h-full overflow-y-auto">
                 {activeRide.status === "payment_pending" && !paymentProcessing ? (
