@@ -759,7 +759,7 @@ const city =
 </div>
 
       {/* Bottom Sheet UI */}
-      <div className="absolute bottom-0 left-0 right-0 z-10">
+      <div className="absolute bottom-[64px] left-0 right-0 z-40">
         <AnimatePresence mode="wait">
           {stage === "search" && (
 <motion.div
@@ -992,7 +992,7 @@ const city =
 
           {stage === "ride" && activeRide && (
 <motion.div
-  animate={{ height: `calc(${sheetHeight}vh - 64px)` }}
+  animate={{ height: `${sheetHeight}vh` }}
   transition={{ type: "spring", stiffness: 120, damping: 20 }}
   className="bg-white/90 backdrop-blur-xl border-t border-gray-200 rounded-t-3xl shadow-2xl px-4 pt-3 pb-10"
 >
