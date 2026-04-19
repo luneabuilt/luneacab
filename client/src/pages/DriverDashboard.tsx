@@ -737,10 +737,6 @@ if (res.ok) {
     <h2 className="text-3xl font-bold tracking-tight text-gray-900">
       ₹{incomingRequest.fare}
     </h2>
-
-    <p className="text-sm text-gray-500 mt-1">
-      📍 {incomingRequest.pickupDistanceKm ?? "--"} km away • 🛣 {incomingRequest.distanceKm ?? "--"} km
-    </p>
   </div>
 
   <div className="h-12 w-12 rounded-full bg-black text-white flex items-center justify-center shadow-md">
@@ -762,24 +758,35 @@ if (res.ok) {
   {/* TEXT */}
   <div className="flex flex-col gap-4">
 
-    <div>
-      <p className="text-xs text-gray-400 uppercase tracking-wide">Pickup</p>
-      <p className="text-sm font-semibold text-gray-900 leading-snug">
-        {incomingRequest.pickupAddress
-          ? incomingRequest.pickupAddress.split(",").slice(0, 2).join(", ")
-          : "Pickup location"}
-      </p>
-    </div>
+<div>
+  <p className="text-xs text-gray-400 uppercase tracking-wide">Pickup</p>
 
-    <div>
-      <p className="text-xs text-gray-400 uppercase tracking-wide">Drop</p>
-      <p className="text-sm font-semibold text-gray-900 leading-snug">
-        {incomingRequest.dropAddress
-          ? incomingRequest.dropAddress.split(",").slice(0, 2).join(", ")
-          : "Drop location"}
-      </p>
-    </div>
+  <p className="text-sm font-semibold text-gray-900 leading-snug">
+    {incomingRequest.pickupAddress
+      ? incomingRequest.pickupAddress.split(",").slice(0, 2).join(", ")
+      : "Pickup location"}
+  </p>
 
+  {/* 🔥 ADD THIS */}
+  <p className="text-xs text-green-600 font-medium mt-1">
+     {incomingRequest.pickupDistanceKm ?? "--"} km away
+  </p>
+</div>
+
+<div>
+  <p className="text-xs text-gray-400 uppercase tracking-wide">Drop</p>
+
+  <p className="text-sm font-semibold text-gray-900 leading-snug">
+    {incomingRequest.dropAddress
+      ? incomingRequest.dropAddress.split(",").slice(0, 2).join(", ")
+      : "Drop location"}
+  </p>
+
+  {/* 🔥 ADD THIS */}
+  <p className="text-xs text-blue-600 font-medium mt-1">
+     {incomingRequest.distanceKm ?? "--"} km trip
+  </p>
+</div>
   </div>
 
 </div>
