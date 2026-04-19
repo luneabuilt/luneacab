@@ -714,94 +714,114 @@ if (res.ok) {
       {/* Incoming Request Popup */}
       <AnimatePresence>
         {incomingRequest && user?.isOnline && (
-          <motion.div
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            className="absolute bottom-0 left-0 right-0 bg-white z-20 rounded-t-3xl shadow-2xl p-6 pb-24 border-t-4 border-primary"
-          >
-            <div className="flex justify-between items-start mb-6">
-              <div>
-                <Badge className="mb-2 bg-green-500 hover:bg-green-600">
-                  New Request
-                </Badge>
-                <h2 className="text-2xl font-bold">₹{incomingRequest.fare}</h2>
-                
+<motion.div
+  initial={{ y: "100%" }}
+  animate={{ y: 0 }}
+  exit={{ y: "100%" }}
+  className="
+    absolute bottom-0 left-0 right-0 z-20
+    bg-white/80 backdrop-blur-2xl
+    rounded-t-[28px]
+    shadow-[0_-10px_40px_rgba(0,0,0,0.15)]
+    border border-white/20
+    p-5 pb-24
+  "
+>
+<div className="flex items-center justify-between mb-5">
 
-<p className="text-sm">
-  📍 Pickup: {incomingRequest.pickupDistanceKm ?? "--"} km away
-</p>
+  <div>
+    <Badge className="bg-green-500/10 text-green-600 font-medium px-3 py-1 rounded-full mb-2">
+      New Request
+    </Badge>
 
-<p className="text-muted-foreground text-sm">
-  🛣 Trip: {incomingRequest.distanceKm ?? "--"} km
-</p>
-              </div>
-              <div className="text-right">
-                <div className="h-10 w-10 bg-secondary rounded-full flex items-center justify-center ml-auto mb-1">
-                  <span className="font-bold">{requestTimer}s</span>
-                </div>
-              </div>
-            </div>
+    <h2 className="text-3xl font-bold tracking-tight text-gray-900">
+      ₹{incomingRequest.fare}
+    </h2>
 
-<div className="mt-4 flex gap-3 mb-6">
-  {/* LEFT LINE (YOUR CODE HERE) */}
-  <div className="flex flex-col items-center mr-2">
-    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-    <div className="w-[1px] h-8 bg-gray-300"></div>
-    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+    <p className="text-sm text-gray-500 mt-1">
+      📍 {incomingRequest.pickupDistanceKm ?? "--"} km away • 🛣 {incomingRequest.distanceKm ?? "--"} km
+    </p>
   </div>
 
-  {/* RIGHT TEXT */}
-  <div className="flex flex-col justify-between gap-4">
-    
-    {/* Pickup */}
-    <div>
-      <p className="text-xs text-gray-500">Pickup</p>
-      <p className="text-sm font-medium leading-tight line-clamp-2">
-        {incomingRequest.pickupAddress
-  ? incomingRequest.pickupAddress.split(",").slice(0, 2).join(", ")
-  : "Pickup location"}
-      </p>
-    </div>
-
-    {/* Drop */}
-    <div>
-      <p className="text-xs text-gray-500">Drop</p>
-      <p className="text-sm font-medium leading-tight line-clamp-2">
-        {incomingRequest.dropAddress
-  ? incomingRequest.dropAddress.split(",").slice(0, 2).join(", ")
-  : "Drop location"}
-      </p>
-    </div>
-
+  <div className="h-12 w-12 rounded-full bg-black text-white flex items-center justify-center shadow-md">
+    <span className="font-semibold text-sm">{requestTimer}s</span>
   </div>
+
 </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Button
-  variant="outline"
-  className="h-12"
-  onClick={async () => {
-    if (!incomingRequest || !user) return;
 
-    await fetch(`${BASE_URL}/api/rides/${incomingRequest.id}/reject`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ driverId: user.id }),
-    });
+<div className="flex gap-3 mb-6">
 
-    setIncomingRequest(null);
-  }}
->
-  Reject
-</Button>
-              <Button
-                className="h-12 text-lg shadow-lg shadow-primary/20"
-                onClick={handleAccept}
-              >
-                Accept Ride
-              </Button>
-            </div>
+  {/* LINE */}
+  <div className="flex flex-col items-center mt-1">
+    <div className="w-2.5 h-2.5 bg-green-500 rounded-full"></div>
+    <div className="w-[2px] h-10 bg-gradient-to-b from-green-400 to-red-400 my-1"></div>
+    <div className="w-2.5 h-2.5 bg-red-500 rounded-full"></div>
+  </div>
+
+  {/* TEXT */}
+  <div className="flex flex-col gap-4">
+
+    <div>
+      <p className="text-xs text-gray-400 uppercase tracking-wide">Pickup</p>
+      <p className="text-sm font-semibold text-gray-900 leading-snug">
+        {incomingRequest.pickupAddress
+          ? incomingRequest.pickupAddress.split(",").slice(0, 2).join(", ")
+          : "Pickup location"}
+      </p>
+    </div>
+
+    <div>
+      <p className="text-xs text-gray-400 uppercase tracking-wide">Drop</p>
+      <p className="text-sm font-semibold text-gray-900 leading-snug">
+        {incomingRequest.dropAddress
+          ? incomingRequest.dropAddress.split(",").slice(0, 2).join(", ")
+          : "Drop location"}
+      </p>
+    </div>
+
+  </div>
+
+</div>
+
+<div className="grid grid-cols-2 gap-3">
+
+  <Button
+    variant="outline"
+    className="
+      h-12 rounded-xl border-gray-300
+      text-gray-700 font-medium
+      hover:bg-gray-100 transition
+    "
+    onClick={async () => {
+      if (!incomingRequest || !user) return;
+
+      await fetch(`${BASE_URL}/api/rides/${incomingRequest.id}/reject`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ driverId: user.id }),
+      });
+
+      setIncomingRequest(null);
+    }}
+  >
+    Reject
+  </Button>
+
+  <Button
+    className="
+      h-12 rounded-xl font-semibold text-white
+      bg-gradient-to-r from-indigo-500 to-blue-600
+      shadow-lg shadow-blue-500/30
+      hover:scale-[1.02] active:scale-[0.98]
+      transition-all
+    "
+    onClick={handleAccept}
+  >
+    Accept Ride
+  </Button>
+
+</div>
           </motion.div>
         )}
       </AnimatePresence>
