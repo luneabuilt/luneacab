@@ -751,7 +751,7 @@ if (res.ok) {
   {/* LINE */}
   <div className="flex flex-col items-center mt-1">
     <div className="w-2.5 h-2.5 bg-green-500 rounded-full"></div>
-    <div className="w-[2px] h-12.1 bg-gradient-to-b from-green-400 to-red-400 my-1"></div>
+    <div className="w-[2px] h-12 bg-gradient-to-b from-green-400 to-red-400 my-1"></div>
     <div className="w-2.5 h-2.5 bg-red-500 rounded-full"></div>
   </div>
 
@@ -768,8 +768,8 @@ if (res.ok) {
   </p>
 
   {/* 🔥 ADD THIS */}
-  <p className="text-xs text-green-600 font-medium mt-1">
-     {incomingRequest.pickupDistanceKm ?? "--"} km away
+  <p className="text-xs text-green-400 font-medium mt-1">
+     {incomingRequest.pickupDistanceKm ?? "--"} km
   </p>
 </div>
 
@@ -783,8 +783,8 @@ if (res.ok) {
   </p>
 
   {/* 🔥 ADD THIS */}
-  <p className="text-xs text-red-600 font-medium mt-1">
-     {incomingRequest.distanceKm ?? "--"} km trip
+  <p className="text-xs text-red-400 font-medium mt-1">
+     {incomingRequest.distanceKm ?? "--"} km
   </p>
 </div>
   </div>
