@@ -751,7 +751,7 @@ if (res.ok) {
   {/* LINE */}
   <div className="flex flex-col items-center mt-1">
     <div className="w-2.5 h-2.5 bg-green-500 rounded-full"></div>
-    <div className="w-[2px] h-13 bg-gradient-to-b from-green-400 to-red-400 my-1"></div>
+    <div className="w-[2px] h-12 bg-gradient-to-b from-green-400 to-red-400 my-1"></div>
     <div className="w-2.5 h-2.5 bg-red-500 rounded-full"></div>
   </div>
 
