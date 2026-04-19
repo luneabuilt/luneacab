@@ -673,19 +673,19 @@ if (res.ok) {
             <div>
               {activeRide?.status === "accepted" && (
                 <>
-                  🚗 Pickup • {etaMinutes ?? "--"} min • {distanceKm ?? "--"} km
+                   Pickup • {etaMinutes ?? "--"} min • {distanceKm ?? "--"} km
                 </>
               )}
 
               {activeRide?.status === "ongoing" && (
                 <>
-                  🛣 To Drop • {etaMinutes ?? "--"} min • {distanceKm ?? "--"}{" "}
+                   To Drop • {etaMinutes ?? "--"} min • {distanceKm ?? "--"}{" "}
                   km
                 </>
               )}
 
               {activeRide?.status === "payment_pending" && (
-                <>💰 Waiting for Payment</>
+                <>Waiting for Payment</>
               )}
             </div>
 
@@ -756,7 +756,7 @@ if (res.ok) {
   </div>
 
   {/* TEXT */}
-  <div className="flex flex-col gap-4">
+  <div className="flex flex-col gap-3.5">
 
 <div>
   <p className="text-xs text-gray-400 uppercase tracking-wide">Pickup</p>
