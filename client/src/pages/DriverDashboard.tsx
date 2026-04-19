@@ -728,9 +728,13 @@ if (res.ok) {
                 <h2 className="text-2xl font-bold">₹{incomingRequest.fare}</h2>
                 
 
-                <p className="text-muted-foreground text-sm">
-                  Trip: {incomingRequest.distanceKm ?? "--"} km
-                </p>
+<p className="text-sm">
+  📍 Pickup: {incomingRequest.pickupDistanceKm ?? "--"} km away
+</p>
+
+<p className="text-muted-foreground text-sm">
+  🛣 Trip: {incomingRequest.distanceKm ?? "--"} km
+</p>
               </div>
               <div className="text-right">
                 <div className="h-10 w-10 bg-secondary rounded-full flex items-center justify-center ml-auto mb-1">
