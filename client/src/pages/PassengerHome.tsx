@@ -642,7 +642,7 @@ const city =
         h-8 w-12 rounded-xl flex items-center justify-center
         ${
           vehicleType === type
-            ? "bg-gradient-to-br from-indigo-500 to-purple-500"
+            ? "bg-gradient-to-br from-gray-500 to-white-500"
             : "bg-gray-100"
         }
       `}
