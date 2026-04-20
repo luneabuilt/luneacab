@@ -1196,13 +1196,25 @@ app.patch("/api/rides/:id/cancel", async (req, res) => {
       );
     }
 
-    if (updatedRide?.driverId) {
-      io.to(`driver-${updatedRide.driverId}`).emit(
-        "ride-updated",
-        updatedRide
-      );
-    }
-    io.emit("ride-updated", updatedRide); // 🔥 ADD THIS
+// 🔥 get all drivers who received this ride
+let queue: number[] = [];
+
+try {
+  queue = JSON.parse(ride.driverQueue || "[]");
+} catch {}
+
+// 🔥 send cancel to ALL drivers (important)
+queue.forEach((driverId) => {
+  io.to(`driver-${driverId}`).emit("ride-updated", updatedRide);
+});
+
+// 🔥 send to passenger
+if (updatedRide?.passengerId) {
+  io.to(`user-${updatedRide.passengerId}`).emit(
+    "ride-updated",
+    updatedRide
+  );
+}
     console.log("🚫 Ride cancelled sync sent");
 
     res.json(updatedRide);

@@ -131,13 +131,9 @@ useEffect(() => {
     if (!user) return;
 
     // 🔥 CLOSE INCOMING REQUEST POPUP
-    if (
-      incomingRequest &&
-      ride.id === incomingRequest.id &&
-      ride.status === "cancelled"
-    ) {
-      setIncomingRequest(null);
-    }
+if (ride.status === "cancelled") {
+  setIncomingRequest(null);
+}
 
     // 🔥 REFRESH ACTIVE RIDE
     queryClient.invalidateQueries({
