@@ -628,27 +628,31 @@ const city =
   className={`
     flex items-center justify-between p-4 rounded-2xl cursor-pointer
     transition-all duration-300
+    backdrop-blur-xl
     ${
       vehicleType === type
-        ? "bg-gradient-to-r from-primary/10 to-primary/5 border border-primary shadow-md scale-[1.02]"
+        ? "bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-400 shadow-lg scale-[1.02]"
         : "bg-white/60 border border-gray-200 hover:shadow-md hover:scale-[1.01]"
     }
   `}
 >
   <div className="flex items-center gap-4">
-<div className="h-8 w-11 flex items-center justify-center">
-  <img
-    src={
-      type === "bike"
-        ? "/icons/bike.png"
-        : type === "auto"
-        ? "/icons/auto.png"
-        : "/icons/car.png"
-    }
-    alt={type}
-    className="h-10 w-10 object-contain drop-shadow-md"
-  />
-</div>
+    <div
+      className={`
+        h-8 w-12 rounded-xl flex items-center justify-center
+        ${
+          vehicleType === type
+            ? "bg-gradient-to-br from-indigo-500 to-purple-500"
+            : "bg-gray-100"
+        }
+      `}
+    >
+      <img
+        src={`/icons/${type}.png`}
+        alt={type}
+        className="w-7 h-7 object-contain"
+      />
+    </div>
 
     <div>
       <p className="font-semibold text-base capitalize">{type}</p>
@@ -656,7 +660,7 @@ const city =
     </div>
   </div>
 
-  <p className="text-lg font-bold text-primary">₹{price}</p>
+  <p className="text-lg font-bold text-indigo-600">₹{price}</p>
 </div>
   );
 
