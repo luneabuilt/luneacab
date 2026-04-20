@@ -125,14 +125,24 @@ acceptRide.mutate({
     socket.off("passenger-paid", handler);
   };
 }, [activeRide]);
+
 useEffect(() => {
   const handler = (ride: any) => {
     if (!user) return;
 
-    // 🔥 ALWAYS update (no activeRide check)
+    // 🔥 CLOSE INCOMING REQUEST POPUP
+    if (
+      incomingRequest &&
+      ride.id === incomingRequest.id &&
+      ride.status === "cancelled"
+    ) {
+      setIncomingRequest(null);
+    }
+
+    // 🔥 REFRESH ACTIVE RIDE
     queryClient.invalidateQueries({
-  queryKey: ["/api/rides/active", user?.id],
-});
+      queryKey: ["/api/rides/active", user?.id],
+    });
   };
 
   socket.on("ride-updated", handler);
@@ -140,7 +150,7 @@ useEffect(() => {
   return () => {
     socket.off("ride-updated", handler);
   };
-}, [user?.id, user?.isOnline]);
+}, [user?.id, user?.isOnline, incomingRequest]);
 
   const [routeCoords, setRouteCoords] = useState<any[]>([]);
   const [etaMinutes, setEtaMinutes] = useState<number | null>(null);

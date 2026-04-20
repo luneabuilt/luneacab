@@ -1202,7 +1202,7 @@ app.patch("/api/rides/:id/cancel", async (req, res) => {
         updatedRide
       );
     }
-
+    io.emit("ride-updated", updatedRide); // 🔥 ADD THIS
     console.log("🚫 Ride cancelled sync sent");
 
     res.json(updatedRide);
