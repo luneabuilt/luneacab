@@ -631,7 +631,7 @@ const city =
     backdrop-blur-xl
     ${
       vehicleType === type
-        ? "bg-gradient-to-r from-indigo-400/10 to-purple-400/10 border border-indigo-400 shadow-lg scale-[1.02]"
+        ? "bg-gradient-to-r from-gray-400/10 to-white-400/10 border border-indigo-400 shadow-lg scale-[1.02]"
         : "bg-white/60 border border-gray-200 hover:shadow-md hover:scale-[1.01]"
     }
   `}
@@ -966,18 +966,21 @@ px-5 pt-4 pb-10
                       "8 min",
                     )}
 
-                    <Button
-                      onClick={handleRequestRide}
-className="
-w-full h-14 text-lg font-semibold
-bg-gradient-to-r from-primary to-indigo-500
-shadow-lg shadow-primary/30
-hover:scale-[1.02] active:scale-[0.98]
-transition-all duration-200
-"
-                    >
-                      Book Ride <ArrowRight className="ml-2" />
-                    </Button>
+<Button
+  onClick={handleRequestRide}
+  className="
+    w-full h-11 text-lg font-semibold
+    bg-gradient-to-r from-indigo-600 to-purple-600
+    text-white
+    rounded-xl
+    shadow-lg shadow-indigo-500/30
+    hover:shadow-xl hover:scale-[1.02]
+    active:scale-[0.97]
+    transition-all duration-200
+  "
+>
+  Book Ride <ArrowRight className="ml-2" />
+</Button>
                   </div>
                 )}
               </div>
@@ -1053,9 +1056,10 @@ px-5 pt-4 pb-10
                     </div>
                     <h2 className="text-2xl font-bold">Payment Pending</h2>
 <div className="
-bg-gradient-to-br from-primary/10 to-indigo-100
-p-5 rounded-2xl
-border border-primary/20
+bg-gradient-to-br from-indigo-500/10 to-purple-500/20
+backdrop-blur-xl
+border border-indigo-200
+shadow-inner
 ">
                       <p className="text-sm text-muted-foreground">
                         Total Fare
