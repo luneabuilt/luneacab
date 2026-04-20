@@ -4,10 +4,8 @@ import {
   useNearestDrivers,
   useRequestRide,
   useActiveRide,
-  useUpdateProfile,
 } from "@/hooks/use-api";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Map from "@/components/Map";
 import { useToast } from "@/hooks/use-toast";
@@ -15,13 +13,11 @@ import {
   Loader2,
   MapPin,
   Navigation,
-  Bike,
-  Car,
-  Truck,
   ArrowRight,
-  Wallet,
   CheckCircle,
 } from "lucide-react";
+
+
 import { motion, AnimatePresence } from "framer-motion";
 import { socket } from "@/lib/socket";
 import { useQueryClient } from "@tanstack/react-query";
@@ -640,14 +636,19 @@ const city =
   `}
 >
   <div className="flex items-center gap-4">
-    <div className={`
-      h-10 w-12 rounded-xl flex items-center justify-center
-      ${vehicleType === type ? "bg-primary text-white" : "bg-gray-100"}
-    `}>
-      {type === "bike" && <Bike className="w-6 h-6" />}
-      {type === "auto" && <Truck className="w-6 h-6" />}
-      {type === "car" && <Car className="w-6 h-6" />}
-    </div>
+<div className="h-12 w-12 flex items-center justify-center">
+  <img
+    src={
+      type === "bike"
+        ? "/icons/bike.png"
+        : type === "auto"
+        ? "/icons/auto.png"
+        : "/icons/car.png"
+    }
+    alt={type}
+    className="h-10 w-10 object-contain drop-shadow-md"
+  />
+</div>
 
     <div>
       <p className="font-semibold text-base capitalize">{type}</p>
