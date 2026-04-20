@@ -631,7 +631,7 @@ const city =
     backdrop-blur-xl
     ${
       vehicleType === type
-        ? "bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-400 shadow-lg scale-[1.02]"
+        ? "bg-gradient-to-r from-indigo-100/10 to-purple-100/10 border border-indigo-400 shadow-lg scale-[1.02]"
         : "bg-white/60 border border-gray-200 hover:shadow-md hover:scale-[1.01]"
     }
   `}
