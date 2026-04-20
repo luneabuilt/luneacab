@@ -639,7 +639,7 @@ const city =
   <div className="flex items-center gap-4">
     <div
       className={`
-        h-8 w-12 rounded-xl flex items-center justify-center
+        h-7 w-12 rounded-xl flex items-center justify-center
         ${
           vehicleType === type
             ? "bg-gradient-to-br from-gray-500 to-white-500"
