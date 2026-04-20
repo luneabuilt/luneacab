@@ -1169,29 +1169,47 @@ res.json(updatedRide);
       res.status(500).json({ message: "Server error" });
     }
   });
-  app.patch("/api/rides/:id/cancel", async (req, res) => {
-    try {
-      const rideId = Number(req.params.id);
+app.patch("/api/rides/:id/cancel", async (req, res) => {
+  try {
+    const rideId = Number(req.params.id);
 
-      const ride = await storage.getRide(rideId);
-      if (!ride) {
-        return res.status(404).json({ message: "Ride not found" });
-      }
-
-      if (!["requested", "accepted"].includes((ride.status ?? ""))) {
-        return res
-          .status(400)
-          .json({ message: "Ride cannot be cancelled now" });
-      }
-
-      const updatedRide = await storage.updateRide(rideId, {
-        status: "cancelled",
-      });
-
-      res.json(updatedRide);
-    } catch (err) {
-      res.status(500).json({ message: "Server error" });
+    const ride = await storage.getRide(rideId);
+    if (!ride) {
+      return res.status(404).json({ message: "Ride not found" });
     }
-  });
+
+    if (!["requested", "accepted"].includes(ride.status ?? "")) {
+      return res.status(400).json({
+        message: "Ride cannot be cancelled now",
+      });
+    }
+
+    const updatedRide = await storage.updateRide(rideId, {
+      status: "cancelled",
+    });
+
+    // 🔥🔥🔥 THIS IS THE REAL FIX
+    if (updatedRide?.passengerId) {
+      io.to(`user-${updatedRide.passengerId}`).emit(
+        "ride-updated",
+        updatedRide
+      );
+    }
+
+    if (updatedRide?.driverId) {
+      io.to(`driver-${updatedRide.driverId}`).emit(
+        "ride-updated",
+        updatedRide
+      );
+    }
+
+    console.log("🚫 Ride cancelled sync sent");
+
+    res.json(updatedRide);
+  } catch (err) {
+    console.error("Cancel error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
   return httpServer;
 }
