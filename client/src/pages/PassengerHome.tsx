@@ -627,30 +627,36 @@ const city =
     price: number,
     time: string,
   ) => (
-    <div
-      onClick={() => setVehicleType(type)}
-      className={`
-        flex items-center justify-between p-3 rounded-xl border-2 cursor-pointer transition-all
-        ${
-          vehicleType === type
-            ? "border-primary bg-primary/5 shadow-sm"
-            : "border-transparent bg-secondary/50 hover:bg-secondary"
-        }
-      `}
-    >
-      <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center shadow-sm">
-          {type === "bike" && <Bike className="w-6 h-6" />}
-          {type === "auto" && <Truck className="w-6 h-6" />}
-          {type === "car" && <Car className="w-6 h-6" />}
-        </div>
-        <div>
-          <p className="font-bold capitalize">{type}</p>
-          <p className="text-xs text-muted-foreground">{time} away</p>
-        </div>
-      </div>
-      <p className="font-bold">₹{price}</p>
+<div
+  onClick={() => setVehicleType(type)}
+  className={`
+    flex items-center justify-between p-4 rounded-2xl cursor-pointer
+    transition-all duration-300
+    ${
+      vehicleType === type
+        ? "bg-gradient-to-r from-primary/10 to-primary/5 border border-primary shadow-md scale-[1.02]"
+        : "bg-white/60 border border-gray-200 hover:shadow-md hover:scale-[1.01]"
+    }
+  `}
+>
+  <div className="flex items-center gap-4">
+    <div className={`
+      h-12 w-12 rounded-xl flex items-center justify-center
+      ${vehicleType === type ? "bg-primary text-white" : "bg-gray-100"}
+    `}>
+      {type === "bike" && <Bike className="w-6 h-6" />}
+      {type === "auto" && <Truck className="w-6 h-6" />}
+      {type === "car" && <Car className="w-6 h-6" />}
     </div>
+
+    <div>
+      <p className="font-semibold text-base capitalize">{type}</p>
+      <p className="text-xs text-gray-500">{time} away</p>
+    </div>
+  </div>
+
+  <p className="text-lg font-bold text-primary">₹{price}</p>
+</div>
   );
 
   return (
@@ -765,13 +771,19 @@ const city =
 <motion.div
   animate={{ height: `${sheetHeight}vh` }}
   transition={{ type: "spring", stiffness: 120, damping: 20 }}
-  className="bg-white/90 backdrop-blur-xl border-t border-gray-200 rounded-t-3xl shadow-2xl px-4 pt-3 pb-10"
+className="
+bg-white/70 backdrop-blur-2xl
+border-t border-white/30
+rounded-t-[32px]
+shadow-[0_-10px_40px_rgba(0,0,0,0.12)]
+px-5 pt-4 pb-10
+"
 >
 <div
   onClick={toggleSheet}
   className="flex flex-col items-center mb-2 cursor-pointer"
 >
-  <div className="w-12 h-1.5 bg-gray-400/60 rounded-full mb-2" />
+<div className="w-14 h-1.5 bg-gradient-to-r from-gray-300 to-gray-400 rounded-full mb-2" />
   <span className="text-xs text-gray-500">Swipe up</span>
 </div>
               <div className="h-full overflow-y-auto pr-1">
@@ -951,7 +963,13 @@ const city =
 
                     <Button
                       onClick={handleRequestRide}
-                      className="w-full h-14 text-lg mt-4 shadow-lg shadow-primary/25"
+className="
+w-full h-14 text-lg font-semibold
+bg-gradient-to-r from-primary to-indigo-500
+shadow-lg shadow-primary/30
+hover:scale-[1.02] active:scale-[0.98]
+transition-all duration-200
+"
                     >
                       Book Ride <ArrowRight className="ml-2" />
                     </Button>
@@ -965,7 +983,13 @@ const city =
 <motion.div
   animate={{ height: `${sheetHeight}vh` }}
   transition={{ type: "spring", stiffness: 120, damping: 20 }}
-  className="bg-white/90 backdrop-blur-xl border-t border-gray-200 rounded-t-3xl shadow-2xl px-4 pt-3 pb-10"
+className="
+bg-white/70 backdrop-blur-2xl
+border-t border-white/30
+rounded-t-[32px]
+shadow-[0_-10px_40px_rgba(0,0,0,0.12)]
+px-5 pt-4 pb-10
+"
 >
   <div
   onClick={toggleSheet}
@@ -1001,7 +1025,13 @@ const city =
 <motion.div
   animate={{ height: `${sheetHeight}vh` }}
   transition={{ type: "spring", stiffness: 120, damping: 20 }}
-  className="bg-white/90 backdrop-blur-xl border-t border-gray-200 rounded-t-3xl shadow-2xl px-4 pt-3 pb-10"
+className="
+bg-white/70 backdrop-blur-2xl
+border-t border-white/30
+rounded-t-[32px]
+shadow-[0_-10px_40px_rgba(0,0,0,0.12)]
+px-5 pt-4 pb-10
+"
 >
   <div
   onClick={toggleSheet}
@@ -1017,11 +1047,15 @@ const city =
                       <CheckCircle className="w-8 h-8" />
                     </div>
                     <h2 className="text-2xl font-bold">Payment Pending</h2>
-                    <div className="bg-secondary/30 p-4 rounded-xl">
+<div className="
+bg-gradient-to-br from-primary/10 to-indigo-100
+p-5 rounded-2xl
+border border-primary/20
+">
                       <p className="text-sm text-muted-foreground">
                         Total Fare
                       </p>
-                      <p className="text-3xl font-bold text-primary">
+<p className="text-4xl font-extrabold text-primary tracking-tight">
                         ₹{activeRide.fare}
                       </p>
                     </div>
@@ -1064,7 +1098,12 @@ const city =
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-6">
+                  <motion.div
+  initial={{ opacity: 0, y: 30 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.4 }}
+  className="space-y-6"
+>
                     {/* 🔥 Ride Progress Tracker */}
                     <div className="mb-6">
                       <div className="flex justify-between text-xs text-muted-foreground mb-2">
@@ -1075,18 +1114,21 @@ const city =
                         <span>Payment</span>
                       </div>
 
-                      <div className="flex gap-2">
-                        {[1, 2, 3, 4, 5].map((step) => (
-                          <div
-                            key={step}
-                            className={`h-2 flex-1 rounded-full ${
-                              getProgressStep() >= step
-                                ? "bg-primary"
-                                : "bg-gray-200"
-                            }`}
-                          />
-                        ))}
-                      </div>
+<div className="flex gap-2 mt-2">
+  {[1, 2, 3, 4, 5].map((step) => (
+    <div
+      key={step}
+      className={`
+        h-2 flex-1 rounded-full transition-all duration-500
+        ${
+          getProgressStep() >= step
+            ? "bg-gradient-to-r from-primary to-indigo-500"
+            : "bg-gray-200"
+        }
+      `}
+    />
+  ))}
+</div>
                     </div>
 
                     <div className="flex justify-between items-center border-b pb-4">
@@ -1133,8 +1175,14 @@ const city =
                       )}
                     </div>
 
-                    <div className="flex items-center gap-4 bg-secondary/20 p-3 rounded-xl">
-                      <div className="h-14 w-14 bg-gray-200 rounded-full overflow-hidden">
+<div className="
+flex items-center gap-4
+bg-white/70 backdrop-blur-xl
+p-4 rounded-2xl
+border border-gray-200
+shadow-sm
+">
+<div className="h-14 w-14 rounded-full overflow-hidden ring-2 ring-primary/20">
                         <img
                           src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=100&h=100&fit=crop"
                           alt="Driver"
@@ -1196,7 +1244,7 @@ const city =
                         Cancel Ride
                       </Button>
                     )}
-                  </div>
+                  </motion.div>
                 )}
               </div>
             </motion.div>
