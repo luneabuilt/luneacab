@@ -800,7 +800,7 @@ px-5 pt-4 pb-10
                     <Input
                       value={pickupSearchText}
                       placeholder="Search pickup location"
-                      className="pl-10 h-12 bg-secondary/30 border-0"
+                      className="pl-10 h-10 bg-secondary/30 border-0"
                       onFocus={() => {
                         setActiveField("pickup");
 
@@ -869,7 +869,7 @@ px-5 pt-4 pb-10
                     <Input
                       value={searchText}
                       placeholder="Search destination"
-                      className="pl-10 h-12 bg-secondary/30 border-0"
+                      className="pl-10 h-10 bg-secondary/30 border-0"
                       onFocus={() => setActiveField("drop")}
                       onChange={async (e) => {
                         const value = e.target.value;
@@ -943,7 +943,7 @@ px-5 pt-4 pb-10
                       Choose Ride
                     </h3>
                     {distanceKm && (
-                      <div className="bg-secondary/30 p-3 rounded-xl text-sm flex justify-between">
+                      <div className="bg-secondary/30 p-2 rounded-xl text-sm flex justify-between">
                         <span>Trip Distance</span>
                         <span className="font-semibold">
                           {distanceKm.toFixed(2)} km
@@ -953,17 +953,17 @@ px-5 pt-4 pb-10
                     {renderVehicleOption(
                       "bike",
                       estimatedFares.bike || 0,
-                      "3 min",
+                      "4 min",
                     )}
                     {renderVehicleOption(
                       "auto",
                       estimatedFares.auto || 0,
-                      "5 min",
+                      "7 min",
                     )}
                     {renderVehicleOption(
                       "car",
                       estimatedFares.car || 0,
-                      "8 min",
+                      "11 min",
                     )}
 
 <Button
