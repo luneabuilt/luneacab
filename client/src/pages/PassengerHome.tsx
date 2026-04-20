@@ -636,7 +636,7 @@ const city =
   `}
 >
   <div className="flex items-center gap-4">
-<div className="h-12 w-12 flex items-center justify-center">
+<div className="h-9 w-10 flex items-center justify-center">
   <img
     src={
       type === "bike"
