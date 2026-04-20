@@ -641,7 +641,7 @@ const city =
 >
   <div className="flex items-center gap-4">
     <div className={`
-      h-12 w-12 rounded-xl flex items-center justify-center
+      h-10 w-12 rounded-xl flex items-center justify-center
       ${vehicleType === type ? "bg-primary text-white" : "bg-gray-100"}
     `}>
       {type === "bike" && <Bike className="w-6 h-6" />}
