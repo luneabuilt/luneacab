@@ -97,6 +97,22 @@ export default function Earnings() {
     });
   }
 
+  const subscribe = async (plan: string) => {
+  await fetch("/api/driver/subscribe", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-user-id": user?.id?.toString() || "",
+    },
+    body: JSON.stringify({
+      driverId: user?.id,
+      plan,
+    }),
+  });
+
+  alert("Subscription activated!");
+};
+
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
 
@@ -113,6 +129,65 @@ export default function Earnings() {
       </div>
 
       <div className="p-4 space-y-6">
+
+{user?.role === "driver" && (
+  <div className="bg-white p-4 rounded-xl border">
+    <h2 className="text-lg font-bold mb-2">🚀 Subscription Plans</h2>
+
+    <p className="text-sm mb-2">
+      Current: {user.subscriptionType || "None"}
+    </p>
+
+    <p className="text-xs mb-3">
+      Valid Till: {user.subscriptionEnd || "N/A"}
+    </p>
+
+    {/* BIKE */}
+    {user.vehicleType === "bike" && (
+      <div className="space-y-2">
+        <button onClick={() => subscribe("daily")} className="w-full bg-black text-white py-2 rounded">
+          Daily ₹19
+        </button>
+        <button onClick={() => subscribe("weekly")} className="w-full bg-black text-white py-2 rounded">
+          Weekly ₹99
+        </button>
+        <button onClick={() => subscribe("monthly")} className="w-full bg-black text-white py-2 rounded">
+          Monthly ₹299
+        </button>
+      </div>
+    )}
+
+    {/* AUTO */}
+    {user.vehicleType === "auto" && (
+      <div className="space-y-2">
+        <button onClick={() => subscribe("daily")} className="w-full bg-black text-white py-2 rounded">
+          Daily ₹59
+        </button>
+        <button onClick={() => subscribe("weekly")} className="w-full bg-black text-white py-2 rounded">
+          Weekly ₹249
+        </button>
+        <button onClick={() => subscribe("monthly")} className="w-full bg-black text-white py-2 rounded">
+          Monthly ₹999
+        </button>
+      </div>
+    )}
+
+    {/* CAR */}
+    {user.vehicleType === "car" && (
+      <div className="space-y-2">
+        <button onClick={() => subscribe("daily")} className="w-full bg-black text-white py-2 rounded">
+          Daily ₹99
+        </button>
+        <button onClick={() => subscribe("weekly")} className="w-full bg-black text-white py-2 rounded">
+          Weekly ₹449
+        </button>
+        <button onClick={() => subscribe("monthly")} className="w-full bg-black text-white py-2 rounded">
+          Monthly ₹1499
+        </button>
+      </div>
+    )}
+  </div>
+)}
 
         {/* 💼 WALLET SECTION */}
 <div className="bg-white rounded-2xl shadow-md p-4 border">

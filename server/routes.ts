@@ -73,7 +73,22 @@ const vehiclePricing: Record<
   auto: { base: 18, rate: 12, minimum: 50, commissionPercent: 9.5 },
   car: { base: 30, rate: 20, minimum: 90, commissionPercent: 10.5 },
 };
-function calculateFare(distanceKm: number, vehicleType: string) {
+
+// 🔥 SUBSCRIPTION PRICING (ADD EXACTLY HERE)
+const subscriptionPricing: Record<
+  "bike" | "auto" | "car",
+  { daily: number; weekly: number; monthly: number }
+> = {
+  bike: { daily: 19, weekly: 99, monthly: 299 },
+  auto: { daily: 59, weekly: 249, monthly: 999 },
+  car: { daily: 99, weekly: 449, monthly: 1499 },
+};
+
+function calculateFare(
+  distanceKm: number,
+  vehicleType: string,
+  driver?: any
+) {
   const pricing = vehiclePricing[vehicleType];
 
   if (!pricing) {
@@ -86,7 +101,16 @@ function calculateFare(distanceKm: number, vehicleType: string) {
     fare = pricing.minimum;
   }
 
-  const commission = (fare * pricing.commissionPercent) / 100;
+  let commission = 0;
+
+  // 🔥 CHECK SUBSCRIPTION
+  if (
+    !driver?.subscriptionEnd ||
+    new Date(driver.subscriptionEnd) < new Date()
+  ) {
+    commission = (fare * pricing.commissionPercent) / 100;
+  }
+
   const driverEarning = fare - commission;
 
   return {
@@ -654,6 +678,59 @@ parseFloat((driver.currentLng ?? "0").toString()),
   });
 
   // -- Rides API --
+
+app.post("/api/driver/subscribe", async (req, res) => {
+  try {
+    const { driverId, plan } = req.body as {
+  driverId: number;
+  plan: "daily" | "weekly" | "monthly";
+};
+
+    // ✅ GET DRIVER
+    const driver = await storage.getUser(driverId);
+    if (!driver) {
+      return res.status(404).json({ message: "Driver not found" });
+    }
+
+    // ✅ GET VEHICLE TYPE
+    const vehicleType = driver.vehicleType as "bike" | "auto" | "car";
+
+    // ✅ GET PRICE
+    const price = subscriptionPricing[vehicleType]?.[plan];
+
+    if (!price) {
+      return res.status(400).json({ message: "Invalid plan" });
+    }
+
+    // ✅ PLAN DAYS
+    let days = 1;
+    if (plan === "weekly") days = 7;
+    if (plan === "monthly") days = 30;
+
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() + days);
+
+    // ✅ SAVE
+    const updatedUser = await storage.updateUser(driverId, {
+      subscriptionType: plan,
+      subscriptionEnd: endDate.toISOString(),
+    });
+
+    // ✅ RESPONSE
+    res.json({
+      success: true,
+      plan,
+      price,
+      validTill: endDate,
+      user: updatedUser,
+    });
+
+  } catch (err) {
+    console.error("Subscription error:", err);
+    res.status(500).json({ message: "Subscription failed" });
+  }
+});
+
   app.post(api.rides.request.path, async (req, res) => {
     try {
       const input = api.rides.request.input.parse(req.body);
@@ -689,10 +766,15 @@ Number(driver.currentLng ?? 0),
 const driverQueueIds = nearestDrivers.map((d: any) => d.id);
 
       // calculate fare
-      const { fare, commission, driverEarning } = calculateFare(
-        parseFloat(input.distanceKm.toString()),
-        input.vehicleType,
-      );
+const driver = nearestDrivers[0]
+  ? await storage.getUser(nearestDrivers[0].id)
+  : null;
+
+const { fare, commission, driverEarning } = calculateFare(
+  parseFloat(input.distanceKm.toString()),
+  input.vehicleType,
+  driver
+);
 
       const generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
 

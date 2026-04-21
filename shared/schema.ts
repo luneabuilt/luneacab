@@ -50,6 +50,10 @@ export const users = pgTable("users", {
   licenseUrl: text("license_url"),
 vehicleImageUrl: text("vehicle_image_url"),
 profileImageUrl: text("profile_image_url"),
+
+subscriptionType: text("subscription_type"),
+subscriptionEnd: text("subscription_end"),
+
 isApproved: boolean("is_approved").default(false),
 });
 
