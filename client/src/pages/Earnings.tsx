@@ -114,7 +114,7 @@ export default function Earnings() {
 };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 pb-24">
 
       {/* HEADER */}
       <div className="bg-gradient-to-r from-emerald-500 to-green-600 text-white p-6 rounded-b-3xl shadow">
@@ -139,9 +139,9 @@ export default function Earnings() {
       <div className="text-right">
         <p className="text-xs text-gray-400">Valid Till</p>
         <p className="text-sm font-semibold">
-          {user.subscriptionEnd
-            ? new Date(user.subscriptionEnd).toLocaleDateString()
-            : "N/A"}
+{user.subscriptionEnd
+  ? new Date(user.subscriptionEnd).toLocaleString("en-IN")
+  : "N/A"}
         </p>
       </div>
     </div>
