@@ -131,7 +131,7 @@ export default function Earnings() {
       <div className="p-4 space-y-6">
 
 {user?.role === "driver" && (
-  <div className="bg-gradient-to-br from-gray-900 to-black text-white p-5 rounded-2xl shadow-xl">
+  <div className="bg-gradient-to-br from-gray-800 to-gray-900 text-white p-4 rounded-2xl shadow-xl">
 
     <div className="flex justify-between items-center mb-4">
       <h2 className="text-lg font-bold">🚀 Subscription Plans</h2>
