@@ -131,61 +131,66 @@ export default function Earnings() {
       <div className="p-4 space-y-6">
 
 {user?.role === "driver" && (
-  <div className="bg-white p-4 rounded-xl border">
-    <h2 className="text-lg font-bold mb-2">🚀 Subscription Plans</h2>
+  <div className="bg-gradient-to-br from-gray-900 to-black text-white p-5 rounded-2xl shadow-xl">
 
-    <p className="text-sm mb-2">
-      Current: {user.subscriptionType || "None"}
+    <div className="flex justify-between items-center mb-4">
+      <h2 className="text-lg font-bold">🚀 Subscription Plans</h2>
+
+      <div className="text-right">
+        <p className="text-xs text-gray-400">Valid Till</p>
+        <p className="text-sm font-semibold">
+          {user.subscriptionEnd
+            ? new Date(user.subscriptionEnd).toLocaleDateString()
+            : "N/A"}
+        </p>
+      </div>
+    </div>
+
+    <p className="text-sm mb-4 text-gray-300">
+      Current Plan:{" "}
+      <span className="text-green-400 font-semibold">
+        {user.subscriptionType || "None"}
+      </span>
     </p>
 
-    <p className="text-xs mb-3">
-      Valid Till: {user.subscriptionEnd || "N/A"}
-    </p>
+    <div className="space-y-3">
 
-    {/* BIKE */}
-    {user.vehicleType === "bike" && (
-      <div className="space-y-2">
-        <button onClick={() => subscribe("daily")} className="w-full bg-black text-white py-2 rounded">
-          Daily ₹19
-        </button>
-        <button onClick={() => subscribe("weekly")} className="w-full bg-black text-white py-2 rounded">
-          Weekly ₹99
-        </button>
-        <button onClick={() => subscribe("monthly")} className="w-full bg-black text-white py-2 rounded">
-          Monthly ₹299
-        </button>
-      </div>
-    )}
+      {/* PLAN CARD */}
+      {(user.vehicleType === "bike" ? [
+        { name: "Daily", price: 19, plan: "daily", tag: "Quick" },
+        { name: "Weekly", price: 99, plan: "weekly", tag: "Save" },
+        { name: "Monthly", price: 299, plan: "monthly", tag: "Best" },
+      ] : user.vehicleType === "auto" ? [
+        { name: "Daily", price: 59, plan: "daily", tag: "Quick" },
+        { name: "Weekly", price: 249, plan: "weekly", tag: "Save" },
+        { name: "Monthly", price: 999, plan: "monthly", tag: "Best" },
+      ] : [
+        { name: "Daily", price: 99, plan: "daily", tag: "Quick" },
+        { name: "Weekly", price: 449, plan: "weekly", tag: "Save" },
+        { name: "Monthly", price: 1499, plan: "monthly", tag: "Best" },
+      ]).map((p) => (
+        <div
+          key={p.plan}
+          onClick={() => subscribe(p.plan)}
+          className={`flex justify-between items-center p-4 rounded-xl cursor-pointer transition 
+          ${
+            user.subscriptionType === p.plan
+              ? "bg-green-600"
+              : "bg-white/10 hover:bg-white/20"
+          }`}
+        >
+          <div>
+            <p className="font-semibold">{p.name} Plan</p>
+            <p className="text-xs text-gray-300">{p.tag} choice</p>
+          </div>
 
-    {/* AUTO */}
-    {user.vehicleType === "auto" && (
-      <div className="space-y-2">
-        <button onClick={() => subscribe("daily")} className="w-full bg-black text-white py-2 rounded">
-          Daily ₹59
-        </button>
-        <button onClick={() => subscribe("weekly")} className="w-full bg-black text-white py-2 rounded">
-          Weekly ₹249
-        </button>
-        <button onClick={() => subscribe("monthly")} className="w-full bg-black text-white py-2 rounded">
-          Monthly ₹999
-        </button>
-      </div>
-    )}
+          <div className="text-right">
+            <p className="text-lg font-bold">₹{p.price}</p>
+          </div>
+        </div>
+      ))}
 
-    {/* CAR */}
-    {user.vehicleType === "car" && (
-      <div className="space-y-2">
-        <button onClick={() => subscribe("daily")} className="w-full bg-black text-white py-2 rounded">
-          Daily ₹99
-        </button>
-        <button onClick={() => subscribe("weekly")} className="w-full bg-black text-white py-2 rounded">
-          Weekly ₹449
-        </button>
-        <button onClick={() => subscribe("monthly")} className="w-full bg-black text-white py-2 rounded">
-          Monthly ₹1499
-        </button>
-      </div>
-    )}
+    </div>
   </div>
 )}
 
