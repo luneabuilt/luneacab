@@ -234,6 +234,7 @@ if (driver?.pushToken) {
 
   data: {
     rideId: ride.id.toString(),
+    click_action: "FLUTTER_NOTIFICATION_CLICK", // 🔥 REQUIRED
   },
 
   android: {
@@ -241,6 +242,10 @@ if (driver?.pushToken) {
     notification: {
       channelId: "default",
       sound: "default",
+      priority: "max",          // 🔥 VERY IMPORTANT
+      visibility: "public",     // 🔥 SHOW ON LOCK SCREEN
+      defaultSound: true,
+      defaultVibrateTimings: true,
     },
   },
 })

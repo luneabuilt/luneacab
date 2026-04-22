@@ -16,17 +16,24 @@ public class MainActivity extends BridgeActivity {
   }
 
   private void createNotificationChannel() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      NotificationChannel channel = new NotificationChannel(
-        "default",
-        "Default Channel",
-        NotificationManager.IMPORTANCE_HIGH
-      );
+  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
-      channel.setDescription("Ride Notifications");
+    NotificationChannel channel = new NotificationChannel(
+      "default",
+      "Default Channel",
+      NotificationManager.IMPORTANCE_HIGH
+    );
 
-      NotificationManager manager = getSystemService(NotificationManager.class);
-      manager.createNotificationChannel(channel);
-    }
+    channel.setDescription("Ride Notifications");
+
+    // 🔥 ADD THESE (CRITICAL FOR POPUP)
+    channel.enableLights(true);
+    channel.enableVibration(true);
+    channel.setVibrationPattern(new long[]{0, 500, 500, 500});
+    channel.setLockscreenVisibility(android.app.Notification.VISIBILITY_PUBLIC);
+
+    NotificationManager manager = getSystemService(NotificationManager.class);
+    manager.createNotificationChannel(channel);
   }
+}
 }
