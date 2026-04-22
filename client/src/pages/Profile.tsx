@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
@@ -16,18 +16,21 @@ export default function Profile() {
   const updateProfile = useUpdateProfile();
 
   const form = useForm();
+  const [selectedRole, setSelectedRole] = useState(user?.role || "passenger");
 
   useEffect(() => {
     if (!user || !user.id) return;
 
     form.reset({
       name: user.name || "",
-      role: user.role || "passenger",
       vehicleType: user.vehicleType || "bike",
       vehicleNumber: user.vehicleNumber || "",
       upiId: user.upiId || "",
+      
     });
+    setSelectedRole(user.role || "passenger");
   }, [user]);
+  
 
   useEffect(() => {
     if (!user || !user.id) return;
@@ -42,19 +45,24 @@ export default function Profile() {
     }
   }, [user]);
 
-  const selectedRole = form.watch("role") || user?.role;
 
-  const onSubmit = (data: any) => {
-    updateProfile.mutate(data, {
+const onSubmit = (data: any) => {
+  updateProfile.mutate(
+    {
+      ...data,
+      role: selectedRole,
+    },
+    {
       onSuccess: () => {
-        if (data.role === "passenger") {
+        if (selectedRole === "passenger") {
           setLocation("/home");
         } else {
           setLocation("/driver-signup");
         }
       },
-    });
-  };
+    }
+  );
+};
 
   const handleLogout = () => {
     logout();
@@ -144,11 +152,10 @@ export default function Profile() {
             <div className="space-y-3">
               <Label>Select Role</Label>
 
-              <RadioGroup
-                value={selectedRole}
-                onValueChange={(val) =>
-                  form.setValue("role", val as any)
-                }
+<RadioGroup
+  value={selectedRole}
+  onValueChange={(val) => setSelectedRole(val as any)}
+
                 className="grid grid-cols-2 gap-3"
               >
                 {["passenger", "driver"].map((role) => (
@@ -221,31 +228,6 @@ export default function Profile() {
               </div>
             )}
 
-            {/* DOCUMENTS */}
-            {user.role === "driver" && (
-              <div className="space-y-4 border-t pt-4">
-
-                <h3 className="font-semibold">📄 Documents</h3>
-
-                <div className="grid grid-cols-2 gap-3">
-
-                  {user.licenseUrl && (
-                    <img
-                      src={user.licenseUrl}
-                      className="h-32 w-full object-cover rounded-lg shadow"
-                    />
-                  )}
-
-                  {user.vehicleImageUrl && (
-                    <img
-                      src={user.vehicleImageUrl}
-                      className="h-32 w-full object-cover rounded-lg shadow"
-                    />
-                  )}
-
-                </div>
-              </div>
-            )}
 
             {/* SAVE BUTTON */}
             <Button
