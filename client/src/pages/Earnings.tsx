@@ -116,45 +116,36 @@ export default function Earnings() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 pb-24">
 
-<div className="relative overflow-hidden bg-gradient-to-br from-emerald-500 via-green-500 to-green-700 text-white p-6 rounded-b-[30px] shadow-xl">
+      {/* HEADER */}
+<div className="p-4">
 
-  {/* Glow effects */}
-  <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-  <div className="absolute bottom-0 left-0 w-32 h-32 bg-black/10 rounded-full blur-xl"></div>
+  <div className="bg-white/80 backdrop-blur-md border border-gray-200 rounded-2xl shadow-sm p-4 flex items-center justify-between">
 
-  <div className="relative z-10">
+    {/* LEFT SIDE */}
+    <div className="flex items-center gap-3">
 
-    {/* Top row */}
-    <div className="flex justify-between items-center">
+      {/* ICON */}
+      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow">
+        <span className="text-white text-lg">💰</span>
+      </div>
+
+      {/* TEXT */}
       <div>
-        <h1 className="text-2xl font-bold">💰 Earnings</h1>
-        <p className="text-xs opacity-80 capitalize">
-          {filter} summary
+        <p className="text-xs text-gray-500">Total Earnings</p>
+
+        <p className="text-xl font-bold text-gray-900">
+          ₹{totalDriver.toFixed(0)}
         </p>
+
+        <div className="flex gap-3 text-xs mt-1">
+          <span className="text-blue-600">🚗 {filteredRides.length}</span>
+          <span className="text-purple-600">💸 ₹{totalCommission.toFixed(0)}</span>
+        </div>
       </div>
-
-      <div className="bg-white/20 px-3 py-1 rounded-full text-xs">
-        LIVE
-      </div>
     </div>
-
-    {/* Main amount */}
-    <div className="mt-6">
-      <p className="text-xs opacity-80">Total Earnings</p>
-
-      <p className="text-5xl font-extrabold drop-shadow-lg">
-        ₹{totalDriver.toFixed(0)}
-      </p>
-    </div>
-
-    {/* Bottom stats */}
-    <div className="mt-4 flex justify-between text-xs opacity-90">
-      <span>🚗 {filteredRides.length} rides</span>
-      <span>💸 ₹{totalCommission.toFixed(0)} fee</span>
-    </div>
-
   </div>
 </div>
+
       <div className="p-4 space-y-6">
 
 {user?.role === "driver" && (
