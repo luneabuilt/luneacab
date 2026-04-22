@@ -431,6 +431,22 @@ app.get("/api/users/:id", async (req, res) => {
     try {
       const input = api.users.updateProfile.input.parse(req.body);
       const user = await storage.updateUser(Number(req.params.id), input);
+      const existingUser = await storage.getUser(Number(req.params.id));
+
+if (
+  existingUser?.isApproved &&
+  existingUser.role === "driver"
+) {
+  // ❌ BLOCK changes
+  if (
+    req.body.vehicleType !== existingUser.vehicleType ||
+    req.body.vehicleNumber !== existingUser.vehicleNumber
+  ) {
+    return res.status(403).json({
+      message: "Cannot change vehicle details after approval",
+    });
+  }
+}
       if (!user) return res.status(404).json({ message: "User not found" });
       res.json(user);
     } catch (err) {
@@ -443,6 +459,7 @@ app.get("/api/users/:id", async (req, res) => {
       throw err;
     }
   });
+
 
 app.patch("/api/users/:id/documents", async (req, res) => {
   try {

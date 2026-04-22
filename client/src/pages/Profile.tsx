@@ -186,6 +186,7 @@ const onSubmit = (data: any) => {
 
                 {/* VEHICLE TYPE */}
                 <RadioGroup
+  disabled={user?.role === "driver" && !!user?.isApproved} // ✅ ADD THIS
                   value={form.watch("vehicleType") || "bike"}
                   onValueChange={(val) =>
                     form.setValue("vehicleType", val as any)
@@ -210,8 +211,9 @@ const onSubmit = (data: any) => {
                 {/* VEHICLE NUMBER */}
                 <div className="space-y-2">
                   <Label>Vehicle Number</Label>
-                  <Input
-                    {...form.register("vehicleNumber")}
+<Input
+  {...form.register("vehicleNumber")}
+  disabled={user?.role === "driver" && !!user?.isApproved} // ✅ ADD
                     placeholder="AS 01 AB 1234"
                     className="uppercase"
                   />
@@ -220,13 +222,20 @@ const onSubmit = (data: any) => {
                 {/* UPI */}
                 <div className="space-y-2">
                   <Label>UPI ID</Label>
-                  <Input
-                    {...form.register("upiId")}
+<Input
+  {...form.register("upiId")}
+  disabled={user?.role === "driver" && !!user?.isApproved}  // optional (your choice)
                     placeholder="yourname@upi"
                   />
                 </div>
               </div>
             )}
+            
+            {user.isApproved && (
+  <p className="text-sm text-yellow-600">
+    ⚠️ Contact support to change vehicle details
+  </p>
+)}
 
 
             {/* SAVE BUTTON */}
