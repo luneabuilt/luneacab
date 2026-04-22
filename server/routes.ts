@@ -232,11 +232,6 @@ if (driver?.pushToken) {
     body: `New trip • Fare ₹${ride.fare}`,
   },
 
-  data: {
-    rideId: ride.id.toString(),
-    click_action: "FLUTTER_NOTIFICATION_CLICK", // 🔥 REQUIRED
-  },
-
   android: {
     priority: "high",
     notification: {

@@ -155,7 +155,7 @@ export default function Earnings() {
             </span>
 
             <span className="text-pink-400 font-medium">
-              💸 ₹{totalCommission.toFixed(0)}
+              💸 ₹{totalFare.toFixed(0)}
             </span>
           </div>
         </div>
