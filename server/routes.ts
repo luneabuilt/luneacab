@@ -69,9 +69,9 @@ const vehiclePricing: Record<
   string,
   { base: number; rate: number; minimum: number; commissionPercent: number }
 > = {
-  bike: { base: 12, rate: 7.5, minimum: 25, commissionPercent: 8.5 },
-  auto: { base: 18, rate: 12, minimum: 50, commissionPercent: 9.5 },
-  car: { base: 30, rate: 20, minimum: 90, commissionPercent: 10.5 },
+  bike: { base: 12, rate: 7.5, minimum: 30, commissionPercent: 8.5 },
+  auto: { base: 18, rate: 12, minimum: 70, commissionPercent: 9.5 },
+  car: { base: 30, rate: 20, minimum: 100, commissionPercent: 10.5 },
 };
 
 // 🔥 SUBSCRIPTION PRICING (ADD EXACTLY HERE)
