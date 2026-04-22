@@ -1,4 +1,4 @@
-package your.package.name;
+package com.luneacab.app;
 
 import android.os.Bundle;
 import android.app.NotificationChannel;
