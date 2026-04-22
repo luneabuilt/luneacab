@@ -151,7 +151,7 @@ export default function Earnings() {
 
           <div className="flex gap-4 mt-1 text-xs">
             <span className="text-blue-400 font-medium">
-              🚗 {filteredRides.length}
+              Rides {filteredRides.length}
             </span>
 
             <span className="text-pink-400 font-medium">
