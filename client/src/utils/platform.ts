@@ -11,7 +11,6 @@ export const isNative = () => Capacitor.isNativePlatform();
 // =========================
 export const getLocation = async () => {
   try {
-    // 📱 MOBILE APP
     if (isNative()) {
       const perm = await Geolocation.requestPermissions();
 
@@ -55,24 +54,35 @@ export const setupPush = async (userId: number, baseUrl: string) => {
   try {
     if (!isNative()) return;
 
-    // ✅ Push permission (REQUIRED)
-const perm = await PushNotifications.requestPermissions();
+    // =========================
+    // 🔐 PERMISSIONS
+    // =========================
+    const perm = await PushNotifications.requestPermissions();
+    console.log("🔐 Push permission:", perm);
 
-console.log("🔐 Push permission status:", perm);
+    if (perm.receive !== "granted") {
+      alert("Enable notification permission from settings");
+      return;
+    }
 
-if (perm.receive !== "granted") {
-  alert("Please enable notification permission manually");
-  return;
-}
-await LocalNotifications.requestPermissions();
-
-    // ✅ Local notification permission (VERY IMPORTANT)
     await LocalNotifications.requestPermissions();
 
-    // ✅ Register device
+    // =========================
+    // 🔔 CREATE CHANNEL (CRITICAL FIX)
+    // =========================
+    await LocalNotifications.createChannel({
+      id: "default",
+      name: "Default Notifications",
+      description: "Ride alerts",
+      importance: 5, // 🔥 HIGH PRIORITY
+      visibility: 1,
+    });
+
+    // =========================
+    // 📲 REGISTER DEVICE
+    // =========================
     await PushNotifications.register();
 
-    // 🔥 Prevent duplicate listeners
     await PushNotifications.removeAllListeners();
 
     // =========================
@@ -88,28 +98,28 @@ await LocalNotifications.requestPermissions();
       });
     });
 
-    // ❌ ERROR HANDLING
     PushNotifications.addListener("registrationError", (err) => {
       console.error("❌ Registration error:", err);
     });
 
     // =========================
-    // 🔔 SHOW NOTIFICATION (FIX)
+    // 🔔 FORCE POPUP (MAIN FIX)
     // =========================
     PushNotifications.addListener(
       "pushNotificationReceived",
       async (notification) => {
         console.log("🔔 PUSH RECEIVED:", notification);
 
-        // 🔥 FORCE SYSTEM NOTIFICATION
         await LocalNotifications.schedule({
           notifications: [
             {
               id: Date.now(),
-              title: notification.title || "New Ride Request",
+              title: notification.title || "🚕 New Ride Request",
               body: notification.body || "",
               schedule: { at: new Date(Date.now() + 100) },
               sound: "default",
+              smallIcon: "ic_launcher",
+              channelId: "default", // 🔥 MUST MATCH CHANNEL
               extra: notification.data,
             },
           ],
@@ -129,8 +139,6 @@ await LocalNotifications.requestPermissions();
 
         if (rideId) {
           console.log("🚕 Ride ID:", rideId);
-
-          // 👉 Later: auto navigate or accept
         }
       }
     );
