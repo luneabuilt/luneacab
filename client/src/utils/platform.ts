@@ -56,12 +56,15 @@ export const setupPush = async (userId: number, baseUrl: string) => {
     if (!isNative()) return;
 
     // ✅ Push permission (REQUIRED)
-    const perm = await PushNotifications.requestPermissions();
+const perm = await PushNotifications.requestPermissions();
 
-    if (perm.receive !== "granted") {
-      console.log("Push permission denied");
-      return;
-    }
+console.log("🔐 Push permission status:", perm);
+
+if (perm.receive !== "granted") {
+  alert("Please enable notification permission manually");
+  return;
+}
+await LocalNotifications.requestPermissions();
 
     // ✅ Local notification permission (VERY IMPORTANT)
     await LocalNotifications.requestPermissions();
