@@ -22,41 +22,77 @@ export default function DriverSignup() {
   const [progress, setProgress] = useState(0);
 
   // 🔥 COMPRESS IMAGE
-  const compressImage = (file: File): Promise<File> => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      const reader = new FileReader();
+const compressImage = (file: File): Promise<File> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const reader = new FileReader();
 
-      reader.onload = (e: any) => {
-        img.src = e.target.result;
-      };
+    reader.onload = (e: any) => {
+      img.src = e.target.result;
+    };
 
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
 
-        const MAX_WIDTH = 800;
-        const scale = MAX_WIDTH / img.width;
+      // 🔥 DYNAMIC RESIZE BASED ON SIZE
+      let maxWidth = 1200;
 
-        canvas.width = MAX_WIDTH;
-        canvas.height = img.height * scale;
+      if (file.size > 5 * 1024 * 1024) {
+        maxWidth = 800;
+      }
 
-        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+      if (file.size > 10 * 1024 * 1024) {
+        maxWidth = 600;
+      }
 
-        canvas.toBlob((blob) => {
+      const scale = maxWidth / img.width;
+
+      canvas.width = maxWidth;
+      canvas.height = img.height * scale;
+
+      ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      // 🔥 DYNAMIC QUALITY
+      let quality = 0.8;
+
+      if (file.size > 5 * 1024 * 1024) {
+        quality = 0.6;
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        quality = 0.5;
+      }
+
+      canvas.toBlob(
+        (blob) => {
           if (!blob) return resolve(file);
 
           const compressed = new File([blob], file.name, {
             type: "image/jpeg",
           });
 
-          resolve(compressed);
-        }, "image/jpeg", 0.7);
-      };
+          console.log(
+            "Original:",
+            (file.size / 1024 / 1024).toFixed(2),
+            "MB"
+          );
+          console.log(
+            "Compressed:",
+            (compressed.size / 1024 / 1024).toFixed(2),
+            "MB"
+          );
 
-      reader.readAsDataURL(file);
-    });
-  };
+          resolve(compressed);
+        },
+        "image/jpeg",
+        quality
+      );
+    };
+
+    reader.readAsDataURL(file);
+  });
+};
 
   // 🔥 OCR (FUTURE READY)
   const runOCR = async (file: File) => {
@@ -165,11 +201,6 @@ export default function DriverSignup() {
 
             if (!f.type.startsWith("image/")) {
               alert("Only images allowed");
-              return;
-            }
-
-            if (f.size > 2 * 1024 * 1024) {
-              alert("Max 2MB file");
               return;
             }
 
