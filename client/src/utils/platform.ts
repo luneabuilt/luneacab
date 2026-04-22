@@ -1,6 +1,7 @@
 import { Capacitor } from "@capacitor/core";
 import { Geolocation } from "@capacitor/geolocation";
 import { PushNotifications } from "@capacitor/push-notifications";
+import { LocalNotifications } from "@capacitor/local-notifications";
 
 // ✅ Detect platform
 export const isNative = () => Capacitor.isNativePlatform();
@@ -52,10 +53,9 @@ export const getLocation = async () => {
 // =========================
 export const setupPush = async (userId: number, baseUrl: string) => {
   try {
-    // 📱 ONLY run on mobile
     if (!isNative()) return;
 
-    // ✅ Ask permission
+    // ✅ Push permission (REQUIRED)
     const perm = await PushNotifications.requestPermissions();
 
     if (perm.receive !== "granted") {
@@ -63,13 +63,18 @@ export const setupPush = async (userId: number, baseUrl: string) => {
       return;
     }
 
+    // ✅ Local notification permission (VERY IMPORTANT)
+    await LocalNotifications.requestPermissions();
+
     // ✅ Register device
     await PushNotifications.register();
 
-    // 🔥 IMPORTANT: prevent duplicate listeners
+    // 🔥 Prevent duplicate listeners
     await PushNotifications.removeAllListeners();
 
+    // =========================
     // 🔥 TOKEN REGISTER
+    // =========================
     PushNotifications.addListener("registration", async (token) => {
       console.log("🔥 FCM TOKEN:", token.value);
 
@@ -85,17 +90,33 @@ export const setupPush = async (userId: number, baseUrl: string) => {
       console.error("❌ Registration error:", err);
     });
 
-    // 🔔 FOREGROUND NOTIFICATION
+    // =========================
+    // 🔔 SHOW NOTIFICATION (FIX)
+    // =========================
     PushNotifications.addListener(
       "pushNotificationReceived",
-      (notification) => {
-        console.log("🔔 Foreground Notification:", notification);
+      async (notification) => {
+        console.log("🔔 PUSH RECEIVED:", notification);
 
-        alert(notification.title + "\n" + notification.body);
+        // 🔥 FORCE SYSTEM NOTIFICATION
+        await LocalNotifications.schedule({
+          notifications: [
+            {
+              id: Date.now(),
+              title: notification.title || "New Ride Request",
+              body: notification.body || "",
+              schedule: { at: new Date(Date.now() + 100) },
+              sound: "default",
+              extra: notification.data,
+            },
+          ],
+        });
       }
     );
 
-    // 📲 USER CLICKED NOTIFICATION
+    // =========================
+    // 📲 CLICK HANDLER
+    // =========================
     PushNotifications.addListener(
       "pushNotificationActionPerformed",
       (action) => {
@@ -104,12 +125,13 @@ export const setupPush = async (userId: number, baseUrl: string) => {
         const rideId = action.notification.data?.rideId;
 
         if (rideId) {
-          console.log("🚕 Ride ID from notification:", rideId);
+          console.log("🚕 Ride ID:", rideId);
 
-          // 👉 You can later auto-accept or navigate here
+          // 👉 Later: auto navigate or accept
         }
       }
     );
+
   } catch (err) {
     console.error("Push setup error:", err);
   }
