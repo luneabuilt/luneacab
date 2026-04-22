@@ -22,6 +22,8 @@ import { BASE_URL } from "@/lib/config";
 
 import { getLocation, setupPush } from "@/utils/platform";
 
+import { PushNotifications } from "@capacitor/push-notifications";
+
 const rideAlertSound = new Audio(
   "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3",
 );
@@ -366,6 +368,29 @@ const handleGoOnline = (checked: boolean) => {
 
   return (
     <div className="h-screen w-full relative flex flex-col bg-background">
+
+
+    {/* 🔥 DEBUG BUTTON */}
+    <button
+      style={{
+        position: "absolute",
+        top: 80,
+        left: 20,
+        zIndex: 9999,
+        padding: "10px",
+        background: "black",
+        color: "white",
+      }}
+      onClick={async () => {
+        const perm = await PushNotifications.requestPermissions();
+        alert(JSON.stringify(perm));
+      }}
+    >
+      Check Notification Permission
+    </button>
+      
+
+
       {activeRide && (
         <div className="absolute bottom-[70px] left-3 right-3 z-30 
 bg-white/90 backdrop-blur-xl 
