@@ -119,31 +119,65 @@ export default function Earnings() {
       {/* HEADER */}
 <div className="p-4">
 
-  <div className="bg-white/80 backdrop-blur-md border border-gray-200 rounded-2xl shadow-sm p-4 flex items-center justify-between">
+<div className="p-4">
 
-    {/* LEFT SIDE */}
-    <div className="flex items-center gap-3">
+  <div className="relative overflow-hidden rounded-2xl p-[1px] bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-lg">
 
-      {/* ICON */}
-      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow">
-        <span className="text-white text-lg">💰</span>
-      </div>
+    {/* INNER CARD */}
+    <div className="bg-white rounded-2xl px-4 py-3 flex items-center justify-between">
 
-      {/* TEXT */}
-      <div>
-        <p className="text-xs text-gray-500">Total Earnings</p>
+      {/* LEFT */}
+      <div className="flex items-center gap-3">
 
-        <p className="text-xl font-bold text-gray-900">
-          ₹{totalDriver.toFixed(0)}
-        </p>
-
-        <div className="flex gap-3 text-xs mt-1">
-          <span className="text-blue-600">🚗 {filteredRides.length}</span>
-          <span className="text-purple-600">💸 ₹{totalCommission.toFixed(0)}</span>
+        {/* ICON */}
+        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-md">
+          <span className="text-white text-lg">💰</span>
         </div>
+
+        {/* TEXT */}
+        <div>
+          <p className="text-[11px] text-gray-400 tracking-wide uppercase">
+            Total Earnings
+          </p>
+
+          <p className="text-2xl font-bold text-gray-900 leading-tight">
+            ₹{totalDriver.toFixed(0)}
+          </p>
+
+          <div className="flex gap-4 text-xs mt-1">
+            <span className="text-blue-600 font-medium">
+              🚗 {filteredRides.length}
+            </span>
+
+            <span className="text-purple-600 font-medium">
+              💸 ₹{totalCommission.toFixed(0)}
+            </span>
+          </div>
+        </div>
+
       </div>
+
+      {/* RIGHT BADGE */}
+      <div className="flex flex-col items-end gap-1">
+
+        <div className="px-2 py-[3px] text-[10px] font-semibold rounded-full bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow">
+          LIVE
+        </div>
+
+        <div className="text-[10px] text-gray-400">
+          updated now
+        </div>
+
+      </div>
+
     </div>
+
+    {/* GLOW EFFECT */}
+    <div className="absolute -top-10 -right-10 w-32 h-32 bg-purple-400 opacity-20 blur-3xl"></div>
+
   </div>
+
+</div>
 </div>
 
       <div className="p-4 space-y-6">
