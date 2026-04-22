@@ -232,12 +232,16 @@ if (driver?.pushToken) {
     body: `New trip • Fare ₹${ride.fare}`,
   },
 
-  android: {
-    priority: "high",
-  },
-
   data: {
     rideId: ride.id.toString(),
+  },
+
+  android: {
+    priority: "high",
+    notification: {
+      channelId: "default",
+      sound: "default",
+    },
   },
 })
     .catch((err: any) => {
