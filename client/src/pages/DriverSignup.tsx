@@ -19,29 +19,102 @@ export default function DriverSignup() {
   const [profileFile, setProfileFile] = useState<File | null>(null);
 
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
 
-  const uploadFile = async (file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
+  // 🔥 COMPRESS IMAGE
+  const compressImage = (file: File): Promise<File> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const reader = new FileReader();
 
-    const res = await fetch(`${BASE_URL}/api/upload`, {
-      method: "POST",
-      body: formData,
+      reader.onload = (e: any) => {
+        img.src = e.target.result;
+      };
+
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        const MAX_WIDTH = 800;
+        const scale = MAX_WIDTH / img.width;
+
+        canvas.width = MAX_WIDTH;
+        canvas.height = img.height * scale;
+
+        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        canvas.toBlob((blob) => {
+          if (!blob) return resolve(file);
+
+          const compressed = new File([blob], file.name, {
+            type: "image/jpeg",
+          });
+
+          resolve(compressed);
+        }, "image/jpeg", 0.7);
+      };
+
+      reader.readAsDataURL(file);
     });
+  };
 
-    const data = await res.json();
-    return data.url;
+  // 🔥 OCR (FUTURE READY)
+  const runOCR = async (file: File) => {
+    try {
+      // 👇 future: integrate Tesseract.js or backend OCR
+      console.log("OCR placeholder running...");
+    } catch (err) {
+      console.log("OCR failed (safe ignore)");
+    }
+  };
+
+  // 🔥 UPLOAD WITH PROGRESS
+  const uploadFile = async (file: File) => {
+    const compressed = await compressImage(file);
+
+    await runOCR(compressed);
+
+    return new Promise<string>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      const formData = new FormData();
+
+      formData.append("file", compressed);
+
+      xhr.open("POST", `${BASE_URL}/api/upload`);
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percent = Math.round((event.loaded / event.total) * 100);
+          setProgress(percent);
+        }
+      };
+
+      xhr.onload = () => {
+        const res = JSON.parse(xhr.response);
+        resolve(res.url);
+      };
+
+      xhr.onerror = () => reject("Upload failed");
+
+      xhr.send(formData);
+    });
   };
 
   const handleSubmit = async () => {
-    if (!user) return;
+    if (!user || loading) return;
+
+    if (!licenseFile || !vehicleFile || !profileFile) {
+      alert("Please upload all files");
+      return;
+    }
 
     setLoading(true);
+    setProgress(0);
 
     try {
-      const licenseUrl = await uploadFile(licenseFile!);
-      const vehicleImageUrl = await uploadFile(vehicleFile!);
-      const profileImageUrl = await uploadFile(profileFile!);
+      const licenseUrl = await uploadFile(licenseFile);
+      const vehicleImageUrl = await uploadFile(vehicleFile);
+      const profileImageUrl = await uploadFile(profileFile);
 
       await fetch(`${BASE_URL}/api/users/${user.id}/documents`, {
         method: "PATCH",
@@ -62,11 +135,14 @@ export default function DriverSignup() {
 
       setUser(updatedUser);
 
+      alert("Application submitted successfully!");
       window.location.href = "/profile";
     } catch (err) {
-      console.error("❌ Signup error:", err);
+      console.error(err);
+      alert("Upload failed. Try again.");
     } finally {
       setLoading(false);
+      setProgress(0);
     }
   };
 
@@ -83,9 +159,22 @@ export default function DriverSignup() {
         <input
           type="file"
           className="hidden"
-          onChange={(e) =>
-            setFile(e.target.files?.[0] || null)
-          }
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (!f) return;
+
+            if (!f.type.startsWith("image/")) {
+              alert("Only images allowed");
+              return;
+            }
+
+            if (f.size > 2 * 1024 * 1024) {
+              alert("Max 2MB file");
+              return;
+            }
+
+            setFile(f);
+          }}
         />
       </label>
 
@@ -111,20 +200,16 @@ export default function DriverSignup() {
     </div>
   );
 
-  const canGoStep2 = name && vehicleNumber;
+  const canGoStep2 = name.length > 2 && vehicleNumber.length > 5;
   const canSubmit = licenseFile && vehicleFile && profileFile;
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-
       <Card className="w-full max-w-md shadow-xl rounded-2xl border-0">
         <CardContent className="p-6 space-y-6">
 
-          {/* HEADER */}
           <div className="text-center">
-            <h1 className="text-2xl font-bold">
-              🚗 Driver Onboarding
-            </h1>
+            <h1 className="text-2xl font-bold">🚗 Driver Onboarding</h1>
             <p className="text-sm text-muted-foreground">
               Step {step} of 3
             </p>
@@ -135,23 +220,22 @@ export default function DriverSignup() {
           {/* STEP 1 */}
           {step === 1 && (
             <div className="space-y-4">
-
               <Input
                 placeholder="Full Name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="h-11"
               />
 
               <Input
                 placeholder="Vehicle Number"
                 value={vehicleNumber}
-                onChange={(e) => setVehicleNumber(e.target.value)}
-                className="h-11 uppercase"
+                onChange={(e) =>
+                  setVehicleNumber(e.target.value.toUpperCase())
+                }
               />
 
               <Button
-                className="w-full h-11"
+                className="w-full"
                 disabled={!canGoStep2}
                 onClick={() => setStep(2)}
               >
@@ -163,28 +247,13 @@ export default function DriverSignup() {
           {/* STEP 2 */}
           {step === 2 && (
             <div className="space-y-4">
-
-              <FileUpload
-                label="Driving License"
-                file={licenseFile}
-                setFile={setLicenseFile}
-              />
-
-              <FileUpload
-                label="Vehicle Photo"
-                file={vehicleFile}
-                setFile={setVehicleFile}
-              />
+              <FileUpload label="Driving License" file={licenseFile} setFile={setLicenseFile} />
+              <FileUpload label="Vehicle Photo" file={vehicleFile} setFile={setVehicleFile} />
 
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setStep(1)}
-                >
+                <Button variant="outline" className="w-full" onClick={() => setStep(1)}>
                   Back
                 </Button>
-
                 <Button
                   className="w-full"
                   disabled={!licenseFile || !vehicleFile}
@@ -199,29 +268,33 @@ export default function DriverSignup() {
           {/* STEP 3 */}
           {step === 3 && (
             <div className="space-y-4">
+              <FileUpload label="Profile Photo" file={profileFile} setFile={setProfileFile} />
 
-              <FileUpload
-                label="Profile Photo"
-                file={profileFile}
-                setFile={setProfileFile}
-              />
+              {/* 🔥 PROGRESS BAR */}
+              {loading && (
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-indigo-500 h-2 rounded-full"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              )}
 
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setStep(2)}
-                >
+                <Button variant="outline" className="w-full" onClick={() => setStep(2)}>
                   Back
                 </Button>
 
                 <Button
-                  className="w-full h-11"
+                  className="w-full"
                   disabled={!canSubmit || loading}
                   onClick={handleSubmit}
                 >
                   {loading ? (
-                    <Loader2 className="animate-spin" />
+                    <>
+                      <Loader2 className="animate-spin mr-2" />
+                      {progress}%
+                    </>
                   ) : (
                     "Submit Application"
                   )}
@@ -230,7 +303,6 @@ export default function DriverSignup() {
             </div>
           )}
 
-          {/* FOOTER */}
           <p className="text-xs text-center text-muted-foreground">
             Your account will be verified before going online
           </p>
