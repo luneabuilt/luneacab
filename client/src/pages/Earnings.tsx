@@ -119,37 +119,42 @@ export default function Earnings() {
       {/* HEADER */}
 <div className="p-4">
 
-<div className="p-4">
+  <div className="relative rounded-2xl overflow-hidden shadow-xl">
 
-  <div className="relative overflow-hidden rounded-2xl p-[1px] bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-lg">
+    {/* BACKGROUND GRADIENT */}
+    <div className="absolute inset-0 bg-gradient-to-br from-[#0f172a] via-[#111827] to-[#020617]" />
 
-    {/* INNER CARD */}
-    <div className="bg-white rounded-2xl px-4 py-3 flex items-center justify-between">
+    {/* GLOW LIGHT */}
+    <div className="absolute -top-20 -right-20 w-72 h-72 bg-purple-500 opacity-20 blur-3xl"></div>
+    <div className="absolute bottom-0 left-0 w-52 h-52 bg-indigo-500 opacity-20 blur-2xl"></div>
+
+    {/* CONTENT */}
+    <div className="relative p-5 flex justify-between items-center">
 
       {/* LEFT */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
 
         {/* ICON */}
-        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-md">
+        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/30">
           <span className="text-white text-lg">💰</span>
         </div>
 
         {/* TEXT */}
         <div>
-          <p className="text-[11px] text-gray-400 tracking-wide uppercase">
+          <p className="text-[11px] uppercase tracking-widest text-gray-400">
             Total Earnings
           </p>
 
-          <p className="text-2xl font-bold text-gray-900 leading-tight">
+          <p className="text-3xl font-bold text-white leading-tight">
             ₹{totalDriver.toFixed(0)}
           </p>
 
-          <div className="flex gap-4 text-xs mt-1">
-            <span className="text-blue-600 font-medium">
+          <div className="flex gap-4 mt-1 text-xs">
+            <span className="text-blue-400 font-medium">
               🚗 {filteredRides.length}
             </span>
 
-            <span className="text-purple-600 font-medium">
+            <span className="text-pink-400 font-medium">
               💸 ₹{totalCommission.toFixed(0)}
             </span>
           </div>
@@ -157,27 +162,28 @@ export default function Earnings() {
 
       </div>
 
-      {/* RIGHT BADGE */}
-      <div className="flex flex-col items-end gap-1">
+      {/* RIGHT SIDE */}
+      <div className="flex flex-col items-end gap-2">
 
-        <div className="px-2 py-[3px] text-[10px] font-semibold rounded-full bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow">
+        {/* LIVE BADGE */}
+        <div className="px-3 py-[4px] rounded-full text-[10px] font-semibold 
+        bg-gradient-to-r from-green-400 to-emerald-500 text-black shadow-md">
           LIVE
         </div>
 
-        <div className="text-[10px] text-gray-400">
-          updated now
-        </div>
+        <p className="text-[10px] text-gray-400">
+          real-time
+        </p>
 
       </div>
 
     </div>
 
-    {/* GLOW EFFECT */}
-    <div className="absolute -top-10 -right-10 w-32 h-32 bg-purple-400 opacity-20 blur-3xl"></div>
+    {/* BOTTOM LINE GLOW */}
+    <div className="h-[1px] bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-40"></div>
 
   </div>
 
-</div>
 </div>
 
       <div className="p-4 space-y-6">
