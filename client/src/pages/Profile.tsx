@@ -35,8 +35,8 @@ export default function Profile() {
   useEffect(() => {
     if (!user || !user.id) return;
 
-    if (
-      user.role === "driver" &&
+if (
+  selectedRole === "driver" &&
       (!user.licenseUrl ||
         !user.vehicleImageUrl ||
         !user.profileImageUrl)
@@ -116,10 +116,10 @@ const onSubmit = (data: any) => {
             </p>
 
             <span className="mt-2 text-xs px-3 py-1 rounded-full bg-gray-100 capitalize">
-              {user.role}
+              {selectedRole}
             </span>
 
-            {user.role === "driver" && (
+            {selectedRole === "driver" && (
               <span
                 className={`mt-2 text-xs px-3 py-1 rounded-full ${
                   user.isApproved
@@ -186,7 +186,7 @@ const onSubmit = (data: any) => {
 
                 {/* VEHICLE TYPE */}
                 <RadioGroup
-                  value={form.getValues("vehicleType") || "bike"}
+                  value={form.watch("vehicleType") || "bike"}
                   onValueChange={(val) =>
                     form.setValue("vehicleType", val as any)
                   }
@@ -196,7 +196,7 @@ const onSubmit = (data: any) => {
                     <Label
                       key={type}
                       className={`text-center border rounded-lg py-2 cursor-pointer capitalize ${
-                        form.getValues("vehicleType") === type
+                        form.watch("vehicleType") === type
                           ? "bg-indigo-500 text-white"
                           : "hover:bg-gray-100"
                       }`}
