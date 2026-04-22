@@ -227,16 +227,17 @@ if (driver?.pushToken) {
 (messaging as any).send({
   token: driver.pushToken,
 
-  // ✅ ADD THIS (VERY IMPORTANT)
   notification: {
     title: "🚕 New Ride Request",
     body: `New trip • Fare ₹${ride.fare}`,
   },
 
-  // ✅ KEEP DATA ALSO
+  android: {
+    priority: "high",
+  },
+
   data: {
     rideId: ride.id.toString(),
-    click_action: "/driver",
   },
 })
     .catch((err: any) => {

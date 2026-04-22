@@ -41,7 +41,6 @@ export const getLocation = async () => {
         { enableHighAccuracy: true }
       );
     });
-
   } catch (err) {
     console.error("Location error:", err);
     return null;
@@ -49,76 +48,68 @@ export const getLocation = async () => {
 };
 
 // =========================
-// 🔔 PUSH TOKEN (WORKS BOTH)
+// 🔔 PUSH (MOBILE ONLY)
 // =========================
 export const setupPush = async (userId: number, baseUrl: string) => {
   try {
-    // 📱 MOBILE APP
-    if (isNative()) {
-      const perm = await PushNotifications.requestPermissions();
+    // 📱 ONLY run on mobile
+    if (!isNative()) return;
 
-      if (perm.receive !== "granted") {
-        console.log("Push denied");
-        return;
-      }
+    // ✅ Ask permission
+    const perm = await PushNotifications.requestPermissions();
 
-      await PushNotifications.register();
-
-      PushNotifications.addListener("registration", async (token) => {
-        console.log("🔥 FCM TOKEN:", token.value);
-
-        await fetch(`${baseUrl}/api/users/${userId}/push-token`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token: token.value }),
-        });
-      });
-
-      PushNotifications.addListener("pushNotificationReceived", (notification) => {
-  console.log("🔔 Foreground Notification:", notification);
-
-  alert(
-    notification.title + "\n" + notification.body
-  );
-});
-
+    if (perm.receive !== "granted") {
+      console.log("Push permission denied");
       return;
     }
 
-    // 🌐 WEB (your existing system)
-    const permission = await Notification.requestPermission();
+    // ✅ Register device
+    await PushNotifications.register();
 
-    if (permission !== "granted") return;
+    // 🔥 IMPORTANT: prevent duplicate listeners
+    await PushNotifications.removeAllListeners();
 
-    const registration = await navigator.serviceWorker.register(
-      "/firebase-messaging-sw.js"
+    // 🔥 TOKEN REGISTER
+    PushNotifications.addListener("registration", async (token) => {
+      console.log("🔥 FCM TOKEN:", token.value);
+
+      await fetch(`${baseUrl}/api/users/${userId}/push-token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: token.value }),
+      });
+    });
+
+    // ❌ ERROR HANDLING
+    PushNotifications.addListener("registrationError", (err) => {
+      console.error("❌ Registration error:", err);
+    });
+
+    // 🔔 FOREGROUND NOTIFICATION
+    PushNotifications.addListener(
+      "pushNotificationReceived",
+      (notification) => {
+        console.log("🔔 Foreground Notification:", notification);
+
+        alert(notification.title + "\n" + notification.body);
+      }
     );
 
-    const { getMessaging, getToken } = await import("firebase/messaging");
-    const { default: app } = await import("@/lib/firebase");
+    // 📲 USER CLICKED NOTIFICATION
+    PushNotifications.addListener(
+      "pushNotificationActionPerformed",
+      (action) => {
+        console.log("📲 Notification clicked:", action);
 
-    const messaging = getMessaging(app);
+        const rideId = action.notification.data?.rideId;
 
-    const token = await getToken(messaging, {
-      vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
-      serviceWorkerRegistration: registration,
-    });
+        if (rideId) {
+          console.log("🚕 Ride ID from notification:", rideId);
 
-    console.log("🔥 WEB TOKEN:", token);
-
-    await fetch(`${baseUrl}/api/users/${userId}/push-token`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token }),
-    });
-    navigator.serviceWorker.addEventListener("message", (event) => {
-  const data = event.data;
-
-  if (data?.notification) {
-    alert(data.notification.title + "\n" + data.notification.body);
-  }
-});
-
+          // 👉 You can later auto-accept or navigate here
+        }
+      }
+    );
   } catch (err) {
     console.error("Push setup error:", err);
   }

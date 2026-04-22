@@ -83,28 +83,6 @@ rideAlertSound.play().catch(() => {});
   };
 }, [user?.id, user?.isOnline]);
 
-  useEffect(() => {
-    if (!navigator.serviceWorker) return;
-
-    const handler = (event: any) => {
-      if (event.data?.type === "ACCEPT_RIDE") {
-        const rideId = event.data.rideId;
-
-if (!user) return;
-
-acceptRide.mutate({
-  rideId: rideId,
-  driverId: user.id,
-});
-      }
-    };
-
-    navigator.serviceWorker.addEventListener("message", handler);
-
-    return () => {
-      navigator.serviceWorker.removeEventListener("message", handler);
-    };
- }, [user?.id, user?.isOnline]);
 
   useEffect(() => {
   const handler = (data: any) => {
