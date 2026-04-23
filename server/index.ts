@@ -19,6 +19,8 @@ process.on("unhandledRejection", (err) => {
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 const limiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 60, // max 60 requests per IP
