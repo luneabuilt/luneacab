@@ -231,10 +231,10 @@ if (driver?.pushToken) {
 (messaging as any).send({
   token: driver.pushToken,
 
-  notification: {
-    title: "🚕 New Ride Request",
-    body: `New trip • Fare ₹${ride.fare}`,
-  },
+data: {
+  title: "🚕 New Ride Request",
+  body: `New trip • Fare ₹${ride.fare}`,
+},
 
   android: {
     priority: "high",

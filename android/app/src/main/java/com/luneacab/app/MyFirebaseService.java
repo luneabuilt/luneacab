@@ -10,22 +10,37 @@ import androidx.core.app.NotificationCompat;
 
 public class MyFirebaseService extends FirebaseMessagingService {
 
-  @Override
-  public void onMessageReceived(RemoteMessage remoteMessage) {
+@Override
+public void onMessageReceived(RemoteMessage remoteMessage) {
 
-    String title = remoteMessage.getNotification().getTitle();
-    String body = remoteMessage.getNotification().getBody();
+    String title = "New Ride";
+    String body = "You have a new notification";
+
+    // ✅ SAFE handling (VERY IMPORTANT)
+    if (remoteMessage.getNotification() != null) {
+        title = remoteMessage.getNotification().getTitle();
+        body = remoteMessage.getNotification().getBody();
+    }
+
+    if (remoteMessage.getData().size() > 0) {
+        if (remoteMessage.getData().get("title") != null) {
+            title = remoteMessage.getData().get("title");
+        }
+        if (remoteMessage.getData().get("body") != null) {
+            body = remoteMessage.getData().get("body");
+        }
+    }
 
     NotificationCompat.Builder builder =
-      new NotificationCompat.Builder(getApplicationContext(), "default")
-        .setSmallIcon(R.drawable.ic_stat_notify)
-        .setContentTitle(title)
-        .setContentText(body)
-        .setPriority(NotificationCompat.PRIORITY_HIGH);
+        new NotificationCompat.Builder(getApplicationContext(), "default")
+            .setSmallIcon(R.drawable.ic_stat_notify)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true);
 
     NotificationManager manager =
-      (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-    manager.notify(1, builder.build());
-  }
+    manager.notify((int) System.currentTimeMillis(), builder.build());
 }
