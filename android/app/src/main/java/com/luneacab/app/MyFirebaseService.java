@@ -44,3 +44,4 @@ public void onMessageReceived(RemoteMessage remoteMessage) {
 
     manager.notify((int) System.currentTimeMillis(), builder.build());
 }
+}
