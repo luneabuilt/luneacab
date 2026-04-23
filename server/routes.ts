@@ -9,11 +9,11 @@ import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 
  // Configuration
-    cloudinary.config({ 
-        cloud_name: 'dy7flkgly', 
-        api_key: '569317233745129', 
-        api_secret: 'Ics21L31ReHfGOefgKLRYKjtAgM'
-    });
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_API_SECRET
+});
 
     const getAddress = async (lat: number, lng: number) => {
   try {
@@ -39,6 +39,10 @@ const res = await fetch(
 
 async function requireAuth(req: any, res: any, next: any) {
   const userId = req.headers["x-user-id"];
+
+if (!userId) {
+  return res.status(401).json({ error: "Unauthorized" });
+}
 
   if (!userId) {
     return res.status(401).json({ message: "Unauthorized" });

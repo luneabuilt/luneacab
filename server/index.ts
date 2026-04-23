@@ -5,6 +5,9 @@ import { serveStatic } from "./static";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
+import dotenv from "dotenv";
+dotenv.config();
+import rateLimit from "express-rate-limit";
 
 process.on("uncaughtException", (err) => {
   console.error("💥 UNCAUGHT EXCEPTION:", err);
@@ -15,6 +18,15 @@ process.on("unhandledRejection", (err) => {
 });
 
 const app = express();
+
+const limiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 60, // max 60 requests per IP
+  message: "Too many requests, slow down"
+});
+
+app.use("/api/", limiter);
+
 
 app.use(cors({
   origin: "*",
