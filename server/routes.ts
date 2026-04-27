@@ -231,13 +231,25 @@ if (driver?.pushToken) {
 (messaging as any).send({
   token: driver.pushToken,
 
-  data: {
+  notification: {
     title: "🚕 New Ride Request",
     body: `New trip • Fare ₹${ride.fare}`,
   },
 
   android: {
     priority: "high",
+    notification: {
+      channelId: "default",
+      sound: "default",
+      priority: "max",
+      visibility: "public",
+      defaultSound: true,
+      defaultVibrateTimings: true,
+    },
+  },
+
+  data: {
+    rideId: String(ride.id),
   },
 })
     .catch((err: any) => {
