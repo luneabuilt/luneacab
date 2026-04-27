@@ -231,21 +231,13 @@ if (driver?.pushToken) {
 (messaging as any).send({
   token: driver.pushToken,
 
-data: {
-  title: "🚕 New Ride Request",
-  body: `New trip • Fare ₹${ride.fare}`,
-},
+  data: {
+    title: "🚕 New Ride Request",
+    body: `New trip • Fare ₹${ride.fare}`,
+  },
 
   android: {
     priority: "high",
-    notification: {
-      channelId: "default",
-      sound: "default",
-      priority: "max",          // 🔥 VERY IMPORTANT
-      visibility: "public",     // 🔥 SHOW ON LOCK SCREEN
-      defaultSound: true,
-      defaultVibrateTimings: true,
-    },
   },
 })
     .catch((err: any) => {
