@@ -12,6 +12,7 @@ public class MyFirebaseService extends FirebaseMessagingService {
 
 @Override
 public void onMessageReceived(RemoteMessage remoteMessage) {
+    android.util.Log.d("FCM_DEBUG", "MESSAGE RECEIVED");
 
     String title = "New Ride";
     String body = "You have a new notification";
